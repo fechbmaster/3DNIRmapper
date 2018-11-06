@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import 3DNIRmapper
+
+if __name__ == '__main__':
+youtube_dl.main()
