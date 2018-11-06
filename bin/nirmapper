@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import 3DNIRmapper
+import nirmapper
 
 if __name__ == '__main__':
-youtube_dl.main()
+    nirmapper.main()
