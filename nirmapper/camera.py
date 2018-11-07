@@ -1,5 +1,7 @@
 import numpy as np
-import math
+from .utils import (
+    euler_angles_to_rotation_matrix
+)
 
 
 class Camera(object):
@@ -54,7 +56,7 @@ class Camera(object):
                              [0, 0, -1]
                              ])
 
-        R_world2cam = self._euler_angles_to_rotation_matrix(self.cam_euler_rotation_theta).T
+        R_world2cam = euler_angles_to_rotation_matrix(self.cam_euler_rotation_theta).T
         T_world2cam = np.dot(-1 * R_world2cam, self.cam_location_xyz)
 
         R_world2cv = np.dot(R_cam2cv, R_world2cam)
@@ -75,30 +77,4 @@ class Camera(object):
 
         return np.dot(K, RT)
 
-    def _euler_angles_to_rotation_matrix(self, theta):
-        """
-        Calculate a rotation matrix from given euler angle.
 
-        :param theta: Euler angle in °
-        :return: Rotation matrix
-        """
-        theta_rad = np.radians(theta)
-
-        R_x = np.array([[1, 0, 0],
-                        [0, math.cos(theta_rad[0]), -math.sin(theta_rad[0])],
-                        [0, math.sin(theta_rad[0]), math.cos(theta_rad[0])]
-                        ])
-
-        R_y = np.array([[math.cos(theta_rad[1]), 0, math.sin(theta_rad[1])],
-                        [0, 1, 0],
-                        [-math.sin(theta_rad[1]), 0, math.cos(theta_rad[1])]
-                        ])
-
-        R_z = np.array([[math.cos(theta_rad[2]), -math.sin(theta_rad[2]), 0],
-                        [math.sin(theta_rad[2]), math.cos(theta_rad[2]), 0],
-                        [0, 0, 1]
-                        ])
-
-        R = np.dot(R_z, np.dot(R_y, R_x))
-
-        return R
