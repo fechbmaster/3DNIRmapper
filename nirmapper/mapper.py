@@ -22,7 +22,7 @@ class UVMapper(object):
         :param Camera cam: The camera
         :return numpy.array: Two-dimensional pixel coordinates in image space
         """
-        P = cam.get_3x4_P_matrix()
+        P = cam.get_3x4_P_projection_matrix()
         # Append 3d coord with fourth param to calculate coordinate
         uv_xyz = P.dot(np.append(object_space_coord, 1))
         uv_xy = get_2d_coordinate_from_homogeneous_vector(uv_xyz)

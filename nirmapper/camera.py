@@ -23,7 +23,7 @@ class Camera(object):
         self.cam_location_xyz = cam_location_xyz
         self.cam_euler_rotation_theta = cam_euler_rotation_theta
 
-    def get_calibration_matrix_K(self):
+    def get_intrinsic_3x4_A_matrix(self):
         """
         Get intrinsic camera calibration matrix K.
 
@@ -38,14 +38,14 @@ class Camera(object):
         v_0 = self.resolution_y / 2
         skew = 0  # use only rectangular pixels
 
-        K = np.array([[alpha_u, skew, u_0],
+        A = np.array([[alpha_u, skew, u_0],
                       [0, alpha_v, v_0],
                       [0, 0, 1]
                       ])
 
-        return K
+        return A
 
-    def get_3x4_RT_matrix(self):
+    def get_extrinsic_3x4_D_matrix(self):
         """
         Get extrinsic camera matrix consisting of rotation and transformation matrix.
 
@@ -66,15 +66,13 @@ class Camera(object):
 
         return RT
 
-    def get_3x4_P_matrix(self):
+    def get_3x4_P_projection_matrix(self):
         """
-        Get combined camera matrix consisiting of intrinsic (K) and extrinsic (RT) matrix.
+        Get combined camera matrix consisting of intrinsic (A) and extrinsic (Rt) matrix.
 
         :return: Combined matrix P
         """
-        K = self.get_calibration_matrix_K()
-        RT = self.get_3x4_RT_matrix()
+        A = self.get_intrinsic_3x4_A_matrix()
+        D = self.get_extrinsic_3x4_D_matrix()
 
-        return np.dot(K, RT)
-
-
+        return np.dot(A, D)

@@ -7,7 +7,6 @@ from .model import Model, ColladaCreator
 
 
 def main(argv=None):
-
     location = np.array([0, 7, 0])
     rotation = np.array([-90, 180, 0])
     focal_length = 35
@@ -18,29 +17,27 @@ def main(argv=None):
 
     cam = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
-
-
     verts = np.array([[1, 1, -1],  # 1
-                            [1, -1, -1],  # 2
-                            [-1, -1, -1],  # 3
-                            [-1, 1, -1],  # 4
-                            [1, 1, 1],  # 5
-                            [1, -1, 1],  # 6
-                            [-1, -1, 1],  # 7
-                            [-1, 1, 1]])  # 8
+                      [1, -1, -1],  # 2
+                      [-1, -1, -1],  # 3
+                      [-1, 1, -1],  # 4
+                      [1, 1, 1],  # 5
+                      [1, -1, 1],  # 6
+                      [-1, -1, 1],  # 7
+                      [-1, 1, 1]])  # 8
 
     normals = np.array([0, 0, -1,
-                              0, 0, 1,
-                              1, 0, 0,
-                              0, -1, 0,
-                              -1, 0, 0,
-                              0, 1, 0,
-                              0, 0, -1,
-                              0, 0, 1,
-                              1, 0, 0,
-                              0, -1, 0,
-                              -1, 0, 0,
-                              0, 1, 0])
+                        0, 0, 1,
+                        1, 0, 0,
+                        0, -1, 0,
+                        -1, 0, 0,
+                        0, 1, 0,
+                        0, 0, -1,
+                        0, 0, 1,
+                        1, 0, 0,
+                        0, -1, 0,
+                        -1, 0, 0,
+                        0, 1, 0])
 
     indices = np.array([0, 0, 0,
                         2, 2, 0,
@@ -91,9 +88,3 @@ def main(argv=None):
     print("This will create a demo mapping of a cube in ", output_path, " using the texture from: ", texture_path)
 
     ColladaCreator.create_collada(model, texture_path, output_path)
-
-
-
-
-
-
