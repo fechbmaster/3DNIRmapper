@@ -105,3 +105,7 @@ venv.bak/
 
 # idea
 .idea/
+
+# .obj cache
+*.obj.bin
+*.obj.json
