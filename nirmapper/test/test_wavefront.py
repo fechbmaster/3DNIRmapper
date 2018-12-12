@@ -9,12 +9,12 @@ def prepend_dir(file):
     return os.path.join(os.path.dirname(__file__), file)
 
 
-class TestWavefrontImporter(TestCase):
+class TestWavefront(TestCase):
 
     def setUp(self):
-        models = Wavefront.import_obj_as_model_list(prepend_dir('simple.obj'))
-        self.model1 = models[0]
-        self.model2 = models[1]
+        self.wavefront = Wavefront(prepend_dir('simple.obj'))
+        self.model1 = self.wavefront.models[0]
+        self.model2 = self.wavefront.models[1]
 
     def test_obj_vertices(self):
 
