@@ -132,15 +132,13 @@ class Wavefront(object):
             sorted_verts = np.split(all_verts, split_seq)[:-1]
 
             vertices = sorted_verts[vert_index::len(formats)]
-            vertices = np.concatenate(vertices, axis=None)
-            indices = np.arange(len(vertices))
+            indices = np.arange(len(np.concatenate(vertices, axis=None)))
             model = Model(vertices, indices)
 
             # Normals are optional
             if 'N3F' in formats:
                 norm_index = formats.index('N3F')
                 normals = sorted_verts[norm_index::len(formats)]
-                normals = np.concatenate(normals, axis=None)
                 indices = np.array([indices, indices]).T
                 model.indices = indices
                 model.normals = np.array(normals)
