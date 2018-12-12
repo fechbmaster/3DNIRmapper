@@ -79,7 +79,7 @@ def main(argv=None):
     # The magic is happening here
     uv_coords = UVMapper.calculate_uv_coordinates(verts, cam)
 
-    model = Model(verts, normals, uv_coords, indices)
+    model = Model(verts, indices, normals, uv_coords)
     scipt_path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     texture_path = scipt_path + '/resources/images/texture_cube.png'
     output_path = '/tmp/cube_example.dae'
@@ -87,4 +87,4 @@ def main(argv=None):
     print("Welcome to 3DNIRMapper!")
     print("This will create a demo mapping of a cube in ", output_path, " using the texture from: ", texture_path)
 
-    ColladaCreator.create_collada(model, texture_path, output_path)
+    ColladaCreator.create_collada_from_model(model, texture_path, output_path)

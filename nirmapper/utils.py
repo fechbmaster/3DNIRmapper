@@ -2,6 +2,8 @@ import numpy as np
 import math
 from collections import Iterable
 
+from nirmapper.exceptions import ReshapeError
+
 
 def euler_angles_to_rotation_matrix(theta):
     """
