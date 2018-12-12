@@ -92,8 +92,8 @@ class Wavefront(object):
         'V3F': 3
     }
 
-    def __init__(self, file_path: str):
-        self.scene = pywavefront.Wavefront(file_path, cache=True)
+    def __init__(self, file_path: str, cache: bool = True):
+        self.scene = pywavefront.Wavefront(file_path, cache=cache)
         self.models = Wavefront.__import_obj_as_model_list_from_scene(self.scene)
 
     @staticmethod
@@ -139,25 +139,26 @@ class Wavefront(object):
             # Normals are optional
             if 'N3F' in formats:
                 norm_index = formats.index('N3F')
-                normals = all_verts[norm_index::len(formats)]
+                normals = sorted_verts[norm_index::len(formats)]
                 normals = np.concatenate(normals, axis=None)
                 indices = np.array([indices, indices]).T
                 model.indices = indices
-                model.normals = normals
+                model.normals = np.array(normals)
 
             models.append(model)
 
         return models
 
     @staticmethod
-    def import_obj_as_model_list(file_path: str) -> List[Model]:
+    def import_obj_as_model_list(file_path: str, cache: bool = True) -> List[Model]:
         """
         Method converts a .obj file to a model list for post processing.
 
         :param file_path: The absolute path to the .obj file.
+        :param cache: Set caching off or on.
         :return: List of models of type Model.
         """
-        cust_scene = pywavefront.Wavefront(file_path, cache=True)
+        cust_scene = pywavefront.Wavefront(file_path, cache=cache)
         model = Wavefront.__import_obj_as_model_list_from_scene(cust_scene)
 
         return model

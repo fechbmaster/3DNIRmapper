@@ -12,7 +12,7 @@ def prepend_dir(file):
 class TestWavefront(TestCase):
 
     def setUp(self):
-        self.wavefront = Wavefront(prepend_dir('simple.obj'))
+        self.wavefront = Wavefront(prepend_dir('resources/simple.obj'), cache=False)
         self.model1 = self.wavefront.models[0]
         self.model2 = self.wavefront.models[1]
 
@@ -38,6 +38,35 @@ class TestWavefront(TestCase):
 
         try:
             np.testing.assert_almost_equal(self.model2.vertices, model2_verts)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
+
+    def test_obj_normals(self):
+        model1_norms = np.array([
+            20.0, 21.0, 22.0,
+            20.0, 21.0, 22.0,
+            20.0, 21.0, 22.0,
+        ])
+
+        model2_norms = np.array([
+            0.0, 1.0, -0.0,
+            0.0, 1.0, -0.0,
+            0.0, 1.0, -0.0
+        ])
+
+        try:
+            np.testing.assert_almost_equal(self.model1.normals, model1_norms)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
+
+        try:
+            np.testing.assert_almost_equal(self.model2.normals, model2_norms)
             res = True
         except AssertionError as err:
             res = False
