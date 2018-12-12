@@ -11,6 +11,8 @@ requirements:
   build:
     - python
     - setuptools
+    - numpy
+    - pywavefront
   run:
     - python
 

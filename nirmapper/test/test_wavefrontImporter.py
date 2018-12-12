@@ -2,7 +2,7 @@ import os
 import numpy as np
 from unittest import TestCase
 
-from nirmapper.model import WavefrontImporter
+from nirmapper.model import Wavefront
 
 
 def prepend_dir(file):
@@ -12,11 +12,11 @@ def prepend_dir(file):
 class TestWavefrontImporter(TestCase):
 
     def setUp(self):
-        models = WavefrontImporter.import_obj_as_model_list(prepend_dir('simple.obj'))
+        models = Wavefront.import_obj_as_model_list(prepend_dir('simple.obj'))
         self.model1 = models[0]
         self.model2 = models[1]
 
-    def test_import_obj_vertices(self):
+    def test_obj_vertices(self):
 
         model1_verts = np.array([
             0.04, 0.05, 0.06,

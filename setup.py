@@ -8,5 +8,6 @@ setup(
     license='Apache-2.0',
     author='fechbmaster',
     author_email='bernd.fecht1@hs-augsburg.de',
-    description='A 3D Mapper to map NIR images to a 3d tooth model.'
+    description='A 3D Mapper to map NIR images to a 3d tooth model.',
+    install_requires=['pywavefront', 'numpy']
 )

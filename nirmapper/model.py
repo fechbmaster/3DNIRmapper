@@ -1,8 +1,9 @@
-from enum import Enum
-from collada import *
-from collada import source
+from typing import List
+
 import numpy as np
 import pywavefront
+from collada import *
+from collada import source
 
 from nirmapper.exceptions import WavefrontError
 
@@ -11,7 +12,8 @@ class Model(object):
     """This is the model defining class.
     """
 
-    def __init__(self, vertices, indices, normals=None, uv_coords=None):
+    def __init__(self, vertices: np.ndarray, indices: np.ndarray, normals: np.ndarray = None,
+                 uv_coords: np.ndarray = None):
         self.vertices = vertices
         self.indices = indices
         self.normals = [] if normals is None else normals
@@ -23,7 +25,7 @@ class ColladaCreator(object):
     """
 
     @staticmethod
-    def create_collada_from_model(model: Model, texture_path, output_path):
+    def create_collada_from_model(model: Model, texture_path: str, output_path: str) -> None:
         """
         Create a Collada file out of an modell and a texture.
 
@@ -37,10 +39,11 @@ class ColladaCreator(object):
         image = material.CImage("material_0-image", texture_path)
         surface = material.Surface("material_0-image-surface", image)
         sampler2d = material.Sampler2D("material_0-image-sampler", surface)
-        map = material.Map(sampler2d, "UVSET0")
+        # todo: check if this can be converted to tuple
+        mat_map = material.Map(sampler2d, "UVSET0")
 
         effect = material.Effect("effect0", [surface, sampler2d], "lambert", emission=(0.0, 0.0, 0.0, 1),
-                                 ambient=(0.0, 0.0, 0.0, 1), diffuse=map, transparent=map, transparency=0.0,
+                                 ambient=(0.0, 0.0, 0.0, 1), diffuse=mat_map, transparent=mat_map, transparency=0.0,
                                  double_sided=True)
         mat = material.Material("material0", "mymaterial", effect)
 
@@ -73,8 +76,11 @@ class ColladaCreator(object):
         mesh.write(output_path)
 
 
-class WavefrontImporter(object):
+class Wavefront(object):
     """Class for importing Wavefront .obj files.
+
+    The class is constructed in a way, that it can be used by calling the static method to immediately getting the Model
+    objects, or by creating a Wavefront object, that holds more information.
 
     """
 
@@ -86,28 +92,30 @@ class WavefrontImporter(object):
         'V3F': 3
     }
 
+    def __init__(self, file_path: str):
+        self.scene = pywavefront.Wavefront(file_path, cache=True)
+        self.models = Wavefront.__import_obj_as_model_list_from_scene(self.scene)
+
     @staticmethod
-    def import_obj_as_model_list(file_path):
+    def __import_obj_as_model_list_from_scene(cust_scene: pywavefront.Wavefront) -> List[Model]:
         """
         Method converts a .obj file to a model list for post processing.
 
-        :param file_path: The absolute path to the .obj file.
+        :param cust_scene: A predefined scene.
         :return: List of models of type Model.
         """
-        scene = pywavefront.Wavefront(file_path, cache=True)
         models = []
-
-        for name, material in scene.materials.items():
+        for name, obj_material in cust_scene.materials.items():
             # Contains the vertex format (string) such as "T2F_N3F_V3F"
             # T2F, C3F, N3F and V3F may appear in this string
             # Only V3F and N3F is needed for model creation
-            format_string = material.vertex_format
+            format_string = obj_material.vertex_format
             formats = format_string.split("_")
             format_values = np.zeros(len(formats), dtype=np.int)
 
             # Convert to enum values and build up format_values array
-            for idx, format in enumerate(formats):
-                format_values[idx] = WavefrontImporter.vertex_formats.get(formats[idx])
+            for idx, vert_format in enumerate(formats):
+                format_values[idx] = Wavefront.vertex_formats.get(formats[idx])
 
             # V3F is mandatory
             if 'V3F' in formats:
@@ -116,11 +124,11 @@ class WavefrontImporter(object):
                 raise WavefrontError("Position Vertices not found in .obj file")
 
             # Contains all vertices no matter if T2F, C3F, N3F or V3F
-            all_verts = material.vertices
+            all_verts = np.array(obj_material.vertices)
 
             # Build the sequence described by the vertex format
-            seq = WavefrontImporter.__build_seq(format_values)
-            split_seq = WavefrontImporter.__built_split_seq(seq, len(all_verts))
+            seq = Wavefront.__build_seq(format_values)
+            split_seq = Wavefront.__built_split_seq(seq, len(all_verts))
             sorted_verts = np.split(all_verts, split_seq)[:-1]
 
             vertices = sorted_verts[vert_index::len(formats)]
@@ -142,7 +150,20 @@ class WavefrontImporter(object):
         return models
 
     @staticmethod
-    def __built_split_seq(seq, length):
+    def import_obj_as_model_list(file_path: str) -> List[Model]:
+        """
+        Method converts a .obj file to a model list for post processing.
+
+        :param file_path: The absolute path to the .obj file.
+        :return: List of models of type Model.
+        """
+        cust_scene = pywavefront.Wavefront(file_path, cache=True)
+        model = Wavefront.__import_obj_as_model_list_from_scene(cust_scene)
+
+        return model
+
+    @staticmethod
+    def __built_split_seq(seq: np.ndarray, length: int) -> np.ndarray:
         """
         Method builds a split sequence out of a small sequence by a given length.
 
@@ -163,10 +184,10 @@ class WavefrontImporter(object):
             d = split_seq + seq[-1]
             split_seq = np.append(seq, d)
 
-        return split_seq
+        return np.array(split_seq)
 
     @staticmethod
-    def __build_seq(format_values):
+    def __build_seq(format_values: np.ndarray) -> np.ndarray:
         """
         Builds an index sequence for values by adding the previous element for every element.
 
@@ -179,4 +200,4 @@ class WavefrontImporter(object):
         for x in range(1, len(format_values)):
             seq[x] = seq[x] + seq[x - 1]
 
-        return seq
+        return np.array(seq)
