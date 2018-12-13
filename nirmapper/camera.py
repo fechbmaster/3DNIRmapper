@@ -125,7 +125,7 @@ class Camera(object):
         Calculates the image space UV coordinates for coordinates in object space.
         UV coordinates are between 0 and 1.
 
-        :param numpy.array point: The three-dimensional coordinates in object space
+        :param numpy.array points: The three-dimensional coordinates in object space
         :return numpy.array: Two-dimensional uv coordinates in image space
         """
         # User maybe just passed a single coord - fallback to other function

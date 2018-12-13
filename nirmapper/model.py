@@ -84,14 +84,6 @@ class Wavefront(object):
 
     """
 
-    # todo: Make this a better data structure
-    vertex_formats = {
-        'T2F': 2,
-        'C3F': 3,
-        'N3F': 3,
-        'V3F': 3
-    }
-
     def __init__(self, file_path: str, cache: bool = True):
         self.scene = pywavefront.Wavefront(file_path, cache=cache)
         self.models = Wavefront.__import_obj_as_model_list_from_scene(self.scene)
@@ -110,35 +102,23 @@ class Wavefront(object):
             # T2F, C3F, N3F and V3F may appear in this string
             # Only V3F and N3F is needed for model creation
             format_string = obj_material.vertex_format
-            formats = format_string.split("_")
-            format_values = np.zeros(len(formats), dtype=np.int)
-
-            # Convert to enum values and build up format_values array
-            for idx, vert_format in enumerate(formats):
-                format_values[idx] = Wavefront.vertex_formats.get(formats[idx])
+            formatter = VertexFormatter(format_string)
 
             # V3F is mandatory
-            if 'V3F' in formats:
-                vert_index = formats.index('V3F')
-            else:
+            if 'V3F' not in formatter.formats:
                 raise WavefrontError("Position Vertices not found in .obj file")
 
             # Contains all vertices no matter if T2F, C3F, N3F or V3F
             all_verts = np.array(obj_material.vertices)
 
-            # Build the sequence described by the vertex format
-            seq = Wavefront.__build_seq(format_values)
-            split_seq = Wavefront.__built_split_seq(seq, len(all_verts))
-            sorted_verts = np.split(all_verts, split_seq)[:-1]
-
-            vertices = sorted_verts[vert_index::len(formats)]
+            vertices = formatter.get_verts_by_format(all_verts, 'V3F')
             indices = np.arange(len(np.concatenate(vertices, axis=None)))
+            indices = np.array([indices, indices]).T
             model = Model(vertices, indices)
 
             # Normals are optional
-            if 'N3F' in formats:
-                norm_index = formats.index('N3F')
-                normals = sorted_verts[norm_index::len(formats)]
+            if 'N3F' in formatter.formats:
+                normals = formatter.get_verts_by_format(all_verts, 'N3F')
                 indices = np.array([indices, indices]).T
                 model.indices = indices
                 model.normals = np.array(normals)
@@ -161,42 +141,62 @@ class Wavefront(object):
 
         return model
 
-    @staticmethod
-    def __built_split_seq(seq: np.ndarray, length: int) -> np.ndarray:
-        """
-        Method builds a split sequence out of a small sequence by a given length.
 
-        Example: The Sequence [2,5,8] results into a extended sequence of [ 2  5  8 10 13 16 18 21 24]
-        by the given length of 24.
+class VertexFormatter(object):
 
+    # These are the valid formats with their vertices length
+    _valid_vertex_formats = {
+        'T2F': 2,
+        'C3F': 3,
+        'N3F': 3,
+        'V3F': 3
+    }
 
-        :param seq: The sequence that should be extended.
-        :param length: The length the sequence should be extended to.
-        :return: The extended sequence.
-        """
-        if (length % seq[-1]) != 0:
-            raise WavefrontError("Can't divide vertices list to the sub-elements defined by the format string.")
+    def __init__(self, format_string: str):
+        self.format_string: str = format_string
+        self.formats: List[str] = format_string.split("_")
+        self.__validate_formats(self.formats)
 
-        split_seq = seq
+    def get_verts_by_format(self, verts: np.ndarray, format: str):
+        if format not in self.formats:
+            return np.array([])
 
-        while (split_seq[-1] + seq[-1]) <= length:
-            d = split_seq + seq[-1]
-            split_seq = np.append(seq, d)
+        seq = self.get_vert_lengths()
+        start_index = self.get_start_index_for_format(format)
+        length = self.get_length_for_format(format)
 
-        return np.array(split_seq)
+        return np.array([verts[i:i+length] for i in range(start_index, len(verts), seq.sum())])
 
-    @staticmethod
-    def __build_seq(format_values: np.ndarray) -> np.ndarray:
+    def get_vert_lengths(self):
+        format_values = np.zeros(len(self.formats), dtype=np.int)
+        # Convert to enum values and build up format_values array
+        for idx, vert_format in enumerate(self.formats):
+            format_values[idx] = self._valid_vertex_formats.get(self.formats[idx])
+
+        return format_values
+
+    def get_start_index_for_format(self, format):
         """
         Builds an index sequence for values by adding the previous element for every element.
 
         Example: The sequence [2, 3, 3] results to [2, 5, 8]
-
-        :param format_values:
         :return:
         """
-        seq = np.copy(format_values)
-        for x in range(1, len(format_values)):
-            seq[x] = seq[x] + seq[x - 1]
+        seq = self.get_vert_lengths()  # [2, 3, 3]
+        index = self.get_index_for_format(format)
 
-        return np.array(seq)
+        start_index = seq[:index].sum()
+
+        return start_index
+
+    def get_length_for_format(self, format):
+        return self._valid_vertex_formats.get(format)
+
+    def get_index_for_format(self, format):
+        return self.formats.index(format)
+
+    def __validate_formats(self, formats):
+        for format in formats:
+            if format not in self._valid_vertex_formats:
+                raise WavefrontError("The specified vertex format sequence is invalid!")
+
