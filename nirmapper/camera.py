@@ -23,7 +23,7 @@ class Camera(object):
         self.cam_location_xyz = cam_location_xyz
         self.cam_euler_rotation_theta = cam_euler_rotation_theta
 
-    def get_intrinsic_3x4_A_matrix(self):
+    def get_intrinsic_3x4_A_matrix(self) -> np.ndarray:
         """
         Get intrinsic camera calibration matrix K.
 
@@ -45,7 +45,7 @@ class Camera(object):
 
         return A
 
-    def get_extrinsic_3x4_D_matrix(self):
+    def get_extrinsic_3x4_D_matrix(self) -> np.ndarray:
         """
         Get extrinsic camera matrix consisting of rotation and transformation matrix.
 
@@ -66,7 +66,7 @@ class Camera(object):
 
         return RT
 
-    def get_3x4_P_projection_matrix(self):
+    def get_3x4_P_projection_matrix(self) -> np.ndarray:
         """
         Get combined camera matrix consisting of intrinsic (A) and extrinsic (Rt) matrix.
 
