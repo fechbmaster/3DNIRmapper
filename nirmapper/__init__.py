@@ -77,7 +77,7 @@ def main(argv=None):
                         7, 7, 11])
 
     # The magic is happening here
-    uv_coords = UVMapper.calculate_uv_coordinates(verts, cam)
+    uv_coords = cam.project_world_points_to_uv_coords(verts)
 
     model = Model(verts, indices, normals, uv_coords)
     scipt_path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
