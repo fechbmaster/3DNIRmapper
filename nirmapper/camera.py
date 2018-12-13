@@ -1,4 +1,5 @@
 import numpy as np
+
 from .utils import (
     euler_angles_to_rotation_matrix
 )
