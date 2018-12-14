@@ -29,10 +29,12 @@ class Model(object):
 
     @vertices.setter
     def vertices(self, vertices: np.ndarray):
-        if len(self.normals) != 0:
+        # Reshape to get vertices
+        vertices.reshape([(vertices.size // 3), 3])
+        if self.normals.size != 0:
             if vertices.shape != self.normals.shape:
                 raise ModelError("Invalid vertices shape. Shape is not matching the defined normals shape.")
-        if len(self.uv_coords) != 0:
+        if self.uv_coords.size != 0:
             if vertices.shape[0] != self.uv_coords.shape[0]:
                 raise ModelError("Invalid vertices shape. Length is not matching the defined uv coordinates length.")
         self.__vertices = vertices
@@ -45,10 +47,12 @@ class Model(object):
     def normals(self, normals: np.ndarray):
         if normals is None:
             return
-        if len(self.vertices) != 0:
+        # Reshape to get vertices
+        normals.reshape([(normals.size // 3), 3])
+        if self.vertices.size != 0:
             if normals.shape != self.vertices.shape:
                 raise ModelError("Invalid normals shape. Shape is not matching the defined vertices shape.")
-        if len(self.uv_coords) != 0:
+        if self.uv_coords.size != 0:
             if normals.shape[0] != self.uv_coords.shape[0]:
                 raise ModelError("Invalid normals shape. Length is not matching the defined uv coordinates length.")
         self.__normals = normals
@@ -61,10 +65,12 @@ class Model(object):
     def uv_coords(self, uv_coords: np.ndarray):
         if uv_coords is None:
             return
-        if len(self.vertices) != 0:
+        # Reshape to get coords
+        uv_coords.reshape([(uv_coords.size // 2), 2])
+        if self.vertices.size != 0:
             if uv_coords.shape[0] != self.vertices.shape[0]:
                 raise ModelError("Invalid uv coordinates shape. Length is not matching the defined normals length.")
-        if len(self.uv_coords) != 0:
+        if self.uv_coords.size != 0:
             if uv_coords.shape[0] != self.normals.shape[0]:
                 raise ModelError("Invalid uv coordinates shape. Length is not matching the defined normals length.")
         self.__uv_coords = uv_coords
