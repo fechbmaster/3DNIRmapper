@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List
 
 import numpy as np
@@ -8,6 +9,29 @@ from collada import source
 from nirmapper.exceptions import WavefrontError, ModelError
 
 
+class IndicesFormat(Enum):
+    T2F = 1,
+    C3F = 2,
+    N3F = 3,
+    V3F = 4
+
+    @staticmethod
+    def get_indices_formats_from_string(format_str: str):
+        formats: List[IndicesFormat] = []
+        format_str_array = format_str.split("_")
+        for format_str in format_str_array:
+            formats.append(IndicesFormat[format_str])
+
+        return formats
+
+    @staticmethod
+    def get_length_for_format(ind_format):
+        if ind_format == IndicesFormat.T2F:
+            return 2
+        else:
+            return 3
+
+
 class Model(object):
     """This is the model defining class.
     """
@@ -15,13 +39,14 @@ class Model(object):
     __normals = np.array([])
     __vertices = np.array([])
     __uv_coords = np.array([])
+    __indices = np.array([])
 
-    def __init__(self, vertices: np.ndarray, indices: np.ndarray = None, normals: np.ndarray = None,
+    def __init__(self, vertices: np.ndarray, normals: np.ndarray = None,
                  uv_coords: np.ndarray = None):
         self.vertices = vertices
-        self.indices = np.array([]) if indices is None else indices
         self.normals = normals
         self.uv_coords = uv_coords
+        self.indices_format: List[IndicesFormat] = []
 
     @property
     def vertices(self) -> np.ndarray:
@@ -29,6 +54,8 @@ class Model(object):
 
     @vertices.setter
     def vertices(self, vertices: np.ndarray):
+        if vertices.size == 0:
+            raise ModelError("Vertices must be defined and can't be length zero.")
         vertices = self.__reshape(vertices, 3)
         if self.normals.size != 0:
             if vertices.shape != self.normals.shape:
@@ -74,27 +101,40 @@ class Model(object):
                 raise ModelError("Invalid uv coordinates shape. Length is not matching the defined normals length.")
         self.__uv_coords = uv_coords
 
-    def generate_indices(self) -> np.ndarray:
-        ind_len = 0
-        dim_ind = 0
-        if len(self.vertices) != 0:
-            dim_ind += 1
-            ind_len = np.shape(self.vertices)[0]
+    @property
+    def indices(self) -> np.ndarray:
+        return self.__indices
+
+    @indices.setter
+    def indices(self, indices: np.ndarray):
+        if indices is None:
+            return
+        dim_ind = 1
         if len(self.normals) != 0:
             dim_ind += 1
-            if ind_len == 0: ind_len = np.shape(self.normals)[0]
         if len(self.uv_coords) != 0:
             dim_ind += 1
-            if ind_len == 0: ind_len = np.shape(self.uv_coords)[0]
-        if dim_ind > 0 and ind_len > 0:
-            return np.indices((ind_len, dim_ind))[0]
+        # Reshape to get coords
+        indices = self.__reshape(indices, dim_ind)
+        self.__indices = indices
 
-    def __reshape(self, array: np.ndarray, vert_length: int):
+    def generate_indices(self) -> np.ndarray:
+        # vertices are always given
+        ind_len = np.shape(self.vertices)[0]
+        dim_ind = 1
+        if self.normals.size != 0:
+            dim_ind += 1
+        if self.uv_coords.size != 0:
+            dim_ind += 1
+        return np.indices((ind_len, dim_ind))[0]
+
+    @staticmethod
+    def __reshape(array: np.ndarray, vert_length: int):
         try:
-            # Reshape to get coords
             return array.reshape([(array.size // vert_length), vert_length])
         except ValueError as e:
             raise ModelError(e)
+
 
 class ColladaCreator(object):
     """A creator class for Collada files.
@@ -178,21 +218,22 @@ class Wavefront(object):
             # T2F, C3F, N3F and V3F may appear in this string
             # Only V3F and N3F is needed for model creation
             format_string = obj_material.vertex_format
-            formatter = VertexFormatter(format_string)
+            formats = IndicesFormat.get_indices_formats_from_string(format_string)
+            formatter = VertexIndicesFormatter(formats)
 
             # V3F is mandatory
-            if 'V3F' not in formatter.formats:
+            if IndicesFormat.V3F not in formatter.formats:
                 raise WavefrontError("Position Vertices not found in .obj file")
 
             # Contains all vertices no matter if T2F, C3F, N3F or V3F
             all_verts = np.array(obj_material.vertices)
 
-            vertices = formatter.get_verts_by_format(all_verts, 'V3F')
+            vertices = formatter.get_verts_by_format(all_verts, IndicesFormat.V3F)
             model = Model(vertices)
 
             # Normals are optional
-            if 'N3F' in formatter.formats:
-                normals = formatter.get_verts_by_format(all_verts, 'N3F')
+            if IndicesFormat.N3F in formatter.formats:
+                normals = formatter.get_verts_by_format(all_verts, IndicesFormat.N3F)
                 model.normals = np.array(normals)
 
             indices = model.generate_indices()
@@ -216,27 +257,19 @@ class Wavefront(object):
         return model
 
 
-class VertexFormatter(object):
+class VertexIndicesFormatter(object):
     # These are the valid formats with their vertices length
-    __valid_vertex_formats = {
-        'T2F': 2,
-        'C3F': 3,
-        'N3F': 3,
-        'V3F': 3
-    }
 
-    def __init__(self, format_string: str):
-        self.format_string: str = format_string
-        self.formats: List[str] = format_string.split("_")
-        self.__validate_formats(self.formats)
+    def __init__(self, formats: List[IndicesFormat]):
+        self.formats = formats
 
-    def get_verts_by_format(self, verts: np.ndarray, format: str):
-        if format not in self.formats:
-            return np.array([])
+    def get_verts_by_format(self, verts: np.ndarray, ind_format: IndicesFormat):
+        # if format in self.formats:
+        #     return np.array([])
 
         seq = self.get_vert_lengths()
-        start_index = self.get_start_index_for_format(format)
-        length = self.get_length_for_format(format)
+        start_index = self.get_start_index_for_format(ind_format)
+        length = IndicesFormat.get_length_for_format(ind_format)
 
         return np.array([verts[i:i + length] for i in range(start_index, len(verts), seq.sum())])
 
@@ -244,11 +277,11 @@ class VertexFormatter(object):
         format_values = np.zeros(len(self.formats), dtype=np.int)
         # Convert to enum values and build up format_values array
         for idx, vert_format in enumerate(self.formats):
-            format_values[idx] = self.__valid_vertex_formats.get(self.formats[idx])
+            format_values[idx] = IndicesFormat.get_length_for_format(vert_format)
 
         return format_values
 
-    def get_start_index_for_format(self, format):
+    def get_start_index_for_format(self, ind_format):
         """
         Builds an index sequence for values by adding the previous element for every element.
 
@@ -256,19 +289,11 @@ class VertexFormatter(object):
         :return:
         """
         seq = self.get_vert_lengths()  # [2, 3, 3]
-        index = self.get_index_for_format(format)
+        index = self.get_index_for_format(ind_format)
 
         start_index = seq[:index].sum()
 
         return start_index
 
-    def get_length_for_format(self, format):
-        return self.__valid_vertex_formats.get(format)
-
-    def get_index_for_format(self, format):
-        return self.formats.index(format)
-
-    def __validate_formats(self, formats):
-        for format in formats:
-            if format not in self.__valid_vertex_formats:
-                raise WavefrontError("The specified vertex format sequence is invalid!")
+    def get_index_for_format(self, ind_format):
+        return self.formats.index(ind_format)
