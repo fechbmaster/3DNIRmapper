@@ -6,3 +6,8 @@ class WavefrontError(Exception):
 class ReshapeError(Exception):
     def __init__(self, message):
         super().__init__(message)
+
+
+class ModelError(Exception):
+    def __init__(self, message):
+        super().__init__(message)

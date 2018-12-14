@@ -5,19 +5,84 @@ import pywavefront
 from collada import *
 from collada import source
 
-from nirmapper.exceptions import WavefrontError
+from nirmapper.exceptions import WavefrontError, ModelError
 
 
 class Model(object):
     """This is the model defining class.
     """
 
-    def __init__(self, vertices: np.ndarray, indices: np.ndarray, normals: np.ndarray = None,
+    __normals = np.array([])
+    __vertices = np.array([])
+    __uv_coords = np.array([])
+
+    def __init__(self, vertices: np.ndarray, indices: np.ndarray = None, normals: np.ndarray = None,
                  uv_coords: np.ndarray = None):
         self.vertices = vertices
-        self.indices = indices
-        self.normals = [] if normals is None else normals
-        self.uv_coords = [] if uv_coords is None else uv_coords
+        self.indices = np.array([]) if indices is None else indices
+        self.normals = normals
+        self.uv_coords = uv_coords
+
+    @property
+    def vertices(self) -> np.ndarray:
+        return self.__vertices
+
+    @vertices.setter
+    def vertices(self, vertices: np.ndarray):
+        if len(self.normals) != 0:
+            if vertices.shape != self.normals.shape:
+                raise ModelError("Invalid vertices shape. Shape is not matching the defined normals shape.")
+        if len(self.uv_coords) != 0:
+            if vertices.shape[0] != self.uv_coords.shape[0]:
+                raise ModelError("Invalid vertices shape. Length is not matching the defined uv coordinates length.")
+        self.__vertices = vertices
+
+    @property
+    def normals(self) -> np.ndarray:
+        return self.__normals
+
+    @normals.setter
+    def normals(self, normals: np.ndarray):
+        if normals is None:
+            return
+        if len(self.vertices) != 0:
+            if normals.shape != self.vertices.shape:
+                raise ModelError("Invalid normals shape. Shape is not matching the defined vertices shape.")
+        if len(self.uv_coords) != 0:
+            if normals.shape[0] != self.uv_coords.shape[0]:
+                raise ModelError("Invalid normals shape. Length is not matching the defined uv coordinates length.")
+        self.__normals = normals
+
+    @property
+    def uv_coords(self) -> np.ndarray:
+        return self.__uv_coords
+
+    @uv_coords.setter
+    def uv_coords(self, uv_coords: np.ndarray):
+        if uv_coords is None:
+            return
+        if len(self.vertices) != 0:
+            if uv_coords.shape[0] != self.vertices.shape[0]:
+                raise ModelError("Invalid uv coordinates shape. Length is not matching the defined normals length.")
+        if len(self.uv_coords) != 0:
+            if uv_coords.shape[0] != self.normals.shape[0]:
+                raise ModelError("Invalid uv coordinates shape. Length is not matching the defined normals length.")
+        self.__uv_coords = uv_coords
+
+    def generate_indices(self) -> np.ndarray:
+        ind_len = 0
+        dim_ind = 0
+        if len(self.vertices) != 0:
+            dim_ind += 1
+            ind_len = np.shape(self.vertices)[0]
+        if len(self.normals) != 0:
+            dim_ind += 1
+            if ind_len == 0: ind_len = np.shape(self.normals)[0]
+        if len(self.uv_coords) != 0:
+            dim_ind += 1
+            if ind_len == 0: ind_len = np.shape(self.uv_coords)[0]
+        if dim_ind > 0 and ind_len > 0:
+            return np.indices((ind_len, dim_ind))[0]
 
 
 class ColladaCreator(object):
@@ -112,17 +177,15 @@ class Wavefront(object):
             all_verts = np.array(obj_material.vertices)
 
             vertices = formatter.get_verts_by_format(all_verts, 'V3F')
-            indices = np.arange(len(np.concatenate(vertices, axis=None)))
-            indices = np.array([indices, indices]).T
-            model = Model(vertices, indices)
+            model = Model(vertices)
 
             # Normals are optional
             if 'N3F' in formatter.formats:
                 normals = formatter.get_verts_by_format(all_verts, 'N3F')
-                indices = np.array([indices, indices]).T
-                model.indices = indices
                 model.normals = np.array(normals)
 
+            indices = model.generate_indices()
+            model.indices = indices
             models.append(model)
 
         return models
@@ -143,9 +206,8 @@ class Wavefront(object):
 
 
 class VertexFormatter(object):
-
     # These are the valid formats with their vertices length
-    _valid_vertex_formats = {
+    __valid_vertex_formats = {
         'T2F': 2,
         'C3F': 3,
         'N3F': 3,
@@ -165,13 +227,13 @@ class VertexFormatter(object):
         start_index = self.get_start_index_for_format(format)
         length = self.get_length_for_format(format)
 
-        return np.array([verts[i:i+length] for i in range(start_index, len(verts), seq.sum())])
+        return np.array([verts[i:i + length] for i in range(start_index, len(verts), seq.sum())])
 
     def get_vert_lengths(self):
         format_values = np.zeros(len(self.formats), dtype=np.int)
         # Convert to enum values and build up format_values array
         for idx, vert_format in enumerate(self.formats):
-            format_values[idx] = self._valid_vertex_formats.get(self.formats[idx])
+            format_values[idx] = self.__valid_vertex_formats.get(self.formats[idx])
 
         return format_values
 
@@ -190,13 +252,12 @@ class VertexFormatter(object):
         return start_index
 
     def get_length_for_format(self, format):
-        return self._valid_vertex_formats.get(format)
+        return self.__valid_vertex_formats.get(format)
 
     def get_index_for_format(self, format):
         return self.formats.index(format)
 
     def __validate_formats(self, formats):
         for format in formats:
-            if format not in self._valid_vertex_formats:
+            if format not in self.__valid_vertex_formats:
                 raise WavefrontError("The specified vertex format sequence is invalid!")
-
