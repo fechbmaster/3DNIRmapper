@@ -29,8 +29,7 @@ class Model(object):
 
     @vertices.setter
     def vertices(self, vertices: np.ndarray):
-        # Reshape to get vertices
-        vertices.reshape([(vertices.size // 3), 3])
+        vertices = self.__reshape(vertices, 3)
         if self.normals.size != 0:
             if vertices.shape != self.normals.shape:
                 raise ModelError("Invalid vertices shape. Shape is not matching the defined normals shape.")
@@ -48,7 +47,7 @@ class Model(object):
         if normals is None:
             return
         # Reshape to get vertices
-        normals.reshape([(normals.size // 3), 3])
+        normals = self.__reshape(normals, 3)
         if self.vertices.size != 0:
             if normals.shape != self.vertices.shape:
                 raise ModelError("Invalid normals shape. Shape is not matching the defined vertices shape.")
@@ -66,7 +65,7 @@ class Model(object):
         if uv_coords is None:
             return
         # Reshape to get coords
-        uv_coords.reshape([(uv_coords.size // 2), 2])
+        uv_coords = self.__reshape(uv_coords, 2)
         if self.vertices.size != 0:
             if uv_coords.shape[0] != self.vertices.shape[0]:
                 raise ModelError("Invalid uv coordinates shape. Length is not matching the defined normals length.")
@@ -90,6 +89,12 @@ class Model(object):
         if dim_ind > 0 and ind_len > 0:
             return np.indices((ind_len, dim_ind))[0]
 
+    def __reshape(self, array: np.ndarray, vert_length: int):
+        try:
+            # Reshape to get coords
+            return array.reshape([(array.size // vert_length), vert_length])
+        except ValueError as e:
+            raise ModelError(e)
 
 class ColladaCreator(object):
     """A creator class for Collada files.
