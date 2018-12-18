@@ -7,6 +7,7 @@ from collada import *
 from collada import source
 
 from nirmapper.exceptions import WavefrontError, ModelError
+from nirmapper.utils import euler_angles_to_rotation_matrix
 
 
 class IndicesFormat(Enum):
@@ -250,12 +251,18 @@ class Wavefront(object):
 
             # Contains all vertices no matter if T2F, C3F, N3F or V3F
             all_verts = np.array(obj_material.vertices)
+            rotation = euler_angles_to_rotation_matrix([90, 180, 0])
 
             # Create empty model
             model = Model()
 
             for ind_format in formats:
                 vertices = formatter.get_verts_by_format(all_verts, ind_format)
+                # rotate vertices by 90° to get into internal coord system
+                # todo: make this better!!!!!!
+                if ind_format != IndicesFormat.T2F:
+                    vertices = vertices.reshape(vertices.size // 3, 3)
+                    vertices = np.array([rotation.dot(x) for x in vertices])
                 model.set_vertices_by_ind_format(vertices, ind_format)
 
             indices, ind_format = model.generate_indices()

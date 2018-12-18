@@ -15,7 +15,7 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    _generate_cube_example()
+    #_generate_cube_example()
     _generate_tooth_example()
 
 
