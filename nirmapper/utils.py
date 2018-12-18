@@ -48,7 +48,7 @@ def flatten(lis):
             yield item
 
 
-def get_2d_coordinate_from_homogeneous_vector(vector):
+def get_2d_coordinate_from_homogeneous_vector(vector) -> np.ndarray:
     """
     Reverting homogeneous coordinates back to 2d coordinates
 
@@ -56,4 +56,4 @@ def get_2d_coordinate_from_homogeneous_vector(vector):
     :return: Reverted two-dimensional coordinate
     """
 
-    return vector[:-1] / vector[-1]
+    return np.array(vector[:-1] / vector[-1])

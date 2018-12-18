@@ -44,10 +44,11 @@ class Camera(object):
             v_0 = self.resolution_y / 2
             skew = 0  # use only rectangular pixels
 
-            A = np.array([[alpha_u, skew, u_0],
-                          [0, alpha_v, v_0],
-                      [0, 0, 1]
-                      ])
+            A = np.array([
+                [alpha_u, skew, u_0],
+                [0, alpha_v, v_0],
+                [0, 0, 1]
+            ])
             self.A = A
 
         return self.A
@@ -99,26 +100,13 @@ class Camera(object):
         :param numpy.array point: The three-dimensional coordinates in object space
         :return numpy.array: Two-dimensional pixel coordinates in image space
         """
+        # todo: maybe vectorize function
         P = self.get_3x4_P_projection_matrix()
         # Append 3d coord with fourth param to calculate coordinate
         uv_xyz = P.dot(np.append(point, 1))
         uv_xy = get_2d_coordinate_from_homogeneous_vector(uv_xyz)
 
-        return uv_xy
-
-    def project_world_point_to_uv_coords(self, point: np.ndarray):
-        """
-        Calculates the image space UV coordinates for a coordinate in object space.
-        UV coordinates are between 0 and 1.
-
-        :param numpy.array point: The three-dimensional coordinates in object space
-        :return numpy.array: Two-dimensional uv coordinate in image space
-        """
-        uv_xy = self.project_world_point_to_pixel_coords(point)
-        uv_xy[0] = uv_xy[0] / self.resolution_x
-        uv_xy[1] = uv_xy[1] / self.resolution_y
-
-        return np.array(uv_xy)
+        return uv_xy.astype(dtype=int)
 
     def project_world_points_to_uv_coords(self, points: np.ndarray):
         """
@@ -128,13 +116,22 @@ class Camera(object):
         :param numpy.array points: The three-dimensional coordinates in object space
         :return numpy.array: Two-dimensional uv coordinates in image space
         """
-        # User maybe just passed a single coord - fallback to other function
-        if points.ndim == 1:
-            return self.project_world_point_to_uv_coords(points)
+        # User maybe just passed a single coord - convert to 2d array
+        dim = points.ndim
+        if dim == 1:
+            points = np.array([points])
 
         uv_coords = []
         for point in points:
-            uv_xy = self.project_world_point_to_uv_coords(point)
+            uv_xy = self.project_world_point_to_pixel_coords(point)
             uv_coords.append(uv_xy)
+
+        uv_coords = np.array(uv_coords, dtype=float)
+
+        uv_coords[:, [0]] = uv_coords[:, [0]] / self.resolution_x
+        uv_coords[:, [1]] = uv_coords[:, [1]] / self.resolution_y
+
+        if dim == 1:
+            uv_coords = uv_coords.flatten()
 
         return np.array(uv_coords)

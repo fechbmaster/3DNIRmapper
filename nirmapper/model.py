@@ -202,6 +202,12 @@ class ColladaCreator(object):
         geomnode = scene.GeometryNode(geom, [matnode])
         node = scene.Node(node_name, children=[geomnode])
 
+        # Collada has a z-down coord system so transform the node
+        rotation1 = scene.RotateTransform(1.0, 0.0, 0.0, -90)
+        rotation2 = scene.RotateTransform(0.0, 1.0, 0.0, 180)
+        node.transforms.append(rotation1)
+        node.transforms.append(rotation2)
+
         myscene = scene.Scene("myscene", [node])
         mesh.scenes.append(myscene)
         mesh.scene = myscene
