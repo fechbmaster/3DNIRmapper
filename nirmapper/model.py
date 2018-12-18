@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Union
+from typing import List, Union, Tuple
 
 import numpy as np
 import pywavefront
@@ -11,6 +11,7 @@ from nirmapper.exceptions import WavefrontError, ModelError
 
 class IndicesFormat(Enum):
     T2F = 1,
+    # C3F - actually not needed but supported
     C3F = 2,
     N3F = 3,
     V3F = 4
@@ -41,19 +42,21 @@ class Model(object):
     __uv_coords = np.array([])
     __indices = np.array([])
 
-    def __init__(self, vertices: np.ndarray, normals: np.ndarray = None,
+    def __init__(self, obj_vertices: np.ndarray = None, normals: np.ndarray = None,
                  uv_coords: np.ndarray = None):
-        self.vertices = vertices
+        self.obj_vertices = obj_vertices
         self.normals = normals
         self.uv_coords = uv_coords
         self.indices_format: List[IndicesFormat] = []
 
     @property
-    def vertices(self) -> np.ndarray:
+    def obj_vertices(self) -> np.ndarray:
         return self.__vertices
 
-    @vertices.setter
-    def vertices(self, vertices: np.ndarray):
+    @obj_vertices.setter
+    def obj_vertices(self, vertices: np.ndarray):
+        if vertices is None:
+            return
         if vertices.size == 0:
             raise ModelError("Vertices must be defined and can't be length zero.")
         vertices = self.__reshape(vertices, 3)
@@ -101,15 +104,18 @@ class Model(object):
         self.__indices = indices
         self.indices_format = ind_format
 
-    def generate_indices(self) -> np.ndarray:
+    def generate_indices(self) -> Tuple[np.ndarray, List[IndicesFormat]]:
         # vertices are always given
-        ind_len = np.shape(self.vertices)[0]
+        ind_len = np.shape(self.obj_vertices)[0]
         dim_ind = 1
+        ind_format = [IndicesFormat.V3F]
         if self.normals.size != 0:
             dim_ind += 1
+            ind_format.append(IndicesFormat.N3F)
         if self.uv_coords.size != 0:
             dim_ind += 1
-        return np.indices((ind_len, dim_ind))[0]
+            ind_format.append(IndicesFormat.T2F)
+        return np.indices((ind_len, dim_ind))[0], ind_format
 
     @staticmethod
     def __reshape(array: np.ndarray, vert_length: int):
@@ -125,6 +131,14 @@ class Model(object):
         index = self.indices_format.index(ind_format)
 
         return self.indices[:, [index]]
+
+    def set_vertices_by_ind_format(self, vertices, ind_format: IndicesFormat):
+        if ind_format == IndicesFormat.V3F:
+            self.obj_vertices = vertices
+        elif ind_format == IndicesFormat.N3F:
+            self.normals = vertices
+        elif ind_format == IndicesFormat.T2F:
+            self.uv_coords = vertices
 
 
 class ColladaCreator(object):
@@ -158,7 +172,7 @@ class ColladaCreator(object):
         mesh.materials.append(mat)
         mesh.images.append(image)
 
-        vert_src = source.FloatSource("cubeverts-array", np.array(model.vertices), ('X', 'Y', 'Z'))
+        vert_src = source.FloatSource("cubeverts-array", np.array(model.obj_vertices), ('X', 'Y', 'Z'))
         normal_src = source.FloatSource("cubenormals-array", np.array(model.normals), ('X', 'Y', 'Z'))
         uv_src = source.FloatSource("cubeuv_array", np.array(model.uv_coords), ('S', 'T'))
 
@@ -219,16 +233,15 @@ class Wavefront(object):
             # Contains all vertices no matter if T2F, C3F, N3F or V3F
             all_verts = np.array(obj_material.vertices)
 
-            vertices = formatter.get_verts_by_format(all_verts, IndicesFormat.V3F)
-            model = Model(vertices)
+            # Create empty model
+            model = Model()
 
-            # Normals are optional
-            if IndicesFormat.N3F in formatter.formats:
-                normals = formatter.get_verts_by_format(all_verts, IndicesFormat.N3F)
-                model.normals = np.array(normals)
+            for ind_format in formats:
+                vertices = formatter.get_verts_by_format(all_verts, ind_format)
+                model.set_vertices_by_ind_format(vertices, ind_format)
 
-            indices = model.generate_indices()
-            model.set_indices(indices, formats)
+            indices, ind_format = model.generate_indices()
+            model.set_indices(indices, ind_format)
             models.append(model)
 
         return models

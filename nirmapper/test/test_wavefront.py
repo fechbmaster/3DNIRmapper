@@ -1,6 +1,7 @@
 import os
-import numpy as np
 from unittest import TestCase
+
+import numpy as np
 
 from nirmapper.model import Wavefront
 
@@ -31,7 +32,7 @@ class TestWavefront(TestCase):
         ])
 
         try:
-            np.testing.assert_almost_equal(self.model1.vertices, model1_verts)
+            np.testing.assert_almost_equal(self.model1.obj_vertices, model1_verts)
             res = True
         except AssertionError as err:
             res = False
@@ -39,7 +40,7 @@ class TestWavefront(TestCase):
         self.assertTrue(res)
 
         try:
-            np.testing.assert_almost_equal(self.model2.vertices, model2_verts)
+            np.testing.assert_almost_equal(self.model2.obj_vertices, model2_verts)
             res = True
         except AssertionError as err:
             res = False
@@ -76,15 +77,25 @@ class TestWavefront(TestCase):
         self.assertTrue(res)
 
     def test_uv_coords(self):
-        # uv_coords must not be imported - not necessary for this program
-        self.assertEqual(len(self.model1.uv_coords), 0)
-        self.assertEqual(len(self.model2.uv_coords), 0)
+        uv_coords = np.array([
+            [14.0, 15.0],
+            [12.0, 13.0],
+            [10.0, 11.0]
+        ])
+
+        try:
+            np.testing.assert_almost_equal(self.model1.uv_coords, uv_coords)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
 
     def test_indices(self):
         indices = np.array([
-            [0, 0],
-            [1, 1],
-            [2, 2]
+            [0, 0, 0],
+            [1, 1, 1],
+            [2, 2, 2]
         ])
 
         try:

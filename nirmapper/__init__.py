@@ -42,10 +42,12 @@ def _generate_tooth_example():
     model = models[0]
 
     # The magic is happening here
-    uv_coords = cam.project_world_points_to_uv_coords(model.vertices)
+    uv_coords = cam.project_world_points_to_uv_coords(model.obj_vertices)
     model.uv_coords = uv_coords
-    updated_indices = model.generate_indices()
-    model.indices = updated_indices
+
+    # Update indices
+    indices, ind_format = model.generate_indices()
+    model.set_indices(indices, ind_format)
 
     ColladaCreator.create_collada_from_model(model, texture_path, output_path)
 
@@ -123,7 +125,8 @@ def _generate_cube_example():
     # The magic is happening here
     uv_coords = cam.project_world_points_to_uv_coords(verts)
 
-    model = Model(verts, indices, normals, uv_coords)
+    model = Model(verts, normals, uv_coords)
+    model.set_indices(indices, "V3F_N3F_T2F")
     scipt_path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     texture_path = scipt_path + '/resources/images/texture_cube.png'
     output_path = '/tmp/cube_example.dae'
