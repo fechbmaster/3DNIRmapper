@@ -50,7 +50,7 @@ def _generate_tooth_example():
     indices, ind_format = model.generate_indices()
     model.set_indices(indices, ind_format)
 
-    ColladaCreator.create_collada_from_model(model, texture_path, output_path)
+    ColladaCreator.create_collada_from_model(model, texture_path, output_path, "Tooth_4")
 
 
 def _generate_cube_example():
@@ -135,4 +135,4 @@ def _generate_cube_example():
     print("Welcome to 3DNIRMapper!")
     print("This will create a demo mapping of a cube in ", output_path, " using the texture from: ", texture_path)
 
-    ColladaCreator.create_collada_from_model(model, texture_path, output_path)
+    ColladaCreator.create_collada_from_model(model, texture_path, output_path, "Cube")

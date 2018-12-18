@@ -159,7 +159,7 @@ class ColladaCreator(object):
     """
 
     @staticmethod
-    def create_collada_from_model(model: Model, texture_path: str, output_path: str) -> None:
+    def create_collada_from_model(model: Model, texture_path: str, output_path: str, node_name: str) -> None:
         """
         Create a Collada file out of an modell and a texture.
 
@@ -173,8 +173,7 @@ class ColladaCreator(object):
         image = material.CImage("material_0-image", texture_path)
         surface = material.Surface("material_0-image-surface", image)
         sampler2d = material.Sampler2D("material_0-image-sampler", surface)
-        # todo: check if this can be converted to tuple
-        mat_map = material.Map(sampler2d, "UVSET0")
+        mat_map: material.Map = material.Map(sampler2d, "UVSET0")
 
         effect = material.Effect("effect0", [surface, sampler2d], "lambert", emission=(0.0, 0.0, 0.0, 1),
                                  ambient=(0.0, 0.0, 0.0, 1), diffuse=mat_map, transparent=mat_map, transparency=0.0,
@@ -201,7 +200,7 @@ class ColladaCreator(object):
 
         matnode = scene.MaterialNode("materialref", mat, inputs=[])
         geomnode = scene.GeometryNode(geom, [matnode])
-        node = scene.Node("Cube", children=[geomnode])
+        node = scene.Node(node_name, children=[geomnode])
 
         myscene = scene.Scene("myscene", [node])
         mesh.scenes.append(myscene)
