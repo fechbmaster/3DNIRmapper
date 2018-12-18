@@ -1,8 +1,7 @@
-import numpy as np
 import math
 from collections import Iterable
 
-from nirmapper.exceptions import ReshapeError
+import numpy as np
 
 
 def euler_angles_to_rotation_matrix(theta):
@@ -57,4 +56,4 @@ def get_2d_coordinate_from_homogeneous_vector(vector):
     :return: Reverted two-dimensional coordinate
     """
 
-    return vector[:-1]/vector[-1]
+    return vector[:-1] / vector[-1]
