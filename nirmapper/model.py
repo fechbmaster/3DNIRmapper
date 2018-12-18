@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List, Union
 
 import numpy as np
 import pywavefront
@@ -57,12 +57,6 @@ class Model(object):
         if vertices.size == 0:
             raise ModelError("Vertices must be defined and can't be length zero.")
         vertices = self.__reshape(vertices, 3)
-        if self.normals.size != 0:
-            if vertices.shape != self.normals.shape:
-                raise ModelError("Invalid vertices shape. Shape is not matching the defined normals shape.")
-        if self.uv_coords.size != 0:
-            if vertices.shape[0] != self.uv_coords.shape[0]:
-                raise ModelError("Invalid vertices shape. Length is not matching the defined uv coordinates length.")
         self.__vertices = vertices
 
     @property
@@ -75,12 +69,6 @@ class Model(object):
             return
         # Reshape to get vertices
         normals = self.__reshape(normals, 3)
-        if self.vertices.size != 0:
-            if normals.shape != self.vertices.shape:
-                raise ModelError("Invalid normals shape. Shape is not matching the defined vertices shape.")
-        if self.uv_coords.size != 0:
-            if normals.shape[0] != self.uv_coords.shape[0]:
-                raise ModelError("Invalid normals shape. Length is not matching the defined uv coordinates length.")
         self.__normals = normals
 
     @property
@@ -93,22 +81,16 @@ class Model(object):
             return
         # Reshape to get coords
         uv_coords = self.__reshape(uv_coords, 2)
-        if self.vertices.size != 0:
-            if uv_coords.shape[0] != self.vertices.shape[0]:
-                raise ModelError("Invalid uv coordinates shape. Length is not matching the defined normals length.")
-        if self.uv_coords.size != 0:
-            if uv_coords.shape[0] != self.normals.shape[0]:
-                raise ModelError("Invalid uv coordinates shape. Length is not matching the defined normals length.")
         self.__uv_coords = uv_coords
 
     @property
     def indices(self) -> np.ndarray:
         return self.__indices
 
-    @indices.setter
-    def indices(self, indices: np.ndarray):
-        if indices is None:
-            return
+    def set_indices(self, indices: np.ndarray, ind_format: Union[str, List[IndicesFormat]]):
+        if type(ind_format) is str:
+            ind_format = IndicesFormat.get_indices_formats_from_string(ind_format)
+
         dim_ind = 1
         if len(self.normals) != 0:
             dim_ind += 1
@@ -117,6 +99,7 @@ class Model(object):
         # Reshape to get coords
         indices = self.__reshape(indices, dim_ind)
         self.__indices = indices
+        self.indices_format = ind_format
 
     def generate_indices(self) -> np.ndarray:
         # vertices are always given
@@ -134,6 +117,14 @@ class Model(object):
             return array.reshape([(array.size // vert_length), vert_length])
         except ValueError as e:
             raise ModelError(e)
+
+    def get_indices_for_format(self, ind_format: IndicesFormat):
+        if ind_format not in self.indices_format:
+            print("Searched for %s format indices, but there are not defined" % ind_format)
+            return np.array([])
+        index = self.indices_format.index(ind_format)
+
+        return self.indices[:, [index]]
 
 
 class ColladaCreator(object):
@@ -237,7 +228,7 @@ class Wavefront(object):
                 model.normals = np.array(normals)
 
             indices = model.generate_indices()
-            model.indices = indices
+            model.set_indices(indices, formats)
             models.append(model)
 
         return models
