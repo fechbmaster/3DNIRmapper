@@ -55,10 +55,9 @@ class Model(object):
 
     @obj_vertices.setter
     def obj_vertices(self, vertices: np.ndarray):
-        if vertices is None:
+        if vertices is None or vertices.size == 0:
+            self.__vertices = np.array([])
             return
-        if vertices.size == 0:
-            raise ModelError("Vertices must be defined and can't be length zero.")
         vertices = self.__reshape(vertices, 3)
         self.__vertices = vertices
 
@@ -68,7 +67,8 @@ class Model(object):
 
     @normals.setter
     def normals(self, normals: np.ndarray):
-        if normals is None:
+        if normals is None or normals.size == 0:
+            self.__normals = np.array([])
             return
         # Reshape to get vertices
         normals = self.__reshape(normals, 3)
@@ -80,7 +80,8 @@ class Model(object):
 
     @uv_coords.setter
     def uv_coords(self, uv_coords: np.ndarray):
-        if uv_coords is None:
+        if uv_coords is None or uv_coords.size == 0:
+            self.__uv_coords = np.array([])
             return
         # Reshape to get coords
         uv_coords = self.__reshape(uv_coords, 2)
@@ -91,6 +92,9 @@ class Model(object):
         return self.__indices
 
     def set_indices(self, indices: np.ndarray, ind_format: Union[str, List[IndicesFormat]]):
+        if indices is None or indices.size == 0:
+            self.__indices = np.array([])
+            return
         if type(ind_format) is str:
             ind_format = IndicesFormat.get_indices_formats_from_string(ind_format)
 
@@ -105,16 +109,25 @@ class Model(object):
         self.indices_format = ind_format
 
     def generate_indices(self) -> Tuple[np.ndarray, List[IndicesFormat]]:
-        # vertices are always given
-        ind_len = np.shape(self.obj_vertices)[0]
-        dim_ind = 1
-        ind_format = [IndicesFormat.V3F]
+        ind_len = 0
+        dim_ind = 0
+        ind_format = []
+        if self.obj_vertices.size != 0:
+            ind_len = np.shape(self.obj_vertices)[0]
+            dim_ind += 1
+            ind_format.append(IndicesFormat.V3F)
         if self.normals.size != 0:
+            if ind_len == 0:
+                ind_len = np.shape(self.normals)[0]
             dim_ind += 1
             ind_format.append(IndicesFormat.N3F)
         if self.uv_coords.size != 0:
+            if ind_len == 0:
+                ind_len = np.shape(self.uv_coords)[0]
             dim_ind += 1
             ind_format.append(IndicesFormat.T2F)
+        if ind_len == 0 and dim_ind == 0:
+            return np.array([]), ind_format
         return np.indices((ind_len, dim_ind))[0], ind_format
 
     @staticmethod
@@ -126,7 +139,7 @@ class Model(object):
 
     def get_indices_for_format(self, ind_format: IndicesFormat):
         if ind_format not in self.indices_format:
-            print("Searched for %s format indices, but there are not defined" % ind_format)
+            print("Searched for %s format indices, but it is not defined" % ind_format)
             return np.array([])
         index = self.indices_format.index(ind_format)
 
