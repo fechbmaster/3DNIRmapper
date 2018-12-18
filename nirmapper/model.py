@@ -258,7 +258,7 @@ class Wavefront(object):
 
             for ind_format in formats:
                 vertices = formatter.get_verts_by_format(all_verts, ind_format)
-                # rotate vertices by 90° to get into internal coord system
+                # rotate vertices by x=90° and y=180° degrees to get into internal coord system
                 # todo: make this better!!!!!!
                 if ind_format != IndicesFormat.T2F:
                     vertices = vertices.reshape(vertices.size // 3, 3)
