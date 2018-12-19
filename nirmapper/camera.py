@@ -65,6 +65,7 @@ class Camera(object):
                                  [0, 0, -1]
                                  ])
 
+            # Transpose since the rotation is object rotation, and coordinate rotation is needed
             R_world2cam = euler_angles_to_rotation_matrix(self.cam_euler_rotation_theta).T
             T_world2cam = np.dot(-1 * R_world2cam, self.cam_location_xyz)
 
