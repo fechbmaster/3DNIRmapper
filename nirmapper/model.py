@@ -11,6 +11,9 @@ from nirmapper.utils import euler_angles_to_rotation_matrix
 
 
 class IndicesFormat(Enum):
+    """Enum that holds the valid formats for the indices.
+
+    """
     T2F = 1,
     # C3F - actually not needed but supported
     C3F = 2,
@@ -19,6 +22,12 @@ class IndicesFormat(Enum):
 
     @staticmethod
     def get_indices_formats_from_string(format_str: str):
+        """
+        Converts a string 'T2F_N3F' to a sequence of enum values.
+
+        :param format_str: String of the format.
+        :return: List of enum formats.
+        """
         formats: List[IndicesFormat] = []
         format_str_array = format_str.split("_")
         for format_str in format_str_array:
@@ -28,6 +37,12 @@ class IndicesFormat(Enum):
 
     @staticmethod
     def get_length_for_format(ind_format):
+        """
+        Get the length for an format.
+
+        :param ind_format: The format.
+        :return: The length of the format.
+        """
         if ind_format == IndicesFormat.T2F:
             return 2
         else:
@@ -92,7 +107,14 @@ class Model(object):
     def indices(self) -> np.ndarray:
         return self.__indices
 
-    def set_indices(self, indices: np.ndarray, ind_format: Union[str, List[IndicesFormat]]):
+    def set_indices(self, indices: np.ndarray, ind_format: Union[str, List[IndicesFormat]]) -> None:
+        """
+        Method sets the indices and its format.
+
+        :param indices: The indices to set.
+        :param ind_format: The format of the indices.
+        :return: None
+        """
         if indices is None or indices.size == 0:
             self.__indices = np.array([])
             return
@@ -110,6 +132,11 @@ class Model(object):
         self.indices_format = ind_format
 
     def generate_indices(self) -> Tuple[np.ndarray, List[IndicesFormat]]:
+        """
+        Generates indices depending on the given vertices.
+
+        :return: An array of indices, The format of the indices.
+        """
         ind_len = 0
         dim_ind = 0
         ind_format = []
@@ -132,13 +159,26 @@ class Model(object):
         return np.indices((ind_len, dim_ind))[0], ind_format
 
     @staticmethod
-    def __reshape(array: np.ndarray, vert_length: int):
+    def __reshape(array: np.ndarray, vert_length: int) -> np.ndarray:
+        """
+        Method reshapes an array depending on its length by giving the vertices length.
+
+        :param array: The array that should be reshaped.
+        :param vert_length: The length of the vectors.
+        :return: The reshaped array.
+        """
         try:
             return array.reshape([(array.size // vert_length), vert_length])
         except ValueError as e:
             raise ModelError(e)
 
-    def get_indices_for_format(self, ind_format: IndicesFormat):
+    def get_indices_for_format(self, ind_format: IndicesFormat) -> np.ndarray:
+        """
+        Gets the indices that describes vertices by a format.
+
+        :param ind_format: The format of the indices.
+        :return: The indices for the format.
+        """
         if ind_format not in self.indices_format:
             print("Searched for %s format indices, but it is not defined" % ind_format)
             return np.array([])
@@ -146,7 +186,14 @@ class Model(object):
 
         return self.indices[:, [index]]
 
-    def set_vertices_by_ind_format(self, vertices, ind_format: IndicesFormat):
+    def set_vertices_by_ind_format(self, vertices, ind_format: IndicesFormat) -> None:
+        """
+        Method enables setting vertices described by a format.
+
+        :param vertices: The vertices that should be set.
+        :param ind_format: The format the vertices are.
+        :return: None
+        """
         if ind_format == IndicesFormat.V3F:
             self.obj_vertices = vertices
         elif ind_format == IndicesFormat.N3F:
