@@ -287,15 +287,22 @@ class Wavefront(object):
 
 
 class VertexIndicesFormatter(object):
-    # These are the valid formats with their vertices length
+    """ A formatter that gives functionality to split a list or array of vertices depending on a format sequence.
+
+    """
 
     def __init__(self, formats: List[IndicesFormat]):
         self.formats = formats
 
     def get_verts_by_format(self, verts: np.ndarray, ind_format: IndicesFormat):
-        # if format in self.formats:
-        #     return np.array([])
+        """
+        Method splits up an array of vertices into an array of specific vertces described by an format and a
+        sequence.
 
+        :param verts: The vertices to split.
+        :param ind_format: The format the vertices should be split.
+        :return: The splited vertices depending on the sequence.
+        """
         seq = self.get_vert_lengths()
         start_index = self.get_start_index_for_format(ind_format)
         length = IndicesFormat.get_length_for_format(ind_format)
@@ -303,6 +310,11 @@ class VertexIndicesFormatter(object):
         return np.array([verts[i:i + length] for i in range(start_index, len(verts), seq.sum())])
 
     def get_vert_lengths(self):
+        """
+        Method returns the length for the format sequence.
+
+        :return: The length sequence.
+        """
         format_values = np.zeros(len(self.formats), dtype=np.int)
         # Convert to enum values and build up format_values array
         for idx, vert_format in enumerate(self.formats):
