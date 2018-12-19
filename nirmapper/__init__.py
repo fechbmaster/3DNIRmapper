@@ -28,7 +28,7 @@ def _generate_tooth_example():
     rotation = np.array([83.6, 7.29, 110])
     focal_length = 35
     sensor_width = 32
-    sensor_height = 18
+    sensor_height = 32
     screen_width = 1280
     screen_height = 1024
 
