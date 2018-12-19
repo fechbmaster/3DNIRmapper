@@ -1,8 +1,7 @@
 import numpy as np
 
 from .utils import (
-    euler_angles_to_rotation_matrix,
-    get_2d_coordinate_from_homogeneous_vector)
+    euler_angles_to_rotation_matrix)
 
 
 class Camera(object):
@@ -105,7 +104,7 @@ class Camera(object):
         P = self.get_3x4_P_projection_matrix()
         # Append 3d coord with fourth param to calculate coordinate
         uv_xyz = P.dot(np.append(point, 1))
-        uv_xy = get_2d_coordinate_from_homogeneous_vector(uv_xyz)
+        uv_xy = np.array(uv_xyz[:-1] / uv_xyz[-1])
 
         return uv_xy.astype(dtype=int)
 

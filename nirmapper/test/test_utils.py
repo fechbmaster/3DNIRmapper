@@ -51,6 +51,3 @@ class TestUtils(TestCase):
             print(err)
         self.assertTrue(res)
 
-
-    def test_get_2d_coordinate_from_homogeneous_vector(self):
-

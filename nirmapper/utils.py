@@ -37,14 +37,3 @@ def euler_angles_to_rotation_matrix(theta):
     R = np.dot(R_z, np.dot(R_y, R_x))
 
     return R
-
-
-def get_2d_coordinate_from_homogeneous_vector(vector) -> np.ndarray:
-    """
-    Reverting homogeneous coordinates back to 2d coordinates
-
-    :param vector: Homogeneous three-dimensional vector
-    :return: Reverted two-dimensional coordinate
-    """
-
-    return np.array(vector[:-1] / vector[-1])
