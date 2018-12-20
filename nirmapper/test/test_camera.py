@@ -80,10 +80,10 @@ class TestCamera(TestCase):
         pix_p4 = self.cam.project_world_point_to_pixel_coords(self.p4)
 
         try:
-            np.testing.assert_equal(pix_p1, exp_p1)
-            np.testing.assert_equal(pix_p2, exp_p2)
-            np.testing.assert_equal(pix_p3, exp_p3)
-            np.testing.assert_equal(pix_p4, exp_p4)
+            np.testing.assert_almost_equal(pix_p1, exp_p1)
+            np.testing.assert_almost_equal(pix_p2, exp_p2)
+            np.testing.assert_almost_equal(pix_p3, exp_p3)
+            np.testing.assert_almost_equal(pix_p4, exp_p4)
             res = True
         except AssertionError as err:
             res = False
