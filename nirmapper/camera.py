@@ -106,7 +106,7 @@ class Camera(object):
         uv_xyz = P.dot(np.append(point, 1))
         uv_xy = np.array(uv_xyz[:-1] / uv_xyz[-1])
 
-        return uv_xy.astype(dtype=int)
+        return uv_xy
 
     def project_world_points_to_uv_coords(self, points: np.ndarray):
         """
