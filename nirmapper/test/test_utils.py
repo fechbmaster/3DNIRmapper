@@ -1,7 +1,7 @@
 import numpy as np
 from unittest import TestCase
 
-from nirmapper.utils import euler_angles_to_rotation_matrix
+from nirmapper.utils import euler_angles_to_rotation_matrix, quaternion_matrix
 
 
 class TestUtils(TestCase):
@@ -51,3 +51,18 @@ class TestUtils(TestCase):
             print(err)
         self.assertTrue(res)
 
+    def test_quaternion_matrix(self):
+        rotation = [0.707, 0.707, 0, 0]
+
+        expected = np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, 0.0, -1.0],
+            [0.0, 1.0, 0.0]])
+
+        try:
+            np.testing.assert_almost_equal(quaternion_matrix(rotation), expected)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
