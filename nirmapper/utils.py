@@ -1,31 +1,39 @@
-import numpy as np
 import math
-from collections import Iterable
 
-from nirmapper.exceptions import ReshapeError
+import numpy as np
+
+# epsilon for testing whether a number is close to zero
+_EPS = np.finfo(float).eps * 4.0
 
 
 def euler_angles_to_rotation_matrix(theta):
     """
     Calculate a rotation matrix from given euler angle.
 
-    :param theta: Euler angle in °
-    :return: Rotation matrix
+    :param theta: Euler angle in degrees.
+    :return: Rotation matrix.
     """
     theta = np.radians(theta)
 
+    cx = math.cos(theta[0])
+    sx = math.sin(theta[0])
+    cy = math.cos(theta[1])
+    sy = math.sin(theta[1])
+    cz = math.cos(theta[2])
+    sz = math.sin(theta[2])
+
     R_x = np.array([[1, 0, 0],
-                    [0, math.cos(theta[0]), -math.sin(theta[0])],
-                    [0, math.sin(theta[0]), math.cos(theta[0])]
+                    [0, cx, -sx],
+                    [0, sx, cx]
                     ])
 
-    R_y = np.array([[math.cos(theta[1]), 0, math.sin(theta[1])],
+    R_y = np.array([[cy, 0, sy],
                     [0, 1, 0],
-                    [-math.sin(theta[1]), 0, math.cos(theta[1])]
+                    [-sy, 0, cy]
                     ])
 
-    R_z = np.array([[math.cos(theta[2]), -math.sin(theta[2]), 0],
-                    [math.sin(theta[2]), math.cos(theta[2]), 0],
+    R_z = np.array([[cz, -sz, 0],
+                    [sz, cz, 0],
                     [0, 0, 1]
                     ])
 
@@ -34,27 +42,18 @@ def euler_angles_to_rotation_matrix(theta):
     return R
 
 
-def flatten(lis):
+def quaternion_matrix(quaternion):
+    """Return homogeneous rotation matrix from quaternion.
+
     """
-    Function flattens a multidimensional list.
-
-    :param lis: The list to flatten
-    :return: Flattened list
-    """
-    for item in lis:
-        if isinstance(item, Iterable) and not isinstance(item, str):
-            for x in flatten(item):
-                yield x
-        else:
-            yield item
-
-
-def get_2d_coordinate_from_homogeneous_vector(vector):
-    """
-    Reverting homogeneous coordinates back to 2d coordinates
-
-    :param vector: Homogeneous three-dimensional vector
-    :return: Reverted two-dimensional coordinate
-    """
-
-    return vector[:-1]/vector[-1]
+    q = np.array(quaternion, dtype=np.float64, copy=True)
+    n = np.dot(q, q)
+    if n < _EPS:
+        return np.identity(4)
+    q *= math.sqrt(2.0 / n)
+    q = np.outer(q, q)
+    return np.array([
+        [1.0 - q[2, 2] - q[3, 3], q[1, 2] - q[3, 0], q[1, 3] + q[2, 0]],
+        [q[1, 2] + q[3, 0], 1.0 - q[1, 1] - q[3, 3], q[2, 3] - q[1, 0]],
+        [q[1, 3] - q[2, 0], q[2, 3] + q[1, 0], 1.0 - q[1, 1] - q[2, 2]]
+        ])
