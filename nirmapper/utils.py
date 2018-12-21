@@ -2,6 +2,9 @@ import math
 
 import numpy as np
 
+# epsilon for testing whether a number is close to zero
+_EPS = np.finfo(float).eps * 4.0
+
 
 def euler_angles_to_rotation_matrix(theta):
     """
@@ -37,3 +40,20 @@ def euler_angles_to_rotation_matrix(theta):
     R = np.dot(R_z, np.dot(R_y, R_x))
 
     return R
+
+
+def quaternion_matrix(quaternion):
+    """Return homogeneous rotation matrix from quaternion.
+
+    """
+    q = np.array(quaternion, dtype=np.float64, copy=True)
+    n = np.dot(q, q)
+    if n < _EPS:
+        return np.identity(4)
+    q *= math.sqrt(2.0 / n)
+    q = np.outer(q, q)
+    return np.array([
+        [1.0 - q[2, 2] - q[3, 3], q[1, 2] - q[3, 0], q[1, 3] + q[2, 0]],
+        [q[1, 2] + q[3, 0], 1.0 - q[1, 1] - q[3, 3], q[2, 3] - q[1, 0]],
+        [q[1, 3] - q[2, 0], q[2, 3] + q[1, 0], 1.0 - q[1, 1] - q[2, 2]]
+        ])
