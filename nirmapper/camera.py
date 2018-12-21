@@ -1,7 +1,7 @@
 import numpy as np
 
 from .utils import (
-    euler_angles_to_rotation_matrix)
+    quaternion_matrix, euler_angles_to_rotation_matrix)
 
 
 class Camera(object):
@@ -14,14 +14,15 @@ class Camera(object):
                  focal_length_in_mm,
                  resolution_x, resolution_y,
                  sensor_width_in_mm, sensor_height_in_mm,
-                 cam_location_xyz, cam_euler_rotation_theta):
+                 cam_location_xyz, cam_euler_rotation, cam_quat_rotation=None):
         self.focal_length_in_mm = focal_length_in_mm
         self.resolution_x = resolution_x
         self.resolution_y = resolution_y
         self.sensor_width_in_mm = sensor_width_in_mm
         self.sensor_height_in_mm = sensor_height_in_mm
         self.cam_location_xyz = cam_location_xyz
-        self.cam_euler_rotation_theta = cam_euler_rotation_theta
+        self.cam_euler_rotation = cam_euler_rotation
+        self.cam_quat_rotation = cam_quat_rotation
 
         self.A = np.array([])
         self.D = np.array([])
@@ -65,7 +66,10 @@ class Camera(object):
                                  ])
 
             # Transpose since the rotation is object rotation, and coordinate rotation is needed
-            R_world2cam = euler_angles_to_rotation_matrix(self.cam_euler_rotation_theta).T
+            if self.cam_quat_rotation:
+                R_world2cam = quaternion_matrix(self.cam_quat_rotation).T
+            else:
+                R_world2cam = euler_angles_to_rotation_matrix(self.cam_euler_rotation).T
             T_world2cam = np.dot(-1 * R_world2cam, self.cam_location_xyz)
 
             R_world2cv = np.dot(R_cam2cv, R_world2cam)
@@ -129,7 +133,7 @@ class Camera(object):
         uv_coords = np.array(uv_coords, dtype=float)
 
         uv_coords[:, [0]] = uv_coords[:, [0]] / self.resolution_x
-        uv_coords[:, [1]] = uv_coords[:, [1]] / self.resolution_y
+        uv_coords[:, [1]] = (self.resolution_y - uv_coords[:, [1]]) / self.resolution_y
 
         if dim == 1:
             uv_coords = uv_coords.flatten()
