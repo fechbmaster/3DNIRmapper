@@ -28,7 +28,7 @@ class IndicesFormat(Enum):
         :param format_str: String of the format.
         :return: List of enum formats.
         """
-        formats: List[IndicesFormat] = []
+        formats = []
         format_str_array = format_str.split("_")
         for format_str in format_str_array:
             formats.append(IndicesFormat[format_str])
@@ -63,7 +63,7 @@ class Model(object):
         self.obj_vertices = obj_vertices
         self.normals = normals
         self.uv_coords = uv_coords
-        self.indices_format: List[IndicesFormat] = []
+        self.indices_format = []
 
     @property
     def obj_vertices(self) -> np.ndarray:
@@ -222,7 +222,7 @@ class ColladaCreator(object):
         image = material.CImage("material_0-image", texture_path)
         surface = material.Surface("material_0-image-surface", image)
         sampler2d = material.Sampler2D("material_0-image-sampler", surface)
-        mat_map: material.Map = material.Map(sampler2d, "UVSET0")
+        mat_map = material.Map(sampler2d, "UVSET0")
 
         effect = material.Effect("effect0", [surface, sampler2d], "lambert", emission=(0.0, 0.0, 0.0, 1),
                                  ambient=(0.0, 0.0, 0.0, 1), diffuse=mat_map, transparent=mat_map, transparency=0.0,

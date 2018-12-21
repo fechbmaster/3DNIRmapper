@@ -39,7 +39,7 @@ def _generate_tooth_example():
                  rotation_quat)
 
     print("Starting model import...")
-    models: List[Model] = Wavefront.import_obj_as_model_list(prepend_dir('resources/models/4_downsized_adjusted.obj'))
+    models = Wavefront.import_obj_as_model_list(prepend_dir('resources/models/4_downsized_adjusted.obj'))
     print("Finished model import...")
 
     model = models[0]
