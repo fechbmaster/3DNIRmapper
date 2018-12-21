@@ -15,7 +15,7 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    #_generate_cube_example()
+    # _generate_cube_example()
     _generate_tooth_example()
 
 
@@ -25,7 +25,8 @@ def _generate_tooth_example():
     print("This will create a demo mapping of a cube in ", output_path, " using the texture from: ", texture_path)
 
     location = np.array([9.8, 1.2, 1.22])
-    rotation = np.array([83.6, 7.29, 110])
+    rotation_euler = np.array([83.6, 7.29, 110])
+    rotation_quat = np.array([0.461, 0.342, 0.572, 0.585])
     focal_length = 35
     sensor_width = 32
     sensor_height = 25.6
@@ -34,7 +35,8 @@ def _generate_tooth_example():
 
     scipt_path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
 
-    cam = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+    cam = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
+                 rotation_quat)
 
     print("Starting model import...")
     models: List[Model] = Wavefront.import_obj_as_model_list(prepend_dir('resources/models/4_downsized_adjusted.obj'))
