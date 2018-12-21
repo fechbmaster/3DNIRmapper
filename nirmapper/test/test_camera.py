@@ -91,10 +91,10 @@ class TestCamera(TestCase):
         self.assertTrue(res)
 
     def test_project_world_points_to_uv_coords(self):
-        exp_p1 = np.array([610 / self.screen_width, 190 / self.screen_height])
-        exp_p2 = np.array([610 / self.screen_width, 890 / self.screen_height])
-        exp_p3 = np.array([1310 / self.screen_width, 890 / self.screen_height])
-        exp_p4 = np.array([1310 / self.screen_width, 190 / self.screen_height])
+        exp_p1 = np.array([610 / self.screen_width, (self.screen_height - 190) / self.screen_height])
+        exp_p2 = np.array([610 / self.screen_width, (self.screen_height - 890) / self.screen_height])
+        exp_p3 = np.array([1310 / self.screen_width, (self.screen_height - 890) / self.screen_height])
+        exp_p4 = np.array([1310 / self.screen_width, (self.screen_height - 190) / self.screen_height])
 
         pix_p1 = (self.cam.project_world_points_to_uv_coords(self.p1))
         pix_p2 = (self.cam.project_world_points_to_uv_coords(self.p2))
