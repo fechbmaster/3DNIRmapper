@@ -7,7 +7,7 @@ from collada import *
 from collada import source
 
 from nirmapper.exceptions import WavefrontError, ModelError
-from nirmapper.utils import euler_angles_to_rotation_matrix
+from nirmapper.utils import euler_angles_to_rotation_matrix, quaternion_matrix
 
 
 class IndicesFormat(Enum):
@@ -211,9 +211,10 @@ class ColladaCreator(object):
         """
         Create a Collada file out of an modell and a texture.
 
-        :param model: The model
-        :param texture_path: Path of the texture
-        :param output_path: Path where collada file should be stored
+        :param model: The model.
+        :param texture_path: Path of the texture.
+        :param output_path: Path where collada file should be stored.
+        :param node_name: The name of the node, the object should carry later.
         """
         mesh = Collada()
 
@@ -250,11 +251,9 @@ class ColladaCreator(object):
         geomnode = scene.GeometryNode(geom, [matnode])
         node = scene.Node(node_name, children=[geomnode])
 
-        # Collada has a z-down coord system so transform the node
+        # pycollada rotates the model for some reason - prevent that
         rotation1 = scene.RotateTransform(1.0, 0.0, 0.0, -90)
-        rotation2 = scene.RotateTransform(0.0, 1.0, 0.0, 180)
         node.transforms.append(rotation1)
-        node.transforms.append(rotation2)
 
         myscene = scene.Scene("myscene", [node])
         mesh.scenes.append(myscene)
@@ -298,14 +297,14 @@ class Wavefront(object):
 
             # Contains all vertices no matter if T2F, C3F, N3F or V3F
             all_verts = np.array(obj_material.vertices)
-            rotation = euler_angles_to_rotation_matrix([90, 180, 0])
+            rotation = quaternion_matrix([0.707, 0.707, 0, 0.0])
 
             # Create empty model
             model = Model()
 
             for ind_format in formats:
                 vertices = formatter.get_verts_by_format(all_verts, ind_format)
-                # rotate vertices by x=90° and y=180° degrees to get into internal coord system
+                # rotate vertices by x=90° degrees to get into internal coord system
                 # todo: make this better!!!!!!
                 if ind_format != IndicesFormat.T2F:
                     vertices = vertices.reshape(vertices.size // 3, 3)
