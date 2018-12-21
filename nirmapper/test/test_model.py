@@ -10,7 +10,7 @@ from nirmapper.model import IndicesFormat
 class TestModel(TestCase):
 
     def setUp(self):
-        self.model: Model = Model()
+        self.model = Model()
         self.vertices = np.array([
             0.04, 0.05, 0.06,
             0.01, 0.02, 0.03,
