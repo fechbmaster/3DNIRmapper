@@ -66,7 +66,7 @@ class Camera(object):
                                  ])
 
             # Transpose since the rotation is object rotation, and coordinate rotation is needed
-            if self.cam_quat_rotation:
+            if self.cam_quat_rotation is not None:
                 R_world2cam = quaternion_matrix(self.cam_quat_rotation).T
             else:
                 R_world2cam = euler_angles_to_rotation_matrix(self.cam_euler_rotation).T
