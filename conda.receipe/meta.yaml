@@ -1,20 +1,19 @@
 package:
   name: nirmapper
-  version: "v0.1.1"
+  version: "v1.0"
 
 source:
-  git_rev: v0.1.1
+  git_rev: v1.0
   git_url: https://github.com/fechbmaster/3DNIRmapper.git
-  path: $RECIPE_DIR/../..
+
 
 requirements:
   build:
     - python
     - setuptools
-    - numpy
-    - pywavefront
   run:
     - python
+    - numpy
 
 test:
   imports:
