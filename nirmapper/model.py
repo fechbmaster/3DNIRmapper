@@ -240,8 +240,8 @@ class ColladaCreator(object):
         geom = geometry.Geometry(mesh, "geometry0", "mycube", [vert_src, normal_src, uv_src])
         input_list = source.InputList()
         input_list.addInput(0, 'VERTEX', "#cubeverts-array")
-        input_list.addInput(1, 'TEXCOORD', "#cubeuv_array", set="0")
-        input_list.addInput(2, 'NORMAL', "#cubenormals-array")
+        input_list.addInput(1, 'NORMAL', "#cubenormals-array")
+        input_list.addInput(2, 'TEXCOORD', "#cubeuv_array", set="0")
 
         triset = geom.createTriangleSet(model.indices, input_list, "materialref")
         geom.primitives.append(triset)
@@ -326,7 +326,7 @@ class Wavefront(object):
         :param cache: Set caching off or on.
         :return: List of models of type Model.
         """
-        cust_scene = pywavefront.Wavefront(file_path, cache=cache)
+        cust_scene = pywavefront.Wavefront(file_path, cache=cache, create_materials=True)
         model = Wavefront.__import_obj_as_model_list_from_scene(cust_scene)
 
         return model
