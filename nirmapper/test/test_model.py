@@ -35,6 +35,7 @@ class TestModel(TestCase):
         self.model.obj_vertices = self.vertices
         self.model.normals = self.normals
         self.model.uv_coords = self.uv_coords
+        self.model.set_indices(self.indices, self.ind_format)
 
     def test_obj_vertices(self):
         expected_vertices = np.array([
@@ -285,6 +286,21 @@ class TestModel(TestCase):
 
         try:
             np.testing.assert_equal(self.model.normals, normals)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
+
+    def test_get_trinagles(self):
+        triangles = np.array([
+            [[0.04, 0.05, 0.06],
+             [0.01, 0.02, 0.03],
+             [0.07, 0.08, 0.09]]
+        ])
+
+        try:
+            np.testing.assert_equal(self.model.get_triangles(), triangles)
             res = True
         except AssertionError as err:
             res = False

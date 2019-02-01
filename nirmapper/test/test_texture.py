@@ -81,7 +81,7 @@ class TestTexture(TestCase):
         model = Model(obj_vertices=verts, normals=normals)
         model.set_indices(indices, ind_format="V3F_N3F")
         self.model = model
-        self.texture = Texture(id=1, texture_path="tmp/fake_path/fake_texture.png", cam=self.cam)
+        self.texture = Texture(text_id=1, texture_path="tmp/fake_path/fake_texture.png", cam=self.cam)
 
 
     def test_check_occlusion_for_model(self):
@@ -91,6 +91,8 @@ class TestTexture(TestCase):
             [1,   1, -1],
             [1,   1,  1]
         ]
+
+        self.model.get_triangles()
 
         calculated_visible_verts= self.texture.check_occlusion_for_model(self.model)
 

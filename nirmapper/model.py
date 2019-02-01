@@ -15,7 +15,6 @@ class IndicesFormat(Enum):
 
     """
     T2F = 1,
-    # C3F - actually not needed but supported
     C3F = 2,
     N3F = 3,
     V3F = 4
@@ -174,7 +173,7 @@ class Model(object):
 
     def get_indices_for_format(self, ind_format: IndicesFormat) -> np.ndarray:
         """
-        Gets the indices that describes vertices by a format.
+        Gets the indices that describes coordinates by a format.
 
         :param ind_format: The format of the indices.
         :return: The indices for the format.
@@ -200,6 +199,19 @@ class Model(object):
             self.normals = vertices
         elif ind_format == IndicesFormat.T2F:
             self.uv_coords = vertices
+
+    def get_triangles(self):
+        vert_indices = self.get_indices_for_format(IndicesFormat.V3F)
+
+        if vert_indices.size == 0:
+            print("Indices not set for V3F")
+            return []
+
+        # Generate vertices sequence from describing indices
+        vert_sequence = np.array(self.obj_vertices[vert_indices.flatten()])
+
+        # Reshape the vert sequence to length/9x3x3 triangle Pairs
+        return vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
 
 
 class ColladaCreator(object):
