@@ -271,7 +271,7 @@ class Wavefront(object):
     """
 
     def __init__(self, file_path: str, cache: bool = True):
-        self.scene = pywavefront.Wavefront(file_path, cache=cache)
+        self.scene = pywavefront.Wavefront(file_path, cache=cache, create_materials=True)
         self.models = Wavefront.__import_obj_as_model_list_from_scene(self.scene)
 
     @staticmethod
