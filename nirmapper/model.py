@@ -57,19 +57,19 @@ class Model(object):
     __uv_coords = np.array([])
     __indices = np.array([])
 
-    def __init__(self, obj_vertices: np.ndarray = None, normals: np.ndarray = None,
+    def __init__(self, vertices: np.ndarray = None, normals: np.ndarray = None,
                  uv_coords: np.ndarray = None):
-        self.obj_vertices = obj_vertices
+        self.vertices = vertices
         self.normals = normals
         self.uv_coords = uv_coords
         self.indices_format = []
 
     @property
-    def obj_vertices(self) -> np.ndarray:
+    def vertices(self) -> np.ndarray:
         return self.__vertices
 
-    @obj_vertices.setter
-    def obj_vertices(self, vertices: np.ndarray):
+    @vertices.setter
+    def vertices(self, vertices: np.ndarray):
         if vertices is None or vertices.size == 0:
             self.__vertices = np.array([])
             return
@@ -139,8 +139,8 @@ class Model(object):
         ind_len = 0
         dim_ind = 0
         ind_format = []
-        if self.obj_vertices.size != 0:
-            ind_len = np.shape(self.obj_vertices)[0]
+        if self.vertices.size != 0:
+            ind_len = np.shape(self.vertices)[0]
             dim_ind += 1
             ind_format.append(IndicesFormat.V3F)
         if self.normals.size != 0:
@@ -194,7 +194,7 @@ class Model(object):
         :return: None
         """
         if ind_format == IndicesFormat.V3F:
-            self.obj_vertices = vertices
+            self.vertices = vertices
         elif ind_format == IndicesFormat.N3F:
             self.normals = vertices
         elif ind_format == IndicesFormat.T2F:
@@ -208,7 +208,7 @@ class Model(object):
             return []
 
         # Generate vertices sequence from describing indices
-        vert_sequence = np.array(self.obj_vertices[vert_indices.flatten()])
+        vert_sequence = np.array(self.vertices[vert_indices.flatten()])
 
         # Reshape the vert sequence to length/9x3x3 triangle Pairs
         return vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
@@ -245,7 +245,7 @@ class ColladaCreator(object):
         mesh.materials.append(mat)
         mesh.images.append(image)
 
-        vert_src = source.FloatSource("cubeverts-array", np.array(model.obj_vertices), ('X', 'Y', 'Z'))
+        vert_src = source.FloatSource("cubeverts-array", np.array(model.vertices), ('X', 'Y', 'Z'))
         normal_src = source.FloatSource("cubenormals-array", np.array(model.normals), ('X', 'Y', 'Z'))
         uv_src = source.FloatSource("cubeuv_array", np.array(model.uv_coords), ('S', 'T'))
 

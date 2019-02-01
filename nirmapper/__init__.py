@@ -45,7 +45,7 @@ def _generate_tooth_example():
     model = models[0]
 
     # The magic is happening here
-    uv_coords = cam.get_texture_coords_for_vertices(model.obj_vertices)
+    uv_coords = cam.get_texture_coords_for_vertices(model.vertices)
     model.uv_coords = uv_coords
 
     # Update indices

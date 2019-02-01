@@ -32,7 +32,7 @@ class TestWavefront(TestCase):
         ])
 
         try:
-            np.testing.assert_almost_equal(self.model1.obj_vertices, model1_verts)
+            np.testing.assert_almost_equal(self.model1.vertices, model1_verts)
             res = True
         except AssertionError as err:
             res = False
@@ -40,7 +40,7 @@ class TestWavefront(TestCase):
         self.assertTrue(res)
 
         try:
-            np.testing.assert_almost_equal(self.model2.obj_vertices, model2_verts)
+            np.testing.assert_almost_equal(self.model2.vertices, model2_verts)
             res = True
         except AssertionError as err:
             res = False

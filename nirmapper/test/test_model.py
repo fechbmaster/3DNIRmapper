@@ -32,7 +32,7 @@ class TestModel(TestCase):
             2, 2, 2
         ])
         self.ind_format = "V3F_N3F_T2F"
-        self.model.obj_vertices = self.vertices
+        self.model.vertices = self.vertices
         self.model.normals = self.normals
         self.model.uv_coords = self.uv_coords
         self.model.set_indices(self.indices, self.ind_format)
@@ -45,7 +45,7 @@ class TestModel(TestCase):
         ])
 
         try:
-            np.testing.assert_equal(self.model.obj_vertices, expected_vertices)
+            np.testing.assert_equal(self.model.vertices, expected_vertices)
             res = True
         except AssertionError as err:
             res = False
@@ -54,10 +54,10 @@ class TestModel(TestCase):
 
         # Test setting empty ndarray
 
-        self.model.obj_vertices = np.array([])
+        self.model.vertices = np.array([])
 
         try:
-            np.testing.assert_equal(self.model.obj_vertices, np.array([]))
+            np.testing.assert_equal(self.model.vertices, np.array([]))
             res = True
         except AssertionError as err:
             res = False
@@ -201,7 +201,7 @@ class TestModel(TestCase):
 
         # Test empty vertices
 
-        self.model.obj_vertices = None
+        self.model.vertices = None
         self.model.uv_coords = None
         indices, ind_format = self.model.generate_indices()
 
