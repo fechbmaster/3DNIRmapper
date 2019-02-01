@@ -45,7 +45,7 @@ def _generate_tooth_example():
     model = models[0]
 
     # The magic is happening here
-    uv_coords = cam.project_world_points_to_uv_coords(model.obj_vertices)
+    uv_coords = cam.get_texture_coords_for_vertices(model.obj_vertices)
     model.uv_coords = uv_coords
 
     # Update indices
@@ -126,7 +126,7 @@ def _generate_cube_example():
                         7, 7, 11])
 
     # The magic is happening here
-    uv_coords = cam.project_world_points_to_uv_coords(verts)
+    uv_coords = cam.get_texture_coords_for_vertices(verts)
 
     model = Model(verts, normals, uv_coords)
     model.set_indices(indices, "V3F_N3F_T2F")

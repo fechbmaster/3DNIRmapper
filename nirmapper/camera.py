@@ -96,23 +96,37 @@ class Camera(object):
 
         return self.P
 
-    def project_world_point_to_pixel_coords(self, point: np.ndarray):
+    def get_pixel_coords_for_vertices(self, points: np.ndarray) -> np.ndarray:
         """
-        Calculates the image space coordinates for a coordinate in object space. The coordinate values will
+        Calculates the image space coordinates for coordinates in object space. The coordinate values will
         be between the image pixel height and width.
 
-        :param numpy.array point: The three-dimensional coordinates in object space
+        :param numpy.array points: The three-dimensional coordinates in object space
         :return numpy.array: Two-dimensional pixel coordinates in image space
         """
-        # todo: maybe vectorize function
-        P = self.get_3x4_P_projection_matrix()
-        # Append 3d coord with fourth param to calculate coordinate
-        uv_xyz = P.dot(np.append(point, 1))
-        uv_xy = np.array(uv_xyz[:-1] / uv_xyz[-1])
+        # User maybe just passed a single coord - convert to 2d array
+        dim = points.ndim
+        if dim == 1:
+            points = np.array([points])
 
-        return uv_xy
+        pixel_coords = []
+        for point in points:
+            # todo: maybe vectorize function
+            P = self.get_3x4_P_projection_matrix()
+            # Append 3d coord with homogeneous coord to calculate coordinate
+            uv_xyz = P.dot(np.append(point, 1))
+            uv_xy = np.array(uv_xyz[:-1] / uv_xyz[-1])
+            pixel_coords.append(uv_xy)
 
-    def project_world_points_to_uv_coords(self, points: np.ndarray):
+        pixel_coords = np.array(pixel_coords, dtype=int)
+
+        # Convert back to single entry if user passed a single point
+        if dim == 1:
+            pixel_coords = pixel_coords.flatten()
+
+        return pixel_coords
+
+    def get_texture_coords_for_vertices(self, points: np.ndarray) -> np.ndarray:
         """
         Calculates the image space UV coordinates for coordinates in object space.
         UV coordinates are between 0 and 1.
@@ -127,7 +141,7 @@ class Camera(object):
 
         uv_coords = []
         for point in points:
-            uv_xy = self.project_world_point_to_pixel_coords(point)
+            uv_xy = self.get_pixel_coords_for_vertices(point)
             uv_coords.append(uv_xy)
 
         uv_coords = np.array(uv_coords, dtype=float)

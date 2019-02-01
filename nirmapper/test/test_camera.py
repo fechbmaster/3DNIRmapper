@@ -69,21 +69,20 @@ class TestCamera(TestCase):
         self.assertTrue(res)
 
     def test_project_world_point_to_pixel_coords(self):
+        # test for single point...
         exp_p1 = np.array([610, 190])
-        exp_p2 = np.array([610, 890])
-        exp_p3 = np.array([1310, 890])
-        exp_p4 = np.array([1310, 190])
+        # ... and for an array
+        exp_p2 = np.array([[610, 890],
+                           [1310, 890],
+                           [1310, 190]
+                           ])
 
-        pix_p1 = self.cam.project_world_point_to_pixel_coords(self.p1)
-        pix_p2 = self.cam.project_world_point_to_pixel_coords(self.p2)
-        pix_p3 = self.cam.project_world_point_to_pixel_coords(self.p3)
-        pix_p4 = self.cam.project_world_point_to_pixel_coords(self.p4)
+        pix_p1 = self.cam.get_pixel_coords_for_vertices(self.p1)
+        pix_p2 = self.cam.get_pixel_coords_for_vertices(np.array([self.p2, self.p3, self.p4]))
 
         try:
             np.testing.assert_almost_equal(pix_p1, exp_p1)
             np.testing.assert_almost_equal(pix_p2, exp_p2)
-            np.testing.assert_almost_equal(pix_p3, exp_p3)
-            np.testing.assert_almost_equal(pix_p4, exp_p4)
             res = True
         except AssertionError as err:
             res = False
@@ -91,21 +90,21 @@ class TestCamera(TestCase):
         self.assertTrue(res)
 
     def test_project_world_points_to_uv_coords(self):
+        # test for single point ...
         exp_p1 = np.array([610 / self.screen_width, (self.screen_height - 190) / self.screen_height])
+        # ... and for array
         exp_p2 = np.array([610 / self.screen_width, (self.screen_height - 890) / self.screen_height])
         exp_p3 = np.array([1310 / self.screen_width, (self.screen_height - 890) / self.screen_height])
         exp_p4 = np.array([1310 / self.screen_width, (self.screen_height - 190) / self.screen_height])
 
-        pix_p1 = (self.cam.project_world_points_to_uv_coords(self.p1))
-        pix_p2 = (self.cam.project_world_points_to_uv_coords(self.p2))
-        pix_p3 = (self.cam.project_world_points_to_uv_coords(self.p3))
-        pix_p4 = (self.cam.project_world_points_to_uv_coords(self.p4))
+        exp_array = np.array([exp_p2, exp_p3, exp_p4])
+
+        pix_p1 = self.cam.get_texture_coords_for_vertices(self.p1)
+        pix_p2 = self.cam.get_texture_coords_for_vertices(np.array([self.p2, self.p3, self.p4]))
 
         try:
             np.testing.assert_almost_equal(pix_p1, exp_p1)
-            np.testing.assert_almost_equal(pix_p2, exp_p2)
-            np.testing.assert_almost_equal(pix_p3, exp_p3)
-            np.testing.assert_almost_equal(pix_p4, exp_p4)
+            np.testing.assert_almost_equal(pix_p2, exp_array)
             res = True
         except AssertionError as err:
             res = False
