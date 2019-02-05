@@ -96,12 +96,13 @@ class Camera(object):
 
         return self.P
 
-    def get_pixel_coords_for_vertices(self, points: np.ndarray) -> np.ndarray:
+    def get_pixel_coords_for_vertices(self, points: np.ndarray, include_z_value: bool = False) -> np.ndarray:
         """
         Calculates the image space coordinates for coordinates in object space. The coordinate values will
         be between the image pixel height and width.
 
         :param numpy.array points: The three-dimensional coordinates in object space
+        :param bool include_z_value: Indicates if z_values should be included in return value or not
         :return numpy.array: Two-dimensional pixel coordinates in image space
         """
         # User maybe just passed a single coord - convert to 2d array
@@ -115,8 +116,12 @@ class Camera(object):
             P = self.get_3x4_P_projection_matrix()
             # Append 3d coord with homogeneous coord to calculate coordinate
             uv_xyz = P.dot(np.append(point, 1))
+            # Normalize by dividing trough third component
             uv_xy = np.array(uv_xyz[:-1] / uv_xyz[-1])
-            pixel_coords.append(uv_xy)
+            if include_z_value:
+                pixel_coords.append(np.append(uv_xy, uv_xyz[-1:]))
+            else:
+                pixel_coords.append(uv_xy)
 
         pixel_coords = np.array(pixel_coords, dtype=int)
 

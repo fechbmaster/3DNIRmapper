@@ -89,6 +89,18 @@ class TestCamera(TestCase):
             print(err)
         self.assertTrue(res)
 
+    def test_project_world_point_to_pixel_coords_including_z_value(self):
+        exp_p1 = np.array([610, 190, 6])
+
+        try:
+            np.testing.assert_almost_equal(self.cam.get_pixel_coords_for_vertices(self.p1, include_z_value=True),
+                                           exp_p1)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
+
     def test_project_world_points_to_uv_coords(self):
         # test for single point ...
         exp_p1 = np.array([610 / self.screen_width, (self.screen_height - 190) / self.screen_height])
