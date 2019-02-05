@@ -282,7 +282,7 @@ class TestModel(TestCase):
 
         ind_format = IndicesFormat.N3F
 
-        self.model.set_vertices_by_ind_format(normals, ind_format)
+        self.model.set_data_by_ind_format(normals, ind_format)
 
         try:
             np.testing.assert_equal(self.model.normals, normals)
@@ -292,7 +292,7 @@ class TestModel(TestCase):
             print(err)
         self.assertTrue(res)
 
-    def test_get_trinagles(self):
+    def test_get_triangles(self):
         triangles = np.array([
             [[0.04, 0.05, 0.06],
              [0.01, 0.02, 0.03],
@@ -300,7 +300,7 @@ class TestModel(TestCase):
         ])
 
         try:
-            np.testing.assert_equal(self.model.get_triangles(), triangles)
+            np.testing.assert_equal(self.model.triangles, triangles)
             res = True
         except AssertionError as err:
             res = False

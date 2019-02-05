@@ -21,10 +21,19 @@ class Texture(object):
         width = self.cam.resolution_x
         height = self.cam.resolution_y
 
-        z_buffer = np.zeros([width, height])
-        triangles = model.get_triangles()
+        z_buffer = np.full([width, height, 2], np.inf)
 
-        # for triangle in triangles:
+        for idx, triangle in enumerate(model.triangles):
+            included_pixels = self.get_pixels_for_triangle(triangle)
+            for pixel in included_pixels:
+                uvz_coords = self.cam.get_pixel_coords_for_vertices(triangle, include_z_value=True)
+                z_value = np.mean(uvz_coords[:, : -1])
+                #todo: could lead to 'z-fighting'
+                if z_value < z_buffer[pixel][1]:
+                    z_buffer[pixel] = [idx, z_value]
+
+        self.z_buffer = z_buffer
+
 
     def get_pixels_for_triangle(self, vertices: np.ndarray) -> np.ndarray:
         if vertices.shape != (3, 3):

@@ -56,6 +56,7 @@ class Model(object):
     __vertices = np.array([])
     __uv_coords = np.array([])
     __indices = np.array([])
+    __triangles = np.array([])
 
     def __init__(self, vertices: np.ndarray = None, normals: np.ndarray = None,
                  uv_coords: np.ndarray = None):
@@ -93,6 +94,25 @@ class Model(object):
     def uv_coords(self) -> np.ndarray:
         return self.__uv_coords
 
+    @property
+    def triangles(self) -> np.ndarray:
+        if self.__triangles is None or self.__triangles.size == 0:
+            self.set_triangles()
+        return self.__triangles
+
+    def set_triangles(self):
+        vert_indices = self.get_indices_for_format(IndicesFormat.V3F)
+
+        if vert_indices.size == 0:
+            print("Indices not set for V3F.")
+            return []
+
+        # Generate vertices sequence from describing indices
+        vert_sequence = np.array(self.vertices[vert_indices.flatten()])
+
+        # Reshape the vert sequence to length/9x3x3 triangle Pairs
+        self.__triangles = vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
+
     @uv_coords.setter
     def uv_coords(self, uv_coords: np.ndarray):
         if uv_coords is None or uv_coords.size == 0:
@@ -129,6 +149,7 @@ class Model(object):
         indices = self.__reshape(indices, dim_ind)
         self.__indices = indices
         self.indices_format = ind_format
+        self.set_triangles()
 
     def generate_indices(self) -> Tuple[np.ndarray, List[IndicesFormat]]:
         """
@@ -185,33 +206,20 @@ class Model(object):
 
         return self.indices[:, [index]]
 
-    def set_vertices_by_ind_format(self, vertices, ind_format: IndicesFormat) -> None:
+    def set_data_by_ind_format(self, coords, ind_format: IndicesFormat) -> None:
         """
         Method enables setting vertices described by a format.
 
-        :param vertices: The vertices that should be set.
+        :param coords: The vertices that should be set.
         :param ind_format: The format the vertices are.
         :return: None
         """
         if ind_format == IndicesFormat.V3F:
-            self.vertices = vertices
+            self.vertices = coords
         elif ind_format == IndicesFormat.N3F:
-            self.normals = vertices
+            self.normals = coords
         elif ind_format == IndicesFormat.T2F:
-            self.uv_coords = vertices
-
-    def get_triangles(self):
-        vert_indices = self.get_indices_for_format(IndicesFormat.V3F)
-
-        if vert_indices.size == 0:
-            print("Indices not set for V3F")
-            return []
-
-        # Generate vertices sequence from describing indices
-        vert_sequence = np.array(self.vertices[vert_indices.flatten()])
-
-        # Reshape the vert sequence to length/9x3x3 triangle Pairs
-        return vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
+            self.uv_coords = coords
 
 
 class ColladaCreator(object):
@@ -315,14 +323,15 @@ class Wavefront(object):
             model = Model()
 
             for ind_format in formats:
-                vertices = formatter.get_verts_by_format(all_verts, ind_format)
+                vertices = formatter.get_coords_by_format(all_verts, ind_format)
                 # rotate vertices by x=90° degrees to get into internal coord system
                 # todo: make this better!!!!!!
                 if ind_format != IndicesFormat.T2F:
                     vertices = vertices.reshape(vertices.size // 3, 3)
                     vertices = np.array([rotation.dot(x) for x in vertices])
-                model.set_vertices_by_ind_format(vertices, ind_format)
+                model.set_data_by_ind_format(vertices, ind_format)
 
+            # There are no triangle describing indices so we have to generate the indices
             indices, ind_format = model.generate_indices()
             model.set_indices(indices, ind_format)
             models.append(model)
@@ -352,7 +361,7 @@ class VertexIndicesFormatter(object):
     def __init__(self, formats: List[IndicesFormat]):
         self.formats = formats
 
-    def get_verts_by_format(self, verts: np.ndarray, ind_format: IndicesFormat):
+    def get_coords_by_format(self, verts: np.ndarray, ind_format: IndicesFormat):
         """
         Method splits up an array of vertices into an array of specific vertces described by an format and a
         sequence.
@@ -361,13 +370,13 @@ class VertexIndicesFormatter(object):
         :param ind_format: The format the vertices should be split.
         :return: The splited vertices depending on the sequence.
         """
-        seq = self.get_vert_lengths()
+        seq = self.get_coord_lengths()
         start_index = self.get_start_index_for_format(ind_format)
         length = IndicesFormat.get_length_for_format(ind_format)
 
         return np.array([verts[i:i + length] for i in range(start_index, len(verts), seq.sum())])
 
-    def get_vert_lengths(self):
+    def get_coord_lengths(self):
         """
         Method returns the length for the format sequence.
 
@@ -387,7 +396,7 @@ class VertexIndicesFormatter(object):
         Example: The sequence [2, 3, 3] results to [2, 5, 8]
         :return:
         """
-        seq = self.get_vert_lengths()  # [2, 3, 3]
+        seq = self.get_coord_lengths()  # [2, 3, 3]
         index = self.get_index_for_format(ind_format)
 
         start_index = seq[:index].sum()
