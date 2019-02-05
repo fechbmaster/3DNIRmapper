@@ -83,17 +83,98 @@ class TestTexture(TestCase):
         self.model = model
         self.texture = Texture(text_id=1, texture_path="tmp/fake_path/fake_texture.png", cam=self.cam)
 
-
     def test_check_occlusion_for_model(self):
         visible_verts = [
-            [-1,  1, 1],
-            [-1,  1, -1],
-            [1,   1, -1],
-            [1,   1,  1]
+            [-1, 1, 1],
+            [-1, 1, -1],
+            [1, 1, -1],
+            [1, 1, 1]
         ]
 
-        self.model.get_triangles()
-
-        calculated_visible_verts= self.texture.check_occlusion_for_model(self.model)
+        calculated_visible_verts = self.texture.check_occlusion_for_model(self.model)
 
         self.assertEqual(visible_verts, calculated_visible_verts)
+
+    def test_get_pixels_for_triangle(self):
+        triangle = np.array([
+            [1, 1, 1],
+            [0.99, 1, 1],
+            [1, 1, 0.99]
+        ])
+
+        expected = np.array([
+            [610., 190.],
+            [611., 190.],
+            [612., 190.],
+            [613., 190.],
+            [610., 191.],
+            [611., 191.],
+            [612., 191.],
+            [610., 192.],
+            [611., 192.],
+            [610., 193.]
+        ])
+
+        try:
+            np.testing.assert_equal(self.texture.get_pixels_for_triangle(triangle), expected)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
+
+    def test_point_is_included_in_uv_triangle(self):
+        triangle = np.array([
+            [0, 0],
+            [2, 0],
+            [0, 2]
+        ])
+
+        p_inside1 = [1, 1]
+        p_inside2 = [2, 0]
+        p_outside = [2, 2]
+
+        self.assertTrue(self.texture.pixel_is_included_in_triangle(triangle, p_inside1))
+        self.assertTrue(self.texture.pixel_is_included_in_triangle(triangle, p_inside2))
+        self.assertFalse(self.texture.pixel_is_included_in_triangle(triangle, p_outside))
+
+    def test_get_bounding_box_coords_for_triangle(self):
+        triangle = np.array([
+            [1, 0],
+            [2, 0],
+            [1, 2]
+        ])
+
+        expected = np.array([
+            [[1, 0], [2, 0]],
+            [[1, 1], [2, 1]],
+            [[1, 2], [2, 2]]
+        ])
+
+        try:
+            np.testing.assert_equal(Texture.get_bounding_box_coords_for_triangle(triangle), expected)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
+
+        triangle_2 = np.array([
+            [0, 0],
+            [2, 0],
+            [0, 2]
+        ])
+
+        expected_2 = np.array([
+            [[0, 0], [1, 0], [2, 0]],
+            [[0, 1], [1, 1], [2, 1]],
+            [[0, 2], [1, 2], [2, 2]]
+        ])
+
+        try:
+            np.testing.assert_equal(Texture.get_bounding_box_coords_for_triangle(triangle_2), expected_2)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
