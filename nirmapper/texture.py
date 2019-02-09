@@ -6,17 +6,22 @@ from nirmapper import Camera, Model
 
 
 class Texture(object):
+    visible_triangle_ids = np.ndarray
+    visible_triangle_counts = np.ndarray
     z_buffer: np.ndarray
 
-    def __init__(self, text_id: int, texture_path: string, cam: Camera):
-        self.id = text_id
+    def __init__(self, texture_path: string, cam: Camera):
         self.texture_path = texture_path
         self.cam = cam
 
     def check_occlusion_for_model(self, model: Model):
         self.create_z_buffer(model)
         ids = self.z_buffer[:, :, 0]
-        return np.unique(ids[ids > -1])
+        ids, counts = np.unique(ids[ids > -1],  return_counts=True)
+
+        self.visible_triangle_ids = ids
+        self.visible_triangle_counts = counts
+        return self.visible_triangle_ids
 
     def create_z_buffer(self, model: Model):
         width = self.cam.resolution_x

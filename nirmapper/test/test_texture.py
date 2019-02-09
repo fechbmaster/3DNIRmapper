@@ -81,7 +81,7 @@ class TestTexture(TestCase):
         model = Model(vertices=verts, normals=normals)
         model.set_indices(indices, ind_format="V3F_N3F")
         self.model = model
-        self.texture = Texture(text_id=1, texture_path="tmp/fake_path/fake_texture.png", cam=self.cam)
+        self.texture = Texture(texture_path="tmp/fake_path/fake_texture.png", cam=self.cam)
 
     def test_check_occlusion_for_model(self):
         # downscale for preformat testing
@@ -89,9 +89,10 @@ class TestTexture(TestCase):
         self.texture.cam.resolution_y = 20
 
         visible_triangle_ids = np.array([0, 1, 2, 4, 5, 11])
+        calculated_visible_triangles = self.texture.check_occlusion_for_model(self.model)
 
         try:
-            np.testing.assert_equal(self.texture.check_occlusion_for_model(self.model), visible_triangle_ids)
+            np.testing.assert_equal(calculated_visible_triangles, visible_triangle_ids)
             res = True
         except AssertionError as err:
             res = False
