@@ -19,9 +19,11 @@ class Renderer(object):
                             cam.sensor_height_in_mm, cam.cam_location_xyz, cam.cam_euler_rotation,
                             cam.cam_quat_rotation)
         z_buffer = Renderer.create_z_buffer(triangles, render_cam)
-        ids = z_buffer[:, :, 0]
-        ids, counts = np.unique(ids[ids > -1], return_counts=True)
-        return ids, counts
+        ind_indices = np.array(z_buffer[:, :, 0]).astype(int)
+        ind_indices, counts = np.unique(ind_indices[ind_indices > -1], return_counts=True)
+        vis_vertices = triangles[ind_indices]
+        vis_vertices = vis_vertices.reshape(vis_vertices.size // 3, 3)
+        return vis_vertices, ind_indices, counts
 
     @staticmethod
     def create_z_buffer(triangles: np.ndarray, render_camera: Camera):

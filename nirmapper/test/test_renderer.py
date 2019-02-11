@@ -90,16 +90,26 @@ class TestRenderer(TestCase):
         buffer_resolution_x = 40
         buffer_resolution_y = 20
 
+        visible_vertices = np.array([[1, 1, -1],
+                                     [-1, 1, 1],
+                                     [1, 1, 1],
+                                     [1, 1, -1],
+                                     [-1, 1, -1],
+                                     [-1, 1, 1]])
         visible_triangle_ids = np.array([5, 11])
         visible_triangle_counts = np.array([99, 96])
-        vis_triangles, counts = \
+
+        vis_verts, vis_ids, counts = \
             self.renderer.get_visible_triangles(self.model.vertices,
                                                 self.model.get_indices_for_format(IndicesFormat.V3F),
                                                 self.cam,
                                                 buffer_resolution_x, buffer_resolution_y)
 
+        print(vis_verts)
+
         try:
-            np.testing.assert_equal(vis_triangles, visible_triangle_ids)
+            np.testing.assert_equal(vis_verts, visible_vertices)
+            np.testing.assert_equal(vis_ids, visible_triangle_ids)
             np.testing.assert_equal(counts, visible_triangle_counts)
             res = True
         except AssertionError as err:
