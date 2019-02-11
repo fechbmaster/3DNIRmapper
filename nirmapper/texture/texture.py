@@ -105,6 +105,8 @@ class Texture(object):
     def barycentric(p, text_coords: np.ndarray):
         v0, v1, v2 = text_coords[1] - text_coords[0], text_coords[2] - text_coords[0], p - text_coords[0]
         den = v0[0] * v1[1] - v1[0] * v0[1]
+        if den == 0:
+            return False
         v = (v2[0] * v1[1] - v1[0] * v2[1]) / den
         w = (v0[0] * v2[1] - v2[0] * v0[1]) / den
         u = 1.0 - v - w
