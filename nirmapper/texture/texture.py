@@ -54,7 +54,7 @@ class Texture(object):
         bounding_box = self.get_bounding_box_coords_for_triangle(text_coords)
 
         included_pixels = []
-        for pixel in bounding_box.reshape(bounding_box.size // 2, 2):
+        for pixel in bounding_box:
             if self.barycentric(pixel, text_coords):
                 included_pixels.append(pixel)
 
@@ -87,12 +87,7 @@ class Texture(object):
         x = np.arange(min_x, max_x + 1)
         y = np.arange(min_y, max_y + 1)
 
-        box = np.zeros((y.size, x.size, 2))
-
-        # todo: maybe don't convert to a 3d array - actually not needed
-        for row_idx, row in enumerate(box):
-            for col_idx, column in enumerate(row):
-                box[row_idx, col_idx] = [x[col_idx], y[row_idx]]
+        box = np.array(np.meshgrid(x, y)).T.reshape(-1, 2)
 
         return box
 
