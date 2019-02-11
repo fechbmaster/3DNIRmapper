@@ -1,6 +1,6 @@
 import numpy as np
 
-from .utils import (
+from nirmapper.utils import (
     quaternion_matrix, euler_angles_to_rotation_matrix)
 
 
@@ -123,7 +123,7 @@ class Camera(object):
             else:
                 pixel_coords.append(uv_xy)
 
-        pixel_coords = np.array(pixel_coords, dtype=int)
+        pixel_coords = np.around(np.array(pixel_coords)).astype(int)
 
         # Convert back to single entry if user passed a single point
         if dim == 1:
