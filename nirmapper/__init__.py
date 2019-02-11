@@ -1,11 +1,10 @@
-from typing import List
-
 import numpy as np
 import os
 import inspect
+
+from nirmapper.texture.texture import Texture, Camera
 from .mapper import UVMapper
-from .camera import Camera
-from .model import Model, ColladaCreator, Wavefront
+from nirmapper.model.model import Model, ColladaCreator, Wavefront
 
 
 def prepend_dir(file):
@@ -15,8 +14,8 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    # _generate_cube_example()
-    _generate_tooth_example()
+    _generate_cube_example()
+    # _generate_tooth_example()
 
 
 def _generate_tooth_example():
@@ -56,6 +55,13 @@ def _generate_tooth_example():
 
 
 def _generate_cube_example():
+    scipt_path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+    texture_path = scipt_path + '/resources/images/texture_cube.png'
+    output_path = '/tmp/cube_example.dae'
+    print("This will create a demo mapping of a cube in ", output_path, " using the texture from: ", texture_path)
+
+    # Create Cam
+
     location = np.array([0, 7, 0])
     rotation = np.array([-90, 180, 0])
     focal_length = 35
@@ -65,6 +71,12 @@ def _generate_cube_example():
     screen_height = 1080
 
     cam = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+
+    # Create Texture
+
+    texture = Texture(texture_path, cam)
+
+    # Create model
 
     verts = np.array([[1, 1, -1],  # 1
                       [1, -1, -1],  # 2
@@ -88,53 +100,121 @@ def _generate_cube_example():
                         -1, 0, 0,
                         0, 1, 0])
 
+    indices = np.array([0, 0,
+                        2, 2,
+                        3, 3,
+                        7, 7,
+                        5, 5,
+                        4, 4,
+                        4, 4,
+                        1, 1,
+                        0, 0,
+                        5, 5,
+                        2, 2,
+                        1, 1,
+                        2, 2,
+                        7, 7,
+                        3, 3,
+                        0, 0,
+                        7, 7,
+                        4, 4,
+                        0, 0,
+                        1, 1,
+                        2, 2,
+                        7, 7,
+                        6, 6,
+                        5, 5,
+                        4, 4,
+                        5, 5,
+                        1, 1,
+                        5, 5,
+                        6, 6,
+                        2, 2,
+                        2, 2,
+                        6, 6,
+                        7, 7,
+                        0, 0,
+                        3, 3,
+                        7, 7])
+
+    model = Model(verts, normals)
+    model.set_indices(indices, "V3F_N3F")
+
+    print("Starting texturing...")
+
+    # Check visible verts
+    texture.cam.resolution_x = 40
+    texture.cam.resolution_y = 20
+    vis_triangle_ids = np.array(texture.check_occlusion_for_model(model), dtype=int)
+    # vis_triangle_ids = np.array([5, 11], dtype=int)
+    texture.cam.resolution_x = 1920
+    texture.cam.resolution_y = 1080
+    triangles = model.triangles
+    vis_vertices = triangles[vis_triangle_ids, :]
+    vis_vertices = np.array(vis_vertices)
+    vis_vertices = vis_vertices.reshape(vis_vertices.size // 3, 3)
+
+    print(vis_vertices)
+
+    def array_in(arr, list_of_arr):
+        for elem in list_of_arr:
+            if np.all((arr == elem)):
+                return True
+        return False
+
+    uv_coords = []
+    for vertex in model.vertices:
+        if array_in(vertex, vis_vertices):
+            uv = cam.get_texture_coords_for_vertices(vertex)
+            uv_coords.append(uv)
+        else:
+            uv_coords.append([0, 0])
+
+    uv_coords = np.array(uv_coords)
+
+    model.uv_coords = uv_coords
+
     indices = np.array([0, 0, 0,
                         2, 2, 0,
                         3, 3, 0,
-                        7, 7, 1,
-                        5, 5, 1,
-                        4, 4, 1,
-                        4, 4, 2,
-                        1, 1, 2,
-                        0, 0, 2,
-                        5, 5, 3,
-                        2, 2, 3,
-                        1, 1, 3,
-                        2, 2, 4,
-                        7, 7, 4,
-                        3, 3, 4,
-                        0, 0, 5,
-                        7, 7, 5,
-                        4, 4, 5,
-                        0, 0, 6,
-                        1, 1, 6,
-                        2, 2, 6,
+                        7, 7, 0,
+                        5, 5, 0,
+                        4, 4, 0,
+                        4, 4, 0,
+                        1, 1, 0,
+                        0, 0, 0,
+                        5, 5, 0,
+                        2, 2, 0,
+                        1, 1, 0,
+                        2, 2, 0,
+                        7, 7, 0,
+                        3, 3, 0,
+                        0, 0, 0,
                         7, 7, 7,
-                        6, 6, 7,
-                        5, 5, 7,
-                        4, 4, 8,
-                        5, 5, 8,
-                        1, 1, 8,
-                        5, 5, 9,
-                        6, 6, 9,
-                        2, 2, 9,
-                        2, 2, 10,
-                        6, 6, 10,
-                        7, 7, 10,
-                        0, 0, 11,
-                        3, 3, 11,
-                        7, 7, 11])
+                        4, 4, 4,
+                        0, 0, 0,
+                        1, 1, 0,
+                        2, 2, 0,
+                        7, 7, 0,
+                        6, 6, 0,
+                        5, 5, 0,
+                        4, 4, 0,
+                        5, 5, 0,
+                        1, 1, 0,
+                        5, 5, 0,
+                        6, 6, 0,
+                        2, 2, 0,
+                        2, 2, 0,
+                        6, 6, 0,
+                        7, 7, 0,
+                        0, 0, 0,
+                        3, 3, 3,
+                        7, 7, 7])
 
-    # The magic is happening here
-    uv_coords = cam.get_texture_coords_for_vertices(verts)
-
-    model = Model(verts, normals, uv_coords)
     model.set_indices(indices, "V3F_N3F_T2F")
-    scipt_path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    texture_path = scipt_path + '/resources/images/texture_cube.png'
-    output_path = '/tmp/cube_example.dae'
 
-    print("Welcome to 3DNIRMapper!")
-    print("This will create a demo mapping of a cube in ", output_path, " using the texture from: ", texture_path)
+    print("Finished texturing...")
+
+    # Calculate UVs
 
     ColladaCreator.create_collada_from_model(model, texture_path, output_path, "Cube")

@@ -1,10 +1,10 @@
 from unittest import TestCase
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import numpy as np
 
 from nirmapper import Model
-from nirmapper.model import IndicesFormat
+from nirmapper.model.model import IndicesFormat
 
 
 class TestModel(TestCase):

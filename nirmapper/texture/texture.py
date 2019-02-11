@@ -2,7 +2,8 @@ import string
 
 import numpy as np
 
-from nirmapper import Camera, Model
+from nirmapper.model.model import Model
+from nirmapper.texture.camera import Camera
 
 
 class Texture(object):
@@ -41,6 +42,7 @@ class Texture(object):
                     z_buffer[pixel[0], pixel[1]] = [idx, z_value]
 
         self.z_buffer = z_buffer
+        # print(self.z_buffer[:,:,0])
         return z_buffer
 
     def get_pixels_for_triangle(self, vertices: np.ndarray) -> np.ndarray:
@@ -106,8 +108,11 @@ class Texture(object):
         v = (v2[0] * v1[1] - v1[0] * v2[1]) / den
         w = (v0[0] * v2[1] - v2[0] * v0[1]) / den
         u = 1.0 - v - w
+        # Make near zero values to zero
+        if np.isclose([u], [0])[0]:
+            u = 0
 
-        return (u >= 0) and (v >= 0) and (u + v < 1)
+        return (u >= 0) and (v >= 0) and (u + v <= 1)
 
     @staticmethod
     def __edge_function(v1, v2, p) -> bool:

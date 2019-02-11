@@ -2,8 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from nirmapper import Model, Camera
-from nirmapper.texture import Texture
+from nirmapper import Model, Camera, Texture
 
 
 class TestTexture(TestCase):
@@ -88,66 +87,11 @@ class TestTexture(TestCase):
         self.texture.cam.resolution_x = 40
         self.texture.cam.resolution_y = 20
 
-        visible_triangle_ids = np.array([0, 1, 2, 4, 5, 11])
+        visible_triangle_ids = np.array([5, 11])
         calculated_visible_triangles = self.texture.check_occlusion_for_model(self.model)
 
         try:
             np.testing.assert_equal(calculated_visible_triangles, visible_triangle_ids)
-            res = True
-        except AssertionError as err:
-            res = False
-            print(err)
-        self.assertTrue(res)
-
-    def test_create_z_buffer(self):
-
-        # downscale for preformat testing
-        self.texture.cam.resolution_x = 40
-        self.texture.cam.resolution_y = 20
-
-        z_buffer = np.array([[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 11, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 11, 11, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 5, 5, 5, 5, 11, 11, 11, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 5, 5, 5, 11, 11, 11, 11, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 5, 5, 5, 11, 11, 11, 11, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 5, 5, 11, 11, 11, 11, 11, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 5, 11, 11, 11, 11, 11, 11, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 5, 5, 5, 5, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 1, 5, 5, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 1, 5, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 1, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, -1, -1, -1],
-                             [-1, -1, -1, 11, 11, 11, -1, 11, 11, 11, 11, 4, 11, -1, 11, 4, 0, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]])
-
-        try:
-            np.testing.assert_equal(self.texture.create_z_buffer(self.model)[:, :, 0], z_buffer)
             res = True
         except AssertionError as err:
             res = False
@@ -161,14 +105,21 @@ class TestTexture(TestCase):
             [1, 1, 0.99]
         ])
 
-        expected = np.array([[610, 191],
+        expected = np.array([[610, 190],
+                             [611, 190],
+                             [612, 190],
+                             [613, 190],
+                             [614, 190],
+                             [610, 191],
                              [611, 191],
                              [612, 191],
+                             [613, 191],
                              [610, 192],
                              [611, 192],
-                             [610, 193]])
-
-        print(self.texture.get_pixels_for_triangle(triangle))
+                             [612, 192],
+                             [610, 193],
+                             [611, 193],
+                             [610, 194]])
 
         try:
             np.testing.assert_equal(self.texture.get_pixels_for_triangle(triangle), expected)
@@ -186,12 +137,12 @@ class TestTexture(TestCase):
         ])
 
         p_inside1 = [1, 1]
-        p_outside1 = [2, 0]
-        p_outside2 = [2, 2]
+        p_inside2 = [2, 0]
+        p_outside = [2, 2]
 
         self.assertTrue(self.texture.barycentric(p_inside1, triangle))
-        self.assertFalse(self.texture.barycentric(p_outside1, triangle))
-        self.assertFalse(self.texture.barycentric(p_outside2, triangle))
+        self.assertTrue(self.texture.barycentric(p_inside2, triangle))
+        self.assertFalse(self.texture.barycentric(p_outside, triangle))
 
         triangle2 = np.array([
             [12, 16],
@@ -202,6 +153,18 @@ class TestTexture(TestCase):
         p_inside3 = [27, 3]
 
         self.assertTrue(self.texture.barycentric(p_inside3, triangle2))
+
+        triangle3 = np.array([
+            [13, 16],
+            [27, 4],
+            [13, 4]
+        ])
+
+        p_inside4 = [18, 4]
+        p_inside5 = [13, 16]
+
+        self.assertTrue(self.texture.barycentric(p_inside4, triangle3))
+        self.assertTrue(self.texture.barycentric(p_inside5, triangle3))
 
     def test_get_bounding_box_coords_for_triangle(self):
         triangle = np.array([
