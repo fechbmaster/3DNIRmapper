@@ -34,21 +34,22 @@ class Camera(object):
 
         :return: Calibration Matrix K
         """
-        s_u = self.resolution_x / self.sensor_width_in_mm
-        s_v = self.resolution_y / self.sensor_height_in_mm
+        if self.A.size == 0:
+            s_u = self.resolution_x / self.sensor_width_in_mm
+            s_v = self.resolution_y / self.sensor_height_in_mm
 
-        alpha_u = self.focal_length_in_mm * s_u
-        alpha_v = self.focal_length_in_mm * s_v
-        u_0 = self.resolution_x / 2
-        v_0 = self.resolution_y / 2
-        skew = 0  # use only rectangular pixels
+            alpha_u = self.focal_length_in_mm * s_u
+            alpha_v = self.focal_length_in_mm * s_v
+            u_0 = self.resolution_x / 2
+            v_0 = self.resolution_y / 2
+            skew = 0  # use only rectangular pixels
 
-        A = np.array([
-            [alpha_u, skew, u_0],
-            [0, alpha_v, v_0],
-            [0, 0, 1]
-        ])
-        self.A = A
+            A = np.array([
+                [alpha_u, skew, u_0],
+                [0, alpha_v, v_0],
+                [0, 0, 1]
+            ])
+            self.A = A
 
         return self.A
 
@@ -58,24 +59,25 @@ class Camera(object):
 
         :return: Extrinsic matrix RT
         """
-        R_cam2cv = np.array([[1, 0, 0],
-                             [0, -1, 0],
-                             [0, 0, -1]
-                             ])
+        if self.D.size == 0:
+            R_cam2cv = np.array([[1, 0, 0],
+                                 [0, -1, 0],
+                                 [0, 0, -1]
+                                 ])
 
-        # Transpose since the rotation is object rotation, and coordinate rotation is needed
-        if self.cam_quat_rotation is not None:
-            R_world2cam = quaternion_matrix(self.cam_quat_rotation).T
-        else:
-            R_world2cam = euler_angles_to_rotation_matrix(self.cam_euler_rotation).T
-        T_world2cam = np.dot(-1 * R_world2cam, self.cam_location_xyz)
+            # Transpose since the rotation is object rotation, and coordinate rotation is needed
+            if self.cam_quat_rotation is not None:
+                R_world2cam = quaternion_matrix(self.cam_quat_rotation).T
+            else:
+                R_world2cam = euler_angles_to_rotation_matrix(self.cam_euler_rotation).T
+            T_world2cam = np.dot(-1 * R_world2cam, self.cam_location_xyz)
 
-        R_world2cv = np.dot(R_cam2cv, R_world2cam)
-        T_world2cv = R_cam2cv.dot(T_world2cam).reshape(3, 1)
+            R_world2cv = np.dot(R_cam2cv, R_world2cam)
+            T_world2cv = R_cam2cv.dot(T_world2cam).reshape(3, 1)
 
-        RT = np.hstack((R_world2cv, T_world2cv))
+            RT = np.hstack((R_world2cv, T_world2cv))
 
-        self.D = RT
+            self.D = RT
 
         return self.D
 
@@ -85,11 +87,12 @@ class Camera(object):
 
         :return: Combined matrix P
         """
-        A = self.get_intrinsic_3x4_A_matrix()
-        D = self.get_extrinsic_3x4_D_matrix()
-        P = np.dot(A, D)
+        if self.P.size == 0:
+            A = self.get_intrinsic_3x4_A_matrix()
+            D = self.get_extrinsic_3x4_D_matrix()
+            P = np.dot(A, D)
 
-        self.P = P
+            self.P = P
 
         return self.P
 

@@ -1,39 +1,39 @@
-import string
-
 import numpy as np
 
-from nirmapper.model.model import Model
-from nirmapper.texture.camera import Camera
+from nirmapper.renderer.camera import Camera
 
 
-class Texture(object):
-    visible_triangle_ids = np.ndarray
-    visible_triangle_counts = np.ndarray
-    z_buffer: np.ndarray
+class Renderer(object):
 
-    def __init__(self, texture_path: string, cam: Camera):
-        self.texture_path = texture_path
-        self.cam = cam
+    @staticmethod
+    def get_visible_triangles(vertices: np.ndarray, indices: np.ndarray, cam: Camera, buffer_size_x: int,
+                              buffer_size_y: int):
+        # Generate vertices sequence from describing indices
+        vert_sequence = np.array(vertices[indices.flatten()])
 
-    def check_occlusion_for_model(self, model: Model):
-        self.create_z_buffer(model)
-        ids = self.z_buffer[:, :, 0]
-        ids, counts = np.unique(ids[ids > -1],  return_counts=True)
+        # Reshape the vert sequence to length/9x3x3 triangle Pairs
+        triangles = vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
 
-        self.visible_triangle_ids = ids
-        self.visible_triangle_counts = counts
-        return self.visible_triangle_ids
+        render_cam = \
+            Camera(cam.focal_length_in_mm, buffer_size_x, buffer_size_y, cam.sensor_width_in_mm,
+                            cam.sensor_height_in_mm, cam.cam_location_xyz, cam.cam_euler_rotation,
+                            cam.cam_quat_rotation)
+        z_buffer = Renderer.create_z_buffer(triangles, render_cam)
+        ids = z_buffer[:, :, 0]
+        ids, counts = np.unique(ids[ids > -1], return_counts=True)
+        return ids, counts
 
-    def create_z_buffer(self, model: Model):
-        width = self.cam.resolution_x
-        height = self.cam.resolution_y
+    @staticmethod
+    def create_z_buffer(triangles: np.ndarray, render_camera: Camera):
+        buffer_width = render_camera.resolution_x - 1
+        buffer_height = render_camera.resolution_y - 1
 
-        z_buffer = np.full([width, height, 2], [-1, np.inf])
+        z_buffer = np.full([buffer_width, buffer_height, 2], [-1, np.inf])
 
-        for idx, triangle in enumerate(model.triangles):
-            included_pixels = self.get_pixels_for_triangle(triangle)
+        for idx, triangle in enumerate(triangles):
+            included_pixels = Renderer.rasterize(triangle, render_camera)
             for pixel in included_pixels:
-                uvz_coords = self.cam.get_pixel_coords_for_vertices(triangle, include_z_value=True)
+                uvz_coords = render_camera.get_pixel_coords_for_vertices(triangle, include_z_value=True)
                 # todo: evaluate this
                 # mean is ok here because we don't have to check triangles that get cut by others
                 z_value = np.mean(uvz_coords[:, -1:])
@@ -41,21 +41,21 @@ class Texture(object):
                 if z_value < z_buffer[pixel[0], pixel[1]][1]:
                     z_buffer[pixel[0], pixel[1]] = [idx, z_value]
 
-        self.z_buffer = z_buffer
-        # print(self.z_buffer[:,:,0])
+        #print(z_buffer[:, :, 0])
         return z_buffer
 
-    def get_pixels_for_triangle(self, vertices: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def rasterize(vertices: np.ndarray, renderer_cam: Camera) -> np.ndarray:
         if vertices.shape != (3, 3):
             raise ValueError("Given triangle must be of shape (3, 3).")
 
-        # Get texture coords for vertice
-        text_coords = self.cam.get_pixel_coords_for_vertices(vertices)
-        bounding_box = self.get_bounding_box_coords_for_triangle(text_coords)
+        # Get renderer coords for vertice
+        text_coords = renderer_cam.get_pixel_coords_for_vertices(vertices)
+        bounding_box = Renderer.get_bounding_box_coords_for_triangle(text_coords)
 
         included_pixels = []
         for pixel in bounding_box:
-            if self.barycentric(pixel, text_coords):
+            if Renderer.barycentric(pixel, text_coords):
                 included_pixels.append(pixel)
 
         return np.array(included_pixels, dtype=int)
@@ -115,14 +115,14 @@ class Texture(object):
     def __edge_function(v1, v2, p) -> bool:
         """
         The edge function determines if a point p is right, left or on line of a edge
-        defined by two texture coordinates v1 and v2.
+        defined by two renderer coordinates v1 and v2.
 
         E(P) > 0 if P is to the "right" side
         E(P) = 0 if P is exactly on the line
         E(P) < 0 if P is to the "left " side
 
-        :param v1: first texture coordinate
-        :param v2: second texture coordinate
+        :param v1: first renderer coordinate
+        :param v2: second renderer coordinate
         :param p: point to check
         :return bool: returns true if point is on or right of the edge
         """

@@ -291,18 +291,3 @@ class TestModel(TestCase):
             res = False
             print(err)
         self.assertTrue(res)
-
-    def test_get_triangles(self):
-        triangles = np.array([
-            [[0.04, 0.05, 0.06],
-             [0.01, 0.02, 0.03],
-             [0.07, 0.08, 0.09]]
-        ])
-
-        try:
-            np.testing.assert_equal(self.model.triangles, triangles)
-            res = True
-        except AssertionError as err:
-            res = False
-            print(err)
-        self.assertTrue(res)

@@ -56,7 +56,6 @@ class Model(object):
     __vertices = np.array([])
     __uv_coords = np.array([])
     __indices = np.array([])
-    __triangles = np.array([])
 
     def __init__(self, vertices: np.ndarray = None, normals: np.ndarray = None,
                  uv_coords: np.ndarray = None):
@@ -94,25 +93,6 @@ class Model(object):
     def uv_coords(self) -> np.ndarray:
         return self.__uv_coords
 
-    @property
-    def triangles(self) -> np.ndarray:
-        if self.__triangles is None or self.__triangles.size == 0:
-            self.set_triangles()
-        return self.__triangles
-
-    def set_triangles(self):
-        vert_indices = self.get_indices_for_format(IndicesFormat.V3F)
-
-        if vert_indices.size == 0:
-            print("Indices not set for V3F.")
-            return []
-
-        # Generate vertices sequence from describing indices
-        vert_sequence = np.array(self.vertices[vert_indices.flatten()])
-
-        # Reshape the vert sequence to length/9x3x3 triangle Pairs
-        self.__triangles = vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
-
     @uv_coords.setter
     def uv_coords(self, uv_coords: np.ndarray):
         if uv_coords is None or uv_coords.size == 0:
@@ -149,7 +129,6 @@ class Model(object):
         indices = self.__reshape(indices, dim_ind)
         self.__indices = indices
         self.indices_format = ind_format
-        self.set_triangles()
 
     def generate_indices(self) -> Tuple[np.ndarray, List[IndicesFormat]]:
         """
@@ -229,16 +208,16 @@ class ColladaCreator(object):
     @staticmethod
     def create_collada_from_model(model: Model, texture_path: str, output_path: str, node_name: str) -> None:
         """
-        Create a Collada file out of an modell and a texture.
+        Create a Collada file out of an modell and a renderer.
 
         :param model: The model.
-        :param texture_path: Path of the texture.
+        :param texture_path: Path of the renderer.
         :param output_path: Path where collada file should be stored.
         :param node_name: The name of the node, the object should carry later.
         """
         mesh = Collada()
 
-        # needed for texture
+        # needed for renderer
         image = material.CImage("material_0-image", texture_path)
         surface = material.Surface("material_0-image-surface", image)
         sampler2d = material.Sampler2D("material_0-image-sampler", surface)
