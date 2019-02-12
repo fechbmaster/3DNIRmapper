@@ -171,12 +171,5 @@ def _generate_cube_example():
     model.normal_indices = normal_indices
 
     # Create Mapper
-    mapper = Mapper([texture1], model, 40, 20)
+    mapper = Mapper([texture1, texture2], model, 40, 20, output_path, "Cube")
     mapper.start_texture_mapping()
-
-    model.uv_indices = texture1.uv_indices
-    model.uv_coords = texture1.uv_coords
-
-    # Calculate UVs
-
-    ColladaCreator.create_collada_from_model(model, output_path, "Cube", texture_path)

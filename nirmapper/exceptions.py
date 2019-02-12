@@ -16,3 +16,8 @@ class ReshapeError(Exception):
 class ModelError(Exception):
     def __init__(self, message):
         super().__init__(message)
+
+
+class TextureError(Exception):
+    def __init__(self, message):
+        super().__init__(message)

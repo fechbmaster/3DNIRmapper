@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Union
 
+from nirmapper.model.colladaExporter import ColladaCreator
 from nirmapper.renderer.renderer import Renderer
 from nirmapper.renderer.texture import Texture
 from nirmapper.model.model import Model
@@ -11,12 +12,15 @@ class Mapper(object):
 
     """
 
-    def __init__(self, textures: Union[List[Texture], Texture], model: Model, buffer_dim_width: int, buffer_dim_height: int):
+    def __init__(self, textures: Union[List[Texture], Texture], model: Model, buffer_dim_width: int,
+                 buffer_dim_height: int, output_path: str, node_name: str):
         self.textures = textures
         self.model = model
         self.renderer = Renderer()
         self.buffer_x = buffer_dim_width
         self.buffer_y = buffer_dim_height
+        self.output_path = output_path
+        self.node_name = node_name
 
         # Generate vertices sequence from describing indices
         vert_sequence = np.array(model.vertices[model.indices.flatten()])
@@ -25,6 +29,10 @@ class Mapper(object):
 
     def start_texture_mapping(self):
         self.start_visibility_analysis()
+        print("Exporting textured model to: ", self.output_path)
+        ColladaCreator.create_collada_from_model_with_textures(self.model, self.textures, self.output_path,
+                                                               self.node_name)
+        print("Finished - have a nice day!")
 
     def start_visibility_analysis(self):
         print("Starting visibility analysis...")
