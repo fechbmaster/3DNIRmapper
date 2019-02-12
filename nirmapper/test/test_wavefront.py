@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from nirmapper.model import Wavefront
+from nirmapper.model.wavefrontImporter import Wavefront
 
 
 def prepend_dir(file):
@@ -32,7 +32,7 @@ class TestWavefront(TestCase):
         ])
 
         try:
-            np.testing.assert_almost_equal(self.model1.obj_vertices, model1_verts)
+            np.testing.assert_almost_equal(self.model1.vertices, model1_verts)
             res = True
         except AssertionError as err:
             res = False
@@ -40,7 +40,7 @@ class TestWavefront(TestCase):
         self.assertTrue(res)
 
         try:
-            np.testing.assert_almost_equal(self.model2.obj_vertices, model2_verts)
+            np.testing.assert_almost_equal(self.model2.vertices, model2_verts)
             res = True
         except AssertionError as err:
             res = False
@@ -93,9 +93,7 @@ class TestWavefront(TestCase):
 
     def test_indices(self):
         indices = np.array([
-            [0, 0, 0],
-            [1, 1, 1],
-            [2, 2, 2]
+            [0, 1, 2]
         ])
 
         try:

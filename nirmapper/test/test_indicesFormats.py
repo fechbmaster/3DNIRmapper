@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from nirmapper.model import IndicesFormat
+from nirmapper import IndicesFormat
 
 
 class TestIndicesFormats(TestCase):
