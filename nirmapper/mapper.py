@@ -1,7 +1,8 @@
 import numpy as np
-from typing import List
+from typing import List, Union
 
-from nirmapper import Renderer, Texture
+from nirmapper.renderer.renderer import Renderer
+from nirmapper.renderer.texture import Texture
 from nirmapper.model.model import Model
 
 
@@ -10,7 +11,7 @@ class Mapper(object):
 
     """
 
-    def __init__(self, textures: List[Texture], model: Model, buffer_dim_width: int, buffer_dim_height: int):
+    def __init__(self, textures: Union[List[Texture], Texture], model: Model, buffer_dim_width: int, buffer_dim_height: int):
         self.textures = textures
         self.model = model
         self.renderer = Renderer()

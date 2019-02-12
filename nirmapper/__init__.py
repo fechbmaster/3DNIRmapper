@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 
+from nirmapper.mapper import Mapper
 from nirmapper.model.colladaExporter import ColladaCreator
 from nirmapper.model.model import Model
 from nirmapper.model.wavefrontImporter import Wavefront, IndicesFormat
@@ -83,7 +84,7 @@ def _generate_cube_example():
     screen_width = 1920
     screen_height = 1080
 
-    cam = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+    cam1 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create Cam2
 
@@ -96,6 +97,11 @@ def _generate_cube_example():
     screen_height = 1080
 
     cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+
+    # Create textures
+
+    texture1 = Texture(texture_path, cam1)
+    texture2 = Texture(texture_path, cam2)
 
     # Create model
 
@@ -164,26 +170,13 @@ def _generate_cube_example():
     model.indices = indices
     model.normal_indices = normal_indices
 
-    print("Starting texturing...")
+    # Create Mapper
+    mapper = Mapper([texture1], model, 40, 20)
+    mapper.start_texture_mapping()
 
-    # Check visible verts
-    vis_vertices, ids, counts = \
-        Renderer.get_visible_triangles(model.vertices,
-                                       model.indices,
-                                       cam, 40, 20)
-
-    uv_coords = cam.get_texture_coords_for_vertices(vis_vertices)
-    model.uv_coords = uv_coords
-
-    vis_tri_indices = np.arange(0, vis_vertices.size // 3)
-
-    uv_indices = np.zeros(model.indices.shape)
-    uv_indices[ids] = vis_tri_indices.reshape(np.size(ids), 3)
-
-    model.uv_indices = uv_indices
-
-    print("Finished texturing...")
+    model.uv_indices = texture1.uv_indices
+    model.uv_coords = texture1.uv_coords
 
     # Calculate UVs
 
-    ColladaCreator.create_collada_from_model(model, texture_path, output_path, "Cube")
+    ColladaCreator.create_collada_from_model(model, output_path, "Cube", texture_path)
