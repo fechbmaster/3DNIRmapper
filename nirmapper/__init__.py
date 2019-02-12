@@ -48,7 +48,7 @@ def _generate_tooth_example():
     vis_vertices, ids, counts = \
         Renderer.get_visible_triangles(model.vertices,
                                        model.get_indices_for_format(IndicesFormat.V3F),
-                                       cam, 1280, 1024)
+                                       cam, 1280*2, 1024*2)
 
     uv_coords = cam.get_texture_coords_for_vertices(vis_vertices)
     model.uv_coords = uv_coords
