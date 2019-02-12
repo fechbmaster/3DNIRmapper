@@ -7,7 +7,7 @@ from nirmapper.model.colladaExporter import ColladaCreator
 from nirmapper.model.model import Model
 from nirmapper.model.wavefrontImporter import Wavefront, IndicesFormat
 from nirmapper.renderer.renderer import Renderer
-from nirmapper.renderer.texture import Texture, Camera
+from nirmapper.renderer.material import Material, Camera
 from .mapper import UVMapper
 
 
@@ -18,8 +18,8 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    # _generate_cube_example()
-    _generate_tooth_example()
+    _generate_cube_example()
+    # _generate_tooth_example()
 
 
 def _generate_tooth_example():
@@ -74,10 +74,10 @@ def _generate_cube_example():
     output_path = '/tmp/cube_example.dae'
     print("This will create a demo mapping of a cube in ", output_path, " using the renderer from: ", texture_path)
 
-    # Create Cam
+    # Create Cam1
 
-    location = np.array([0, 7, 0])
-    rotation = np.array([-90, 180, 0])
+    location = [0, 7, 0]
+    rotation = [-90, 180, 0]
     focal_length = 35
     sensor_width = 32
     sensor_height = 18
@@ -85,6 +85,18 @@ def _generate_cube_example():
     screen_height = 1080
 
     cam = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+
+    # Create Cam2
+
+    location = [7, 0, 0]
+    rotation = [-90, 180, -90]
+    focal_length = 35
+    sensor_width = 32
+    sensor_height = 18
+    screen_width = 1920
+    screen_height = 1080
+
+    cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create model
 
