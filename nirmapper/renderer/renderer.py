@@ -8,24 +8,17 @@ from nirmapper.renderer.camera import Camera
 class Renderer(object):
 
     @staticmethod
-    def get_visible_triangles(vertices: np.ndarray, indices: np.ndarray, cam: Camera, buffer_size_x: int,
+    def get_visible_triangles(triangles: np.ndarray, cam: Camera, buffer_size_x: int,
                               buffer_size_y: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Method calculates the visible vertices by using a z-buffer approach
-        :param np.ndarray vertices: The vertices to check
-        :param np.ndarray indices: The indices of the vertices
+        :param np.ndarray triangles: The triangles to check
         :param np.ndarray cam: The camera that should be used for the visiblity analysis
         :param int buffer_size_x: Z-buffer width
         :param int buffer_size_y: Z-Buffer height
         :return Tuple[np.ndarray, np.ndarray, np.ndarray]: Returns a tuple of the visible vertices,
         their indices depending on the indices of the vertices and their counts
         """
-        # Generate vertices sequence from describing indices
-        vert_sequence = np.array(vertices[indices.flatten()])
-
-        # Reshape the vert sequence to length/9x3x3 triangle Pairs
-        triangles = vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
-
         render_cam = \
             Camera(cam.focal_length_in_mm, buffer_size_x, buffer_size_y, cam.sensor_width_in_mm,
                    cam.sensor_height_in_mm, cam.cam_location_xyz, cam.cam_euler_rotation,

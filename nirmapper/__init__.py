@@ -7,8 +7,7 @@ from nirmapper.model.colladaExporter import ColladaCreator
 from nirmapper.model.model import Model
 from nirmapper.model.wavefrontImporter import Wavefront, IndicesFormat
 from nirmapper.renderer.renderer import Renderer
-from nirmapper.renderer.material import Material, Camera
-from .mapper import UVMapper
+from nirmapper.renderer.texture import Texture, Camera
 
 
 def prepend_dir(file):
