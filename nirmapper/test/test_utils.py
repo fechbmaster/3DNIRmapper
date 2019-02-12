@@ -1,5 +1,6 @@
-import numpy as np
 from unittest import TestCase
+
+import numpy as np
 
 from nirmapper.utils import euler_angles_to_rotation_matrix, quaternion_matrix
 

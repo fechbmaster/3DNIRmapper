@@ -3,9 +3,9 @@ from typing import Tuple, List
 import numpy as np
 from collada import Collada, material, source, geometry, scene
 
-from nirmapper.model.wavefrontImporter import IndicesFormat
 from nirmapper.exceptions import ColladaError
 from nirmapper.model.model import Model
+from nirmapper.model.wavefrontImporter import IndicesFormat
 
 
 class ColladaCreator(object):
@@ -77,9 +77,11 @@ class ColladaCreator(object):
 
     @staticmethod
     def generate_faces(model: Model) -> Tuple[np.ndarray, List[IndicesFormat]]:
-        # uv_indices = uv_indices.reshape(uv_indices.size, 1)
-        # new_indices = np.hstack([indices, uv_indices])
-        # new_indices = new_indices.flatten().astype(int)
+        """
+        Method generates faces out of the given model data
+        :param Model model: The model
+        :return Tuple[np.ndarray, List[IndicesFormat]]: Returns the faces and the format of the faces
+        """
         if model.vertices is None or model.vertices.size == 0:
             raise ColladaError("Vertices are not defined!")
         if model.indices is None or model.indices.size == 0:

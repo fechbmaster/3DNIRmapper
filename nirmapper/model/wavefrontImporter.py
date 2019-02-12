@@ -4,8 +4,8 @@ from typing import List
 import numpy as np
 import pywavefront
 
-from nirmapper.model.model import Model
 from nirmapper.exceptions import WavefrontError
+from nirmapper.model.model import Model
 from nirmapper.utils import quaternion_matrix
 
 
@@ -14,7 +14,7 @@ class IndicesFormat(Enum):
 
     """
     T2F = 1,
-    #C3F = 2,   # not needed here
+    # C3F = 2,   # not needed here
     N3F = 3,
     V3F = 4
 
@@ -179,7 +179,21 @@ class IndicesFormatter(object):
         return start_index
 
     def __get_index_for_format(self, ind_format):
+        """
+        Returns the index of a given format.
+        :param ind_format: The format
+        :return: The index
+        """
         return self.formats.index(ind_format)
+
+    @staticmethod
+    def generate_indices(length: int) -> np.ndarray:
+        """
+        Generates indices depending on the given vertices.
+
+        :return: An array of indices, The format of the indices.
+        """
+        return np.arange(0, length)
 
     # def get_indices_for_format(self, ind_format: IndicesFormat, indices: np.ndarray) -> np.ndarray:
     #     """
@@ -192,12 +206,3 @@ class IndicesFormatter(object):
     #     index = self.formats.index(ind_format)
     #
     #     return indices[:, [index]]
-
-    @staticmethod
-    def generate_indices(length: int) -> np.ndarray:
-        """
-        Generates indices depending on the given vertices.
-
-        :return: An array of indices, The format of the indices.
-        """
-        return np.arange(0, length)

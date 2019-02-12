@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 
 from nirmapper.renderer.camera import Camera
@@ -7,7 +9,17 @@ class Renderer(object):
 
     @staticmethod
     def get_visible_triangles(vertices: np.ndarray, indices: np.ndarray, cam: Camera, buffer_size_x: int,
-                              buffer_size_y: int):
+                              buffer_size_y: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """
+        Method calculates the visible vertices by using a z-buffer approach
+        :param np.ndarray vertices: The vertices to check
+        :param np.ndarray indices: The indices of the vertices
+        :param np.ndarray cam: The camera that should be used for the visiblity analysis
+        :param int buffer_size_x: Z-buffer width
+        :param int buffer_size_y: Z-Buffer height
+        :return Tuple[np.ndarray, np.ndarray, np.ndarray]: Returns a tuple of the visible vertices,
+        their indices depending on the indices of the vertices and their counts
+        """
         # Generate vertices sequence from describing indices
         vert_sequence = np.array(vertices[indices.flatten()])
 
@@ -16,8 +28,8 @@ class Renderer(object):
 
         render_cam = \
             Camera(cam.focal_length_in_mm, buffer_size_x, buffer_size_y, cam.sensor_width_in_mm,
-                            cam.sensor_height_in_mm, cam.cam_location_xyz, cam.cam_euler_rotation,
-                            cam.cam_quat_rotation)
+                   cam.sensor_height_in_mm, cam.cam_location_xyz, cam.cam_euler_rotation,
+                   cam.cam_quat_rotation)
         z_buffer = Renderer.create_z_buffer(triangles, render_cam)
         ind_indices = np.array(z_buffer[:, :, 0]).astype(int)
         ind_indices, counts = np.unique(ind_indices[ind_indices > -1], return_counts=True)
@@ -26,7 +38,13 @@ class Renderer(object):
         return vis_vertices, ind_indices, counts
 
     @staticmethod
-    def create_z_buffer(triangles: np.ndarray, render_camera: Camera):
+    def create_z_buffer(triangles: np.ndarray, render_camera: Camera) -> np.ndarray:
+        """
+        Method builds up a z-buffer
+        :param np.ndarray triangles: The triangles in shape (x, 3, 3)
+        :param Camera render_camera: The render camera
+        :return np.ndarray: The z-buffer
+        """
         buffer_width = render_camera.resolution_x - 1
         buffer_height = render_camera.resolution_y - 1
 
@@ -43,11 +61,17 @@ class Renderer(object):
                 if z_value < z_buffer[pixel[0], pixel[1]][1]:
                     z_buffer[pixel[0], pixel[1]] = [idx, z_value]
 
-        #print(z_buffer[:, :, 0])
+        # print(z_buffer[:, :, 0])
         return z_buffer
 
     @staticmethod
     def rasterize(vertices: np.ndarray, renderer_cam: Camera) -> np.ndarray:
+        """
+        Method rasterizes given vertices in their including pixels
+        :param np.ndarray vertices: The 3 vertices of the triangle
+        :param Cam renderer_cam: The render camera
+        :return np.ndarray: Array of visible pixels in triangle
+        """
         if vertices.shape != (3, 3):
             raise ValueError("Given triangle must be of shape (3, 3).")
 
@@ -61,6 +85,46 @@ class Renderer(object):
                 included_pixels.append(pixel)
 
         return np.array(included_pixels, dtype=int)
+
+    @staticmethod
+    def get_bounding_box_coords_for_triangle(text_coords: np.ndarray) -> np.ndarray:
+        """
+        Method builds a bounding box around a triangle
+        :param np.array text_coords: The texture coordinates of the triangle
+        :return np.ndarray: The bounding box as array
+        """
+        min_x = np.amin(text_coords[:, 0])
+        max_x = np.amax(text_coords[:, 0])
+        min_y = np.amin(text_coords[:, 1])
+        max_y = np.amax(text_coords[:, 1])
+
+        x = np.arange(min_x, max_x + 1)
+        y = np.arange(min_y, max_y + 1)
+
+        box = np.array(np.meshgrid(x, y)).T.reshape(-1, 2)
+
+        return box
+
+    @staticmethod
+    def barycentric(p, text_coords: np.ndarray) -> bool:
+        """
+        Barycentric coordinates help to check if a pixel is inside a triangle.
+        :param p: The Pixel to check for inclusion
+        :param np.ndarray text_coords: The texture coordinates of the triangle
+        :return bool: True if inside - False if outside of triangle
+        """
+        v0, v1, v2 = text_coords[1] - text_coords[0], text_coords[2] - text_coords[0], p - text_coords[0]
+        den = v0[0] * v1[1] - v1[0] * v0[1]
+        if den == 0:
+            return False
+        v = (v2[0] * v1[1] - v1[0] * v2[1]) / den
+        w = (v0[0] * v2[1] - v2[0] * v0[1]) / den
+        u = 1.0 - v - w
+        # Make near zero values to zero
+        if np.isclose([u], [0])[0]:
+            u = 0
+
+        return (u >= 0) and (v >= 0) and (u + v <= 1)
 
     # def pixel_is_included_in_triangle(self, text_coords: np.ndarray, pixel) -> bool:
     #     if text_coords.shape != (3, 2):
@@ -79,42 +143,14 @@ class Renderer(object):
     #
     #     return inside
 
-    @staticmethod
-    def get_bounding_box_coords_for_triangle(text_coords: np.ndarray) -> np.ndarray:
-        min_x = np.amin(text_coords[:, 0])
-        max_x = np.amax(text_coords[:, 0])
-        min_y = np.amin(text_coords[:, 1])
-        max_y = np.amax(text_coords[:, 1])
-
-        x = np.arange(min_x, max_x + 1)
-        y = np.arange(min_y, max_y + 1)
-
-        box = np.array(np.meshgrid(x, y)).T.reshape(-1, 2)
-
-        return box
-
     # @staticmethod
     # def __sort_triangles_by_x_coord(triangles) -> np.ndarray:
     #     index = np.lexsort((triangles[:, 1], triangles[:, 0]))
     #     return triangles[index]
 
     @staticmethod
-    def barycentric(p, text_coords: np.ndarray):
-        v0, v1, v2 = text_coords[1] - text_coords[0], text_coords[2] - text_coords[0], p - text_coords[0]
-        den = v0[0] * v1[1] - v1[0] * v0[1]
-        if den == 0:
-            return False
-        v = (v2[0] * v1[1] - v1[0] * v2[1]) / den
-        w = (v0[0] * v2[1] - v2[0] * v0[1]) / den
-        u = 1.0 - v - w
-        # Make near zero values to zero
-        if np.isclose([u], [0])[0]:
-            u = 0
-
-        return (u >= 0) and (v >= 0) and (u + v <= 1)
-
-    @staticmethod
     def __edge_function(v1, v2, p) -> bool:
+        # Disclaimer: Not used anymore because of using barycentric coords
         """
         The edge function determines if a point p is right, left or on line of a edge
         defined by two renderer coordinates v1 and v2.

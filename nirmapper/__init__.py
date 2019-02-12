@@ -1,6 +1,7 @@
-import numpy as np
-import os
 import inspect
+import os
+
+import numpy as np
 
 from nirmapper.model.colladaExporter import ColladaCreator
 from nirmapper.model.model import Model
@@ -17,7 +18,7 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    #_generate_cube_example()
+    # _generate_cube_example()
     _generate_tooth_example()
 
 
