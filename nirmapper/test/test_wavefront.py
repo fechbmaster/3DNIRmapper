@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from nirmapper.model.model import Wavefront
+from nirmapper.model.wavefrontImporter import Wavefront
 
 
 def prepend_dir(file):
@@ -93,9 +93,7 @@ class TestWavefront(TestCase):
 
     def test_indices(self):
         indices = np.array([
-            [0, 0, 0],
-            [1, 1, 1],
-            [2, 2, 2]
+            [0, 1, 2]
         ])
 
         try:

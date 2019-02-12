@@ -2,10 +2,12 @@ import numpy as np
 import os
 import inspect
 
+from nirmapper.model.colladaExporter import ColladaCreator
+from nirmapper.model.model import Model
+from nirmapper.model.wavefrontImporter import Wavefront, IndicesFormat
 from nirmapper.renderer.renderer import Renderer
 from nirmapper.renderer.texture import Texture, Camera
 from .mapper import UVMapper
-from nirmapper.model.model import Model, ColladaCreator, Wavefront, IndicesFormat
 
 
 def prepend_dir(file):
@@ -15,7 +17,7 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    # _generate_cube_example()
+    #_generate_cube_example()
     _generate_tooth_example()
 
 
@@ -47,65 +49,18 @@ def _generate_tooth_example():
     # Check visible verts
     vis_vertices, ids, counts = \
         Renderer.get_visible_triangles(model.vertices,
-                                       model.get_indices_for_format(IndicesFormat.V3F),
-                                       cam, 1280*2, 1024*2)
+                                       model.indices,
+                                       cam, 1280, 1024)
 
     uv_coords = cam.get_texture_coords_for_vertices(vis_vertices)
     model.uv_coords = uv_coords
 
     vis_tri_indices = np.arange(0, vis_vertices.size // 3)
 
-    tmp_indices = model.get_indices_for_format(IndicesFormat.V3F)
-    tmp_indices = tmp_indices.reshape(tmp_indices.size // 3, 3)
-
-    uv_indices = np.zeros(tmp_indices.shape)
+    uv_indices = np.zeros(model.indices.shape)
     uv_indices[ids] = vis_tri_indices.reshape(np.size(ids), 3)
 
-    # cut last half - workaround
-    indices = model.indices[:, :-1]
-    indices = indices.reshape(indices.size // 2, 2)
-    uv_indices = uv_indices.reshape(uv_indices.size, 1)
-    new_indices = np.hstack([indices, uv_indices])
-    new_indices = new_indices.flatten().astype(int)
-
-    # indices = np.array([0, 0, 0,  # 0
-    #                     2, 2, 0,  # 0
-    #                     3, 3, 0,  # 0
-    #                     7, 7, 0,  # 1
-    #                     5, 5, 0,  # 1
-    #                     4, 4, 0,  # 1
-    #                     4, 4, 0,  # 2
-    #                     1, 1, 0,  # 2
-    #                     0, 0, 0,  # 2
-    #                     5, 5, 0,  # 3
-    #                     2, 2, 0,  # 3
-    #                     1, 1, 0,  # 3
-    #                     2, 2, 0,  # 4
-    #                     7, 7, 0,  # 4
-    #                     3, 3, 0,  # 4
-    #                     0, 0, 0,  # 5
-    #                     7, 7, 1,  # 5
-    #                     4, 4, 2,  # 5
-    #                     0, 0, 0,  # 6
-    #                     1, 1, 0,  # 6
-    #                     2, 2, 0,  # 6
-    #                     7, 7, 0,  # 7
-    #                     6, 6, 0,  # 7
-    #                     5, 5, 0,  # 7
-    #                     4, 4, 0,  # 8
-    #                     5, 5, 0,  # 8
-    #                     1, 1, 0,  # 8
-    #                     5, 5, 0,  # 9
-    #                     6, 6, 0,  # 9
-    #                     2, 2, 0,  # 9
-    #                     2, 2, 0,  # 10
-    #                     6, 6, 0,  # 10
-    #                     7, 7, 0,  # 10
-    #                     0, 0, 3,  # 11
-    #                     3, 3, 4,  # 11
-    #                     7, 7, 5])  # 11
-
-    model.set_indices(new_indices, "V3F_N3F_T2F")
+    model.uv_indices = uv_indices
 
     print("Finished texturing...")
 
@@ -154,52 +109,55 @@ def _generate_cube_example():
                         -1, 0, 0,
                         0, 1, 0])
 
-    indices = np.array([0, 0,
-                        2, 2,
-                        3, 3,
-                        7, 7,
-                        5, 5,
-                        4, 4,
-                        4, 4,
-                        1, 1,
-                        0, 0,
-                        5, 5,
-                        2, 2,
-                        1, 1,
-                        2, 2,
-                        7, 7,
-                        3, 3,
-                        0, 0,
-                        7, 7,
-                        4, 4,
-                        0, 0,
-                        1, 1,
-                        2, 2,
-                        7, 7,
-                        6, 6,
-                        5, 5,
-                        4, 4,
-                        5, 5,
-                        1, 1,
-                        5, 5,
-                        6, 6,
-                        2, 2,
-                        2, 2,
-                        6, 6,
-                        7, 7,
-                        0, 0,
-                        3, 3,
-                        7, 7])
+    indices = np.array([0,
+                        2,
+                        3,
+                        7,
+                        5,
+                        4,
+                        4,
+                        1,
+                        0,
+                        5,
+                        2,
+                        1,
+                        2,
+                        7,
+                        3,
+                        0,
+                        7,
+                        4,
+                        0,
+                        1,
+                        2,
+                        7,
+                        6,
+                        5,
+                        4,
+                        5,
+                        1,
+                        5,
+                        6,
+                        2,
+                        2,
+                        6,
+                        7,
+                        0,
+                        3,
+                        7])
+
+    normal_indices = indices
 
     model = Model(verts, normals)
-    model.set_indices(indices, "V3F_N3F")
+    model.indices = indices
+    model.normal_indices = normal_indices
 
     print("Starting texturing...")
 
     # Check visible verts
     vis_vertices, ids, counts = \
         Renderer.get_visible_triangles(model.vertices,
-                                       model.get_indices_for_format(IndicesFormat.V3F),
+                                       model.indices,
                                        cam, 40, 20)
 
     uv_coords = cam.get_texture_coords_for_vertices(vis_vertices)
@@ -207,55 +165,10 @@ def _generate_cube_example():
 
     vis_tri_indices = np.arange(0, vis_vertices.size // 3)
 
-    tmp_indices = model.get_indices_for_format(IndicesFormat.V3F)
-    tmp_indices = tmp_indices.reshape(tmp_indices.size // 3, 3)
-
-    uv_indices = np.zeros(tmp_indices.shape)
+    uv_indices = np.zeros(model.indices.shape)
     uv_indices[ids] = vis_tri_indices.reshape(np.size(ids), 3)
 
-    indices = indices.reshape(indices.size // 2, 2)
-    uv_indices = uv_indices.reshape(uv_indices.size, 1)
-    new_indices = np.hstack([indices, uv_indices])
-    new_indices = new_indices.flatten().astype(int)
-
-    # indices = np.array([0, 0, 0,  # 0
-    #                     2, 2, 0,  # 0
-    #                     3, 3, 0,  # 0
-    #                     7, 7, 0,  # 1
-    #                     5, 5, 0,  # 1
-    #                     4, 4, 0,  # 1
-    #                     4, 4, 0,  # 2
-    #                     1, 1, 0,  # 2
-    #                     0, 0, 0,  # 2
-    #                     5, 5, 0,  # 3
-    #                     2, 2, 0,  # 3
-    #                     1, 1, 0,  # 3
-    #                     2, 2, 0,  # 4
-    #                     7, 7, 0,  # 4
-    #                     3, 3, 0,  # 4
-    #                     0, 0, 0,  # 5
-    #                     7, 7, 1,  # 5
-    #                     4, 4, 2,  # 5
-    #                     0, 0, 0,  # 6
-    #                     1, 1, 0,  # 6
-    #                     2, 2, 0,  # 6
-    #                     7, 7, 0,  # 7
-    #                     6, 6, 0,  # 7
-    #                     5, 5, 0,  # 7
-    #                     4, 4, 0,  # 8
-    #                     5, 5, 0,  # 8
-    #                     1, 1, 0,  # 8
-    #                     5, 5, 0,  # 9
-    #                     6, 6, 0,  # 9
-    #                     2, 2, 0,  # 9
-    #                     2, 2, 0,  # 10
-    #                     6, 6, 0,  # 10
-    #                     7, 7, 0,  # 10
-    #                     0, 0, 3,  # 11
-    #                     3, 3, 4,  # 11
-    #                     7, 7, 5])  # 11
-
-    model.set_indices(new_indices, "V3F_N3F_T2F")
+    model.uv_indices = uv_indices
 
     print("Finished texturing...")
 
