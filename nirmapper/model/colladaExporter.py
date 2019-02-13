@@ -2,7 +2,7 @@ from copy import copy
 from typing import Tuple, List
 
 import numpy as np
-from collada import Collada, material, source, geometry, scene
+from collada import Collada, material, source, geometry, scene, asset
 
 from nirmapper.renderer.texture import Texture
 from nirmapper.exceptions import ColladaError
@@ -26,6 +26,8 @@ class ColladaCreator(object):
         """
 
         mesh = Collada()
+        axis = asset.UP_AXIS.Z_UP
+        mesh.assetInfo.upaxis = axis
 
         # Insert plain material
         plain_mat, plain_mat_id = ColladaCreator.insert_plain_material_to_mesh(mesh, 0)
@@ -48,20 +50,20 @@ class ColladaCreator(object):
         # === Define sources ===
         source_list = []
         # vertices
-        source_list.append(source.FloatSource("cubeverts-array", np.array(vertices), ('X', 'Y', 'Z')))
+        source_list.append(source.FloatSource("verts-array", np.array(vertices), ('X', 'Y', 'Z')))
         # normals
         if np.size(normals) > 0:
-            source_list.append(source.FloatSource("cubenormals-array", np.array(normals), ('X', 'Y', 'Z')))
-        source_list.append(source.FloatSource("cubeuv_array", np.array(combined_uvs), ('S', 'T')))
+            source_list.append(source.FloatSource("normals-array", np.array(normals), ('X', 'Y', 'Z')))
+        source_list.append(source.FloatSource("uv_array", np.array(combined_uvs), ('S', 'T')))
 
         # === Define plain geometry ===
         plain_geom = geometry.Geometry(mesh, "mesh1-geometry", "mesh1-geometry", source_list)
 
         # === Define input list for plain model ===
         plain_input_list = source.InputList()
-        plain_input_list.addInput(0, 'VERTEX', "#cubeverts-array")
+        plain_input_list.addInput(0, 'VERTEX', "#verts-array")
         if np.size(normals) > 0:
-            plain_input_list.addInput(1, 'NORMAL', "#cubenormals-array")
+            plain_input_list.addInput(1, 'NORMAL', "#normals-array")
 
         # === Define plain faces ===
         faces, formats = ColladaCreator.__generate_faces(model, True)
@@ -75,22 +77,24 @@ class ColladaCreator(object):
         plain_geomnode = scene.GeometryNode(plain_geom, [plain_matnode])
 
         geomnode_list = [plain_geomnode]
+
+        # Set geom for textured verts
+        geom = geometry.Geometry(mesh, "geometry1", "geometry1", source_list)
+
         for i, texture in enumerate(textures):
             # i+1 because plain model uses id 0
             id = i + 1
             mat, mat_id = ColladaCreator.insert_texture_material_to_mesh(mesh, texture.texture_path, id)
-            # Set geoms
-            geom = geometry.Geometry(mesh, "geometry%d" % id, "geometry%d" % id, source_list)
 
             # Set input list
             input_list = source.InputList()
             j = 0
-            input_list.addInput(j, 'VERTEX', "#cubeverts-array")
+            input_list.addInput(j, 'VERTEX', "#verts-array")
             j += 1
             if np.size(normals) > 0:
-                input_list.addInput(j, 'NORMAL', "#cubenormals-array")
+                input_list.addInput(j, 'NORMAL', "#normals-array")
                 j += 1
-            input_list.addInput(j, 'TEXCOORD', "#cubeuv_array", set="0")
+            input_list.addInput(j, 'TEXCOORD', "#uv_array", set="0")
 
             # Extend faces
             text_faces = texture.verts_indices.reshape(texture.verts_indices.size, 1)
@@ -111,10 +115,6 @@ class ColladaCreator(object):
             geomnode_list.append(geomnode)
 
         node = scene.Node(node_name, children=geomnode_list)
-
-        # pycollada rotates the model for some reason - prevent that
-        rotation1 = scene.RotateTransform(1.0, 0.0, 0.0, -90)
-        node.transforms.append(rotation1)
 
         myscene = scene.Scene("scene0", [node])
         mesh.scenes.append(myscene)
@@ -161,6 +161,8 @@ class ColladaCreator(object):
         :param node_name: The name of the node, the object should carry later.
         """
         mesh = Collada()
+        axis = asset.UP_AXIS.Z_UP
+        mesh.assetInfo.upaxis = axis
 
         faces, formats = ColladaCreator.__generate_faces(model)
 
@@ -194,10 +196,6 @@ class ColladaCreator(object):
         matnode = scene.MaterialNode(mat_identifier, mat, inputs=[])
         geomnode = scene.GeometryNode(geom, [matnode])
         node = scene.Node(node_name, children=[geomnode])
-
-        # pycollada rotates the model for some reason - prevent that
-        rotation1 = scene.RotateTransform(1.0, 0.0, 0.0, -90)
-        node.transforms.append(rotation1)
 
         myscene = scene.Scene("scene0", [node])
         mesh.scenes.append(myscene)
