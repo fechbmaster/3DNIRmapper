@@ -43,15 +43,19 @@ class Mapper(object):
             # Set visible vertices
             texture.visible_vertices = vis_vertices
 
+            # Set vertex indices
+            texture.verts_indices = self.model.indices[ids]
+
+            # Set normal indices
+            if np.size(self.model.normals) > 0:
+                texture.normal_indices = self.model.normal_indices[ids]
+
             # Set uv coords
             uv_coords = texture.cam.get_texture_coords_for_vertices(vis_vertices)
             texture.uv_coords = uv_coords
 
-            # Set uv indices
-            vis_tri_indices = np.arange(0, vis_vertices.size // 3)
-            uv_indices = np.zeros(self.model.indices.shape)
-            uv_indices[ids] = vis_tri_indices.reshape(np.size(ids), 3)
-            texture.uv_indices = uv_indices
+            # Set uv indices -> these are just indices of the uv_coords array
+            texture.uv_indices = np.arange(texture.uv_coords.size // 2)
 
             # Set counts
             texture.counts = counts

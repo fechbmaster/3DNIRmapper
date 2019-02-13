@@ -112,13 +112,13 @@ class TestMapper(TestCase):
         model.normal_indices = normal_indices
 
         # Create Mapper
-        self.mapper = Mapper([texture1, texture2], model, 40, 20)
+        self.mapper = Mapper([texture1, texture2], model, 40, 20, "/tmp/test.dae", "TestCube")
 
     def test_visibility_analysis(self):
         exp_vis_ids1 = [5, 11]
         exp_vis_ids2 = [2, 8]
 
-        self.mapper.start_texture_mapping()
+        self.mapper.start_visibility_analysis()
 
         try:
             np.testing.assert_equal(self.mapper.textures[0].vis_triangle_ids, exp_vis_ids1)

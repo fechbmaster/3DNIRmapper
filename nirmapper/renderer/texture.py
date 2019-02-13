@@ -11,6 +11,7 @@ class Texture(object):
     __vert_indices = []
     __uv_coords = []
     __uv_indices = []
+    __normal_indices = []
     counts = []
     vis_triangle_ids = []
 
@@ -64,9 +65,20 @@ class Texture(object):
         if uv_indices is None or uv_indices.size == 0:
             self.__uv_indices = []
             return
-        # Reshape to get coords
-        uv_indices = self.__reshape(uv_indices, 3)
         self.__uv_indices = uv_indices
+
+    @property
+    def normal_indices(self) -> np.ndarray:
+        return self.__normal_indices
+
+    @normal_indices.setter
+    def normal_indices(self, normal_indices: np.ndarray):
+        if normal_indices is None or normal_indices.size == 0:
+            self.__normal_indices = []
+            return
+        # Reshape to get coords
+        normal_indices = self.__reshape(normal_indices, 3)
+        self.__normal_indices = normal_indices
 
     @staticmethod
     def __reshape(array: np.ndarray, vert_length: int) -> np.ndarray:

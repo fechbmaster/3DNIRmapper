@@ -27,51 +27,79 @@ class ColladaCreator(object):
 
         mesh = Collada()
 
-        # Don't calculate faces for UV because not needed if textured with own textures
-        faces, formats = ColladaCreator.generate_faces(model, ignore_uvs=True)
+        # Insert plain material
+        plain_mat, plain_mat_id = ColladaCreator.insert_plain_material_to_mesh(mesh, 0)
 
-        # Vertices must be there so no need to check for that
-        vert_src = source.FloatSource("cubeverts-array", np.array(model.vertices), ('X', 'Y', 'Z'))
+        # Define data for 3d model
 
-        source_list = [vert_src]
-        input_list = source.InputList()
-        idx = 0
-        input_list.addInput(idx, 'VERTEX', "#cubeverts-array")
-
-        if IndicesFormat.N3F in formats:
-            normal_src = source.FloatSource("cubenormals-array", np.array(model.normals), ('X', 'Y', 'Z'))
-            source_list.append(normal_src)
-            idx += 1
-            input_list.addInput(idx, 'NORMAL', "#cubenormals-array")
-
-        idx += 1
-        input_list.addInput(idx, 'TEXCOORD', "#cubeuv_array", set="0")
-
-        # Create material dict
-        faces = faces.reshape(faces.size // np.size(formats), np.size(formats))
-        geomnode_list = []
-        for i, texture in enumerate(textures):
-            mat, mat_id = ColladaCreator.insert_material_to_mesh(mesh, texture.texture_path, i)
-
-            # check for uv coords in texture
-            if (texture.uv_coords is None or texture.uv_coords.size == 0) and (
-                    texture.uv_indices is None or texture.uv_indices.size == 0):
+        vertices = model.vertices
+        normals = model.normals
+        combined_uvs = np.array([])
+        ind_offset = 0
+        for texture in textures:
+            # check for uv coords and incices in texture
+            if (texture.uv_coords is None or np.size(texture.uv_coords.size) == 0) and (
+                    texture.uv_indices is None or np.size(texture.uv_indices.size) == 0):
                 raise ColladaError("UV indices or coordinates of texture are not defined!")
+            combined_uvs = np.append(combined_uvs, texture.uv_coords)
+            texture.uv_indices = texture.uv_indices + ind_offset
+            ind_offset = texture.uv_indices.size
 
-            # Set sources
-            uv_src = source.FloatSource("cubeuv_array", np.array(texture.uv_coords), ('S', 'T'))
-            tmp_source_list = copy(source_list)
-            tmp_source_list.append(uv_src)
+        # === Define sources ===
+        source_list = []
+        # vertices
+        source_list.append(source.FloatSource("cubeverts-array", np.array(vertices), ('X', 'Y', 'Z')))
+        # normals
+        if np.size(normals) > 0:
+            source_list.append(source.FloatSource("cubenormals-array", np.array(normals), ('X', 'Y', 'Z')))
+        source_list.append(source.FloatSource("cubeuv_array", np.array(combined_uvs), ('S', 'T')))
 
+        # === Define plain geometry ===
+        plain_geom = geometry.Geometry(mesh, "mesh1-geometry", "mesh1-geometry", source_list)
+
+        # === Define input list for plain model ===
+        plain_input_list = source.InputList()
+        plain_input_list.addInput(0, 'VERTEX', "#cubeverts-array")
+        if np.size(normals) > 0:
+            plain_input_list.addInput(1, 'NORMAL', "#cubenormals-array")
+
+        # === Define plain faces ===
+        faces, formats = ColladaCreator.__generate_faces(model, True)
+
+        # === Create plain triset ===
+        plain_triset = plain_geom.createTriangleSet(faces, plain_input_list, plain_mat_id)
+
+        # === Combine to geomnode
+        plain_geom.primitives.append(plain_triset)
+        plain_matnode = scene.MaterialNode(plain_mat_id, plain_mat, inputs=[])
+        plain_geomnode = scene.GeometryNode(plain_geom, [plain_matnode])
+
+        geomnode_list = [plain_geomnode]
+        for i, texture in enumerate(textures):
+            # i+1 because plain model uses id 0
+            id = i + 1
+            mat, mat_id = ColladaCreator.insert_texture_material_to_mesh(mesh, texture.texture_path, id)
             # Set geoms
-            geom = geometry.Geometry(mesh, "geometry%d" % i, "geometry%d" % i, tmp_source_list)
+            geom = geometry.Geometry(mesh, "geometry%d" % id, "geometry%d" % id, source_list)
+
+            # Set input list
+            input_list = source.InputList()
+            j = 0
+            input_list.addInput(j, 'VERTEX', "#cubeverts-array")
+            j += 1
+            if np.size(normals) > 0:
+                input_list.addInput(j, 'NORMAL', "#cubenormals-array")
+                j += 1
+            input_list.addInput(j, 'TEXCOORD', "#cubeuv_array", set="0")
 
             # Extend faces
-            uv_indices = texture.uv_indices.reshape(texture.uv_indices.size, 1)
-            tmp_faces = np.hstack([faces, uv_indices]).astype(int)
+            text_faces = texture.verts_indices.reshape(texture.verts_indices.size, 1)
+            if np.size(normals) > 0:
+                text_faces = np.hstack([text_faces, texture.normal_indices.reshape(texture.normal_indices.size, 1)])
+            text_faces = np.hstack([text_faces, texture.uv_indices.reshape(texture.uv_indices.size, 1)]).astype(int)
 
             # Set triset
-            triset = geom.createTriangleSet(tmp_faces, input_list, mat_id)
+            triset = geom.createTriangleSet(text_faces, input_list, mat_id)
             geom.primitives.append(triset)
             mesh.geometries.append(geom)
 
@@ -81,9 +109,6 @@ class ColladaCreator(object):
             # Set geomnode
             geomnode = scene.GeometryNode(geom, [matnode])
             geomnode_list.append(geomnode)
-
-        # this is just for debugging and actually not needed
-        # formats.append(IndicesFormat.T2F)
 
         node = scene.Node(node_name, children=geomnode_list)
 
@@ -98,14 +123,14 @@ class ColladaCreator(object):
         mesh.write(output_path)
 
     @staticmethod
-    def insert_material_to_mesh(mesh: Collada, texture_path: str, id: int) -> Tuple[material.Material, str]:
+    def insert_texture_material_to_mesh(mesh: Collada, texture_path: str, id: int) -> Tuple[material.Material, str]:
         # needed for renderer
         image = material.CImage("material_%d-image" % id, texture_path)
         surface = material.Surface("material_%d-image-surface" % id, image)
         sampler2d = material.Sampler2D("material_%d-image-sampler" % id, surface)
         mat_map = material.Map(sampler2d, "UVSET0")
 
-        effect = material.Effect("effect0", [surface, sampler2d], "lambert", emission=(0.0, 0.0, 0.0, 1),
+        effect = material.Effect("effect%d" % id, [surface, sampler2d], "lambert", emission=(0.0, 0.0, 0.0, 1),
                                  ambient=(0.0, 0.0, 0.0, 1), diffuse=mat_map, transparent=mat_map, transparency=0.0,
                                  double_sided=True)
         mat = material.Material("material_%d_ID" % id, "material_%d" % id, effect)
@@ -117,13 +142,13 @@ class ColladaCreator(object):
         return mat, "material_%d" % id
 
     @staticmethod
-    def insert_default_material_to_mesh(mesh: Collada) -> Tuple[material.Material, str]:
-        effect = material.Effect("effect0", [], "phong", diffuse=(1, 0, 0), specular=(0, 1, 0))
-        mat = material.Material("material0_ID", "material_0", effect)
+    def insert_plain_material_to_mesh(mesh: Collada, id: int) -> Tuple[material.Material, str]:
+        effect = material.Effect("effect%d" % id, [], "phong", diffuse=(1, 0, 0), specular=(0, 1, 0))
+        mat = material.Material("material_%d_ID" % id, "material_%d" % id, effect)
         mesh.effects.append(effect)
         mesh.materials.append(mat)
 
-        return mat, "material_0"
+        return mat, "material_%d" % id
 
     @staticmethod
     def create_collada_from_model(model: Model, output_path: str, node_name: str, texture_path: str = None) -> None:
@@ -137,7 +162,7 @@ class ColladaCreator(object):
         """
         mesh = Collada()
 
-        faces, formats = ColladaCreator.generate_faces(model)
+        faces, formats = ColladaCreator.__generate_faces(model)
 
         # Vertices must be there so no need to check for that
         vert_src = source.FloatSource("cubeverts-array", np.array(model.vertices), ('X', 'Y', 'Z'))
@@ -155,11 +180,11 @@ class ColladaCreator(object):
         if IndicesFormat.T2F in formats:
             uv_src = source.FloatSource("cubeuv_array", np.array(model.uv_coords), ('S', 'T'))
             geometry_list.append(uv_src)
-            mat, mat_identifier = ColladaCreator.insert_material_to_mesh(mesh, texture_path, 0)
+            mat, mat_identifier = ColladaCreator.insert_texture_material_to_mesh(mesh, texture_path, 0)
             idx += 1
             input_list.addInput(idx, 'TEXCOORD', "#cubeuv_array", set="0")
         else:
-            mat, mat_identifier = ColladaCreator.insert_default_material_to_mesh(mesh)
+            mat, mat_identifier = ColladaCreator.insert_plain_material_to_mesh(mesh, 0)
 
         geom = geometry.Geometry(mesh, "geometry0", "geometry0", geometry_list)
         triset = geom.createTriangleSet(faces, input_list, mat_identifier)
@@ -181,7 +206,7 @@ class ColladaCreator(object):
         mesh.write(output_path)
 
     @staticmethod
-    def generate_faces(model: Model, ignore_uvs: bool = False) -> Tuple[np.ndarray, List[IndicesFormat]]:
+    def __generate_faces(model: Model, ignore_uvs: bool = False) -> Tuple[np.ndarray, List[IndicesFormat]]:
         """
         Method generates faces out of the given model data
         :param ignore_uvs: Indicates if uv coordinates should be ignored. Needed for multiple texturing.
