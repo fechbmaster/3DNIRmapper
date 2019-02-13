@@ -73,7 +73,7 @@ class ColladaCreator(object):
 
         # === Combine to geomnode
         plain_geom.primitives.append(plain_triset)
-        mesh.geometries.append(plain_geom)
+        # mesh.geometries.append(plain_geom)
         plain_matnode = scene.MaterialNode(plain_mat_id, plain_mat, inputs=[])
         plain_geomnode = scene.GeometryNode(plain_geom, [plain_matnode])
 
