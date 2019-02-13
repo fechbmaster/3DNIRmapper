@@ -73,10 +73,12 @@ class ColladaCreator(object):
 
         # === Combine to geomnode
         plain_geom.primitives.append(plain_triset)
+        mesh.geometries.append(plain_geom)
         plain_matnode = scene.MaterialNode(plain_mat_id, plain_mat, inputs=[])
         plain_geomnode = scene.GeometryNode(plain_geom, [plain_matnode])
 
         geomnode_list = [plain_geomnode]
+        matnode_list = []
 
         # Set geom for textured verts
         geom = geometry.Geometry(mesh, "geometry1", "geometry1", source_list)
@@ -105,15 +107,16 @@ class ColladaCreator(object):
             # Set triset
             triset = geom.createTriangleSet(text_faces, input_list, mat_id)
             geom.primitives.append(triset)
-            mesh.geometries.append(geom)
 
             # Set matnode
             matnode = scene.MaterialNode(mat_id, mat, inputs=[])
+            matnode_list.append(matnode)
 
-            # Set geomnode
-            geomnode = scene.GeometryNode(geom, [matnode])
-            geomnode_list.append(geomnode)
+        # Set geomnode
+        geomnode = scene.GeometryNode(geom, matnode_list)
+        geomnode_list.append(geomnode)
 
+        mesh.geometries.append(geom)
         node = scene.Node(node_name, children=geomnode_list)
 
         myscene = scene.Scene("scene0", [node])
@@ -143,7 +146,7 @@ class ColladaCreator(object):
 
     @staticmethod
     def insert_plain_material_to_mesh(mesh: Collada, id: int) -> Tuple[material.Material, str]:
-        effect = material.Effect("effect%d" % id, [], "phong", diffuse=(1, 0, 0), specular=(0, 1, 0))
+        effect = material.Effect("effect%d" % id, [], "phong", diffuse=(0, 0, 0), specular=(0, 0, 0))
         mat = material.Material("material_%d_ID" % id, "material_%d" % id, effect)
         mesh.effects.append(effect)
         mesh.materials.append(mat)
