@@ -18,13 +18,14 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    _generate_cube_example()
-    #_generate_tooth_example()
+    #_generate_cube_example()
+    _generate_tooth_example()
 
 
 def _generate_tooth_example():
     texture_path1 = prepend_dir('resources/images/texture_4_adjusted.bmp')
     texture_path2 = prepend_dir('resources/images/texture_11_adjusted.bmp')
+    texture_path3 = prepend_dir('resources/images/texture_1_adjusted.bmp')
     output_path = '/tmp/4_adjusted.dae'
 
     # Cam 1
@@ -55,10 +56,25 @@ def _generate_tooth_example():
     cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
                   rotation_quat)
 
+    # Cam 3
+
+    location = np.array([-1.22, 1.21, 9.8])
+    rotation_euler = np.array([-8, 20.2, 85.2])
+    rotation_quat = np.array([0.715, -0.169, 0.082, 0.674])
+    focal_length = 35
+    sensor_width = 32
+    sensor_height = 25.6
+    screen_width = 1280
+    screen_height = 1024
+
+    cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
+                  rotation_quat)
+
     # Create textures
 
     texture1 = Texture(texture_path1, cam1)
     texture2 = Texture(texture_path2, cam2)
+    texture3 = Texture(texture_path3, cam3)
 
     print("Starting model import...")
     models = Wavefront.import_obj_as_model_list(prepend_dir('resources/models/4_downsized_adjusted.obj'))
@@ -67,7 +83,7 @@ def _generate_tooth_example():
     model = models[0]
 
     # Create Mapper
-    mapper = Mapper([texture1, texture2], model, 1280, 10240, output_path, "Tooth")
+    mapper = Mapper([texture1, texture2, texture3], model, 1280, 1024, output_path, "Tooth")
     mapper.start_texture_mapping()
 
 

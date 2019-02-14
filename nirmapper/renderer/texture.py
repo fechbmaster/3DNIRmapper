@@ -82,7 +82,7 @@ class Texture(object):
         self.__normal_indices = normal_indices
 
     def remove_duplicate_data_at_triangle_id(self, triangle_id: int):
-        if triangle_id in self.duplicate_triangle_ids:
+        if triangle_id in self.vis_triangle_ids:
             # Delete elements
             idx = np.where(self.vis_triangle_ids == triangle_id)[0]
             self.__delete_triangle_at_index(idx)
