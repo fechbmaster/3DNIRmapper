@@ -38,14 +38,14 @@ class ColladaCreator(object):
         normals = model.normals
         combined_uvs = np.array([])
         ind_offset = 0
-        for texture in textures:
+        for idx, texture in enumerate(textures):
             # check for uv coords and incices in texture
-            if (texture.uv_coords is None or np.size(texture.uv_coords.size) == 0) and (
-                    texture.uv_indices is None or np.size(texture.uv_indices.size) == 0):
-                raise ColladaError("UV indices or coordinates of texture are not defined!")
-            combined_uvs = np.append(combined_uvs, texture.uv_coords)
-            texture.uv_indices = texture.uv_indices + ind_offset
-            ind_offset = texture.uv_indices.size
+            if texture.visible_vertices is None or np.size(texture.visible_vertices) == 0:
+                textures = np.delete(textures, idx)
+            else:
+                combined_uvs = np.append(combined_uvs, texture.uv_coords)
+                texture.uv_indices = texture.uv_indices + ind_offset
+                ind_offset = texture.uv_indices.size
 
         # === Define sources ===
         source_list = []

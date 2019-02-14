@@ -12,8 +12,9 @@ class Texture(object):
     __uv_coords = []
     __uv_indices = []
     __normal_indices = []
-    counts = []
+    counts = np.array([], dtype=int)
     vis_triangle_ids = []
+    duplicate_triangle_ids = np.array([], dtype=int)
 
     def __init__(self, texture_path: string, cam: Camera):
         self.texture_path = texture_path
@@ -79,6 +80,28 @@ class Texture(object):
         # Reshape to get coords
         normal_indices = self.__reshape(normal_indices, 3)
         self.__normal_indices = normal_indices
+
+    def remove_duplicate_data_at_triangle_id(self, triangle_id: int):
+        if triangle_id in self.duplicate_triangle_ids:
+            # Delete elements
+            idx = np.where(self.vis_triangle_ids == triangle_id)[0]
+            self.__delete_triangle_at_index(idx)
+
+    def __delete_triangle_at_index(self, tri_idx: int):
+        # Delete verts
+        indices = np.arange(tri_idx * 3, (tri_idx + 1) * 3)
+        self.visible_vertices = np.delete(self.visible_vertices, indices, axis=0)
+        # Delete vert indices
+        self.verts_indices = np.delete(self.verts_indices, tri_idx, axis=0)
+        # Delete uvs
+        self.uv_coords = np.delete(self.uv_coords, indices, axis=0)
+        # Re-arange uv indices
+        self.uv_indices = np.arange(np.size(self.uv_coords) // 2)
+        # Delete normal indices
+        self.normal_indices = np.delete(self.normal_indices, tri_idx, axis=0)
+        # Delete triangle id
+        self.vis_triangle_ids = np.delete(self.vis_triangle_ids, tri_idx)
+
 
     @staticmethod
     def __reshape(array: np.ndarray, vert_length: int) -> np.ndarray:

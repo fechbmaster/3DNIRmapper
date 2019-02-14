@@ -18,8 +18,8 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    #_generate_cube_example()
-    _generate_tooth_example()
+    _generate_cube_example()
+    #_generate_tooth_example()
 
 
 def _generate_tooth_example():
@@ -74,6 +74,7 @@ def _generate_tooth_example():
 def _generate_cube_example():
     scipt_path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     texture_path = scipt_path + '/resources/images/texture_cube.png'
+    texture_path2 = scipt_path + '/resources/images/texture_cube_side.png'
     output_path = '/tmp/cube_example.dae'
     print("This will create a demo mapping of a cube in ", output_path, " using the renderer from: ", texture_path)
 
@@ -101,10 +102,23 @@ def _generate_cube_example():
 
     cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
+    # Create Cam3
+
+    location = [4.28, 3.58, 0]
+    rotation = [-90, 180, -52.2]
+    focal_length = 35
+    sensor_width = 32
+    sensor_height = 18
+    screen_width = 1920
+    screen_height = 1080
+
+    cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+
     # Create textures
 
     texture1 = Texture(texture_path, cam1)
     texture2 = Texture(texture_path, cam2)
+    texture3 = Texture(texture_path2, cam3)
 
     # Create model
 
@@ -174,5 +188,5 @@ def _generate_cube_example():
     model.normal_indices = normal_indices
 
     # Create Mapper
-    mapper = Mapper([texture1, texture2], model, 40, 20, output_path, "Cube")
+    mapper = Mapper([texture1, texture2, texture3], model, 40, 20, output_path, "Cube")
     mapper.start_texture_mapping()

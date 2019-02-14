@@ -38,8 +38,8 @@ class Renderer(object):
         :param Camera render_camera: The render camera
         :return np.ndarray: The z-buffer
         """
-        buffer_width = render_camera.resolution_x - 1
-        buffer_height = render_camera.resolution_y - 1
+        buffer_width = render_camera.resolution_x
+        buffer_height = render_camera.resolution_y
 
         z_buffer = np.full([buffer_width, buffer_height, 2], [-1, np.inf])
 
