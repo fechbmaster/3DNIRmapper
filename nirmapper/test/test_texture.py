@@ -42,7 +42,7 @@ class TestTexture(TestCase):
              [0.68229167, 0.17592593],
              [0.68229167, 0.82407407]]
         )
-        texture.uv_indices = [0, 1, 2, 3, 4, 5]
+        texture.arange_uv_indices()
 
         texture.verts_indices = [0, 7, 4, 0, 3, 7]
         texture.counts = [667, 665]

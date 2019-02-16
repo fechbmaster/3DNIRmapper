@@ -55,7 +55,7 @@ class Mapper(object):
             texture.uv_coords = uv_coords
 
             # Set uv indices -> these are just indices of the uv_coords array
-            texture.uv_indices = np.arange(texture.uv_coords.size // 2)
+            texture.arange_uv_indices()
 
             # Set counts
             texture.counts = counts

@@ -10,7 +10,7 @@ class Texture(object):
     __visible_vertices = []
     __vert_indices = []
     __uv_coords = []
-    __uv_indices = []
+    __uv_indices = np.array([], dtype=int)
     __normal_indices = []
     counts = np.array([], dtype=int)
     vis_triangle_indices = np.array([], dtype=int)
@@ -61,12 +61,8 @@ class Texture(object):
     def uv_indices(self) -> np.ndarray:
         return self.__uv_indices
 
-    @uv_indices.setter
-    def uv_indices(self, uv_indices: np.ndarray):
-        if uv_indices is None or np.size(uv_indices) == 0:
-            self.__uv_indices = []
-            return
-        self.__uv_indices = uv_indices
+    def arange_uv_indices(self, start_index: int = 0):
+        self.__uv_indices = np.arange(start_index, start_index + (np.size(self.uv_coords) // 2))
 
     @property
     def normal_indices(self) -> np.ndarray:
@@ -103,7 +99,7 @@ class Texture(object):
         # Delete uvs
         self.uv_coords = np.delete(self.uv_coords, indices, axis=0)
         # Re-arange uv indices
-        self.uv_indices = np.arange(np.size(self.uv_coords) // 2)
+        self.arange_uv_indices()
         # Delete normal indices
         self.normal_indices = np.delete(self.normal_indices, tri_idx, axis=0)
         # Delete triangle id
