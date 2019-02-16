@@ -34,7 +34,7 @@ class Mapper(object):
 
     def start_visibility_analysis(self):
         print("Starting visibility analysis...")
-        tmp_ids = np.array([])
+        tmp_ids = np.array([], dtype=int)
         for idx, texture in enumerate(self.textures):
             vis_vertices, ids, counts = \
                 self.renderer.get_visible_triangles(self.model.vertices, self.model.indices, texture.cam,
@@ -113,4 +113,6 @@ class Mapper(object):
 
     def __set_duplicate_ids(self, id_list):
         s = np.sort(np.array([id_list]), axis=None)
-        self.duplicate_ids = np.array(s[:-1][s[1:] == s[:-1]], dtype=int)
+        s = np.array(s[:-1][s[1:] == s[:-1]], dtype=int)
+
+        self.duplicate_ids = np.unique(s)
