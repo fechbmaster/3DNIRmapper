@@ -18,15 +18,15 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    #_generate_cube_example()
-    _generate_tooth_example()
+    _generate_cube_example()
+    #_generate_tooth_example()
 
 
 def _generate_tooth_example():
     texture_path1 = prepend_dir('resources/images/texture_4_adjusted.bmp')
     texture_path2 = prepend_dir('resources/images/texture_11_adjusted.bmp')
     texture_path3 = prepend_dir('resources/images/texture_1_adjusted.bmp')
-    output_path = '/tmp/4_adjusted.dae'
+    output_path = '/tmp/MappedNIR.dae'
 
     # Cam 1
 
@@ -91,6 +91,7 @@ def _generate_cube_example():
     scipt_path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     texture_path = scipt_path + '/resources/images/texture_cube.png'
     texture_path2 = scipt_path + '/resources/images/texture_cube_side.png'
+    texture_path3 = scipt_path + '/resources/images/texture_cube_4.png'
     output_path = '/tmp/cube_example.dae'
     print("This will create a demo mapping of a cube in ", output_path, " using the renderer from: ", texture_path)
 
@@ -130,11 +131,24 @@ def _generate_cube_example():
 
     cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
+    # Create Cam4
+
+    location = [4.28, 3.58, 2.91]
+    rotation = [-119, 178, -47.8]
+    focal_length = 35
+    sensor_width = 32
+    sensor_height = 18
+    screen_width = 1920
+    screen_height = 1080
+
+    cam4 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+
     # Create textures
 
     texture1 = Texture(texture_path, cam1)
     texture2 = Texture(texture_path, cam2)
     texture3 = Texture(texture_path2, cam3)
+    texture4 = Texture(texture_path3, cam4)
 
     # Create model
 
@@ -204,5 +218,5 @@ def _generate_cube_example():
     model.normal_indices = normal_indices
 
     # Create Mapper
-    mapper = Mapper([texture1, texture2, texture3], model, 40, 20, output_path, "Cube")
+    mapper = Mapper([texture1, texture2, texture3, texture4], model, 96, 54, output_path, "Cube")
     mapper.start_texture_mapping()

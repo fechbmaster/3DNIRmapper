@@ -2,6 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
+from nirmapper.exceptions import RenderError
 from nirmapper.renderer.camera import Camera
 
 
@@ -19,6 +20,11 @@ class Renderer(object):
         :return Tuple[np.ndarray, np.ndarray, np.ndarray]: Returns a tuple of the visible vertices,
         their indices depending on the indices of the vertices and their counts
         """
+        aspect_ratio_cam = cam.resolution_x / cam.resolution_y
+        aspect_ratio_buffer = buffer_size_x / buffer_size_y
+        if aspect_ratio_cam != aspect_ratio_buffer:
+            raise RenderError("Ratio of cam must be the same as the buffer size.")
+
         render_cam = \
             Camera(cam.focal_length_in_mm, buffer_size_x, buffer_size_y, cam.sensor_width_in_mm,
                    cam.sensor_height_in_mm, cam.cam_location_xyz, cam.cam_euler_rotation,

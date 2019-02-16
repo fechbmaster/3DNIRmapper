@@ -112,7 +112,7 @@ class TestMapper(TestCase):
         model.normal_indices = normal_indices
 
         # Create Mapper
-        self.mapper = Mapper([texture1, texture2], model, 40, 20, "/tmp/test.dae", "TestCube")
+        self.mapper = Mapper([texture1, texture2], model, 96, 54, "/tmp/test.dae", "TestCube")
 
     def test_visibility_analysis(self):
         exp_vis_ids1 = [5, 11]
