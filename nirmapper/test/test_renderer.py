@@ -98,13 +98,15 @@ class TestRenderer(TestCase):
         visible_triangle_ids = np.array([5, 11])
         visible_triangle_counts = np.array([99, 96])
 
+        # Generate vertices sequence from describing indices
+        vert_sequence = np.array(self.model.vertices[self.model.indices.flatten()])
+        # Reshape the vert sequence to length/9x3x3 triangle Pairs
+        triangles = vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
+
         vis_verts, vis_ids, counts = \
-            self.renderer.get_visible_triangles(self.model.vertices,
-                                                self.model.indices,
+            self.renderer.get_visible_triangles(triangles,
                                                 self.cam,
                                                 buffer_resolution_x, buffer_resolution_y)
-
-        print(vis_verts)
 
         try:
             np.testing.assert_equal(vis_verts, visible_vertices)
