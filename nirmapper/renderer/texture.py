@@ -13,8 +13,8 @@ class Texture(object):
     __uv_indices = []
     __normal_indices = []
     counts = np.array([], dtype=int)
-    vis_triangle_ids = []
-    duplicate_triangle_ids = np.array([], dtype=int)
+    vis_triangle_indices = np.array([], dtype=int)
+    duplicate_triangle_indices = np.array([], dtype=int)
 
     def __init__(self, texture_path: string, cam: Camera):
         self.texture_path = texture_path
@@ -26,7 +26,7 @@ class Texture(object):
 
     @visible_vertices.setter
     def visible_vertices(self, visible_vertices: np.ndarray):
-        if visible_vertices is None or visible_vertices.size == 0:
+        if visible_vertices is None or np.size(visible_vertices) == 0:
             self.__visible_vertices = []
             return
         visible_vertices = self.__reshape(visible_vertices, 3)
@@ -38,7 +38,7 @@ class Texture(object):
 
     @verts_indices.setter
     def verts_indices(self, verts_indices: np.ndarray):
-        if verts_indices is None or verts_indices.size == 0:
+        if verts_indices is None or np.size(verts_indices) == 0:
             self.__vert_indices = []
             return
         visible_vertices = self.__reshape(verts_indices, 3)
@@ -50,7 +50,7 @@ class Texture(object):
 
     @uv_coords.setter
     def uv_coords(self, uv_coords: np.ndarray):
-        if uv_coords is None or uv_coords.size == 0:
+        if uv_coords is None or np.size(uv_coords) == 0:
             self.__uv_coords = []
             return
         # Reshape to get coords
@@ -63,7 +63,7 @@ class Texture(object):
 
     @uv_indices.setter
     def uv_indices(self, uv_indices: np.ndarray):
-        if uv_indices is None or uv_indices.size == 0:
+        if uv_indices is None or np.size(uv_indices) == 0:
             self.__uv_indices = []
             return
         self.__uv_indices = uv_indices
@@ -74,18 +74,25 @@ class Texture(object):
 
     @normal_indices.setter
     def normal_indices(self, normal_indices: np.ndarray):
-        if normal_indices is None or normal_indices.size == 0:
+        if normal_indices is None or np.size(normal_indices) == 0:
             self.__normal_indices = []
             return
         # Reshape to get coords
         normal_indices = self.__reshape(normal_indices, 3)
         self.__normal_indices = normal_indices
 
-    def remove_duplicate_data_at_triangle_id(self, triangle_id: int):
-        if triangle_id in self.vis_triangle_ids:
+    def remove_triangle_with_index(self, triangle_index: int):
+        if triangle_index in self.vis_triangle_indices:
             # Delete elements
-            idx = np.where(self.vis_triangle_ids == triangle_id)[0]
+            idx = list(self.vis_triangle_indices).index(triangle_index)
             self.__delete_triangle_at_index(idx)
+            self.remove_duplicate_with_index(triangle_index)
+
+    def remove_duplicate_with_index(self, triangle_index: int):
+        if triangle_index in self.duplicate_triangle_indices:
+            # Delete duplicate if there
+            idx = list(self.duplicate_triangle_indices).index(triangle_index)
+            self.duplicate_triangle_indices = np.delete(self.duplicate_triangle_indices, idx)
 
     def __delete_triangle_at_index(self, tri_idx: int):
         # Delete verts
@@ -100,11 +107,13 @@ class Texture(object):
         # Delete normal indices
         self.normal_indices = np.delete(self.normal_indices, tri_idx, axis=0)
         # Delete triangle id
-        self.vis_triangle_ids = np.delete(self.vis_triangle_ids, tri_idx)
+        self.vis_triangle_indices = np.delete(self.vis_triangle_indices, tri_idx)
+        # Delete counts
+        self.counts = np.delete(self.counts, tri_idx)
 
 
     @staticmethod
-    def __reshape(array: np.ndarray, vert_length: int) -> np.ndarray:
+    def __reshape(array, vert_length: int) -> np.ndarray:
         """
         Method reshapes an array depending on its length by giving the vertices length.
 
@@ -113,6 +122,7 @@ class Texture(object):
         :return: The reshaped array.
         """
         try:
+            array = np.array(array)
             return array.reshape([(array.size // vert_length), vert_length])
         except ValueError as e:
             raise TextureError(e)
