@@ -5,6 +5,7 @@ from nirmapper.model.colladaExporter import ColladaCreator
 from nirmapper.renderer.renderer import Renderer
 from nirmapper.renderer.texture import Texture
 from nirmapper.model.model import Model
+from nirmapper.utils import generate_triangle_sequence
 
 
 class Mapper(object):
@@ -24,10 +25,8 @@ class Mapper(object):
         self.output_path = output_path
         self.node_name = node_name
 
-        # Generate vertices sequence from describing indices
-        vert_sequence = np.array(model.vertices[model.indices.flatten()])
         # Reshape the vert sequence to length/9x3x3 triangle Pairs
-        self.triangles = vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
+        self.triangles = generate_triangle_sequence(model.vertices, model.indices)
 
     def start_texture_mapping(self):
         self.start_visibility_analysis()
@@ -38,8 +37,9 @@ class Mapper(object):
         print("Starting visibility analysis...")
         tmp_ids = np.array([])
         for idx, texture in enumerate(self.textures):
-            vis_vertices, ids, counts = self.renderer.get_visible_triangles(self.triangles, texture.cam,
-                                                                            self.buffer_x, self.buffer_y)
+            vis_vertices, ids, counts = \
+                self.renderer.get_visible_triangles(self.model.vertices, self.model.indices, texture.cam,
+                                                    self.buffer_x, self.buffer_y)
 
             # Set visible vertices
             texture.visible_vertices = vis_vertices

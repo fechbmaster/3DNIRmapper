@@ -4,16 +4,18 @@ import numpy as np
 
 from nirmapper.exceptions import RenderError
 from nirmapper.renderer.camera import Camera
+from nirmapper.utils import generate_triangle_sequence
 
 
 class Renderer(object):
 
     @staticmethod
-    def get_visible_triangles(triangles: np.ndarray, cam: Camera, buffer_size_x: int,
+    def get_visible_triangles(vertices: np.ndarray, indices: np.ndarray, cam: Camera, buffer_size_x: int,
                               buffer_size_y: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Method calculates the visible vertices by using a z-buffer approach
-        :param np.ndarray triangles: The triangles to check
+        :param vertices: The vertices to check.
+        :param indices: The indices of the vertices
         :param np.ndarray cam: The camera that should be used for the visiblity analysis
         :param int buffer_size_x: Z-buffer width
         :param int buffer_size_y: Z-Buffer height
@@ -29,18 +31,23 @@ class Renderer(object):
             Camera(cam.focal_length_in_mm, buffer_size_x, buffer_size_y, cam.sensor_width_in_mm,
                    cam.sensor_height_in_mm, cam.cam_location_xyz, cam.cam_euler_rotation,
                    cam.cam_quat_rotation)
-        z_buffer = Renderer.create_z_buffer(triangles, render_cam)
+
+        z_buffer = Renderer.create_z_buffer(vertices, indices, render_cam)
         ind_indices = np.array(z_buffer[:, :, 0]).astype(int)
         ind_indices, counts = np.unique(ind_indices[ind_indices > -1], return_counts=True)
+
+        triangles = generate_triangle_sequence(vertices, indices)
+
         vis_vertices = triangles[ind_indices]
         vis_vertices = vis_vertices.reshape(vis_vertices.size // 3, 3)
         return vis_vertices, ind_indices, counts
 
     @staticmethod
-    def create_z_buffer(triangles: np.ndarray, render_camera: Camera) -> np.ndarray:
+    def create_z_buffer(vertices: np.ndarray, indices: np.ndarray, render_camera: Camera) -> np.ndarray:
         """
         Method builds up a z-buffer
-        :param np.ndarray triangles: The triangles in shape (x, 3, 3)
+        :param vertices: The vertices.
+        :param indices: The indices of the vertices.
         :param Camera render_camera: The render camera
         :return np.ndarray: The z-buffer
         """
@@ -48,6 +55,8 @@ class Renderer(object):
         buffer_height = render_camera.resolution_y
 
         z_buffer = np.full([buffer_width, buffer_height, 2], [-1, np.inf])
+
+        triangles = generate_triangle_sequence(vertices, indices)
 
         for idx, triangle in enumerate(triangles):
             included_pixels = Renderer.rasterize(triangle, render_camera)
