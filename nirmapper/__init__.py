@@ -18,7 +18,7 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    #_generate_cube_example()
+    # _generate_cube_example()
     _generate_tooth_example()
 
 
@@ -112,7 +112,7 @@ def _generate_tooth_example():
     model = models[0]
 
     # Create Mapper
-    mapper = Mapper([texture1, texture4, texture8, texture11, texture19], model, 1280 * 2, 1024 * 2,
+    mapper = Mapper([texture1], model, 1280 // 8, 1024 // 8,
                     output_path, "Tooth")
     mapper.start_texture_mapping()
 

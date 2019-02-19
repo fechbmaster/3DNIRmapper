@@ -1,10 +1,12 @@
-import numpy as np
+import time
 from typing import List, Union
 
+import numpy as np
+
 from nirmapper.model.colladaExporter import ColladaCreator
+from nirmapper.model.model import Model
 from nirmapper.renderer.renderer import Renderer
 from nirmapper.renderer.texture import Texture
-from nirmapper.model.model import Model
 from nirmapper.utils import generate_triangle_sequence
 
 
@@ -28,12 +30,23 @@ class Mapper(object):
         self.triangles = generate_triangle_sequence(model.vertices, model.indices)
 
     def start_texture_mapping(self):
+        print("Starting visibility analysis...")
+        start = time.time()
         self.start_visibility_analysis()
+        end = time.time()
+        duration = end - start
+        print("Finished visibility analysis. Time exceeded: ", duration)
+        print("Cleaning up duplicates...")
+        start = time.time()
         self.clean_duplicates()
+        end = time.time()
+        duration = end - start
+        print("Finished cleaning up duplicates. Time exceeded: ", duration)
+        print("Exporting textured model to: ", self.output_path)
         self.export_textured_model()
+        print("Finished - have a nice day!")
 
     def start_visibility_analysis(self):
-        print("Starting visibility analysis...")
         tmp_ids = np.array([], dtype=int)
         for idx, texture in enumerate(self.textures):
             vis_vertices, ids, counts = \
@@ -66,12 +79,10 @@ class Mapper(object):
             # Set multiple textured triangles
             tmp_ids = np.append(tmp_ids, ids)
 
-        print("Finished visibility analysis...")
         # Set the list of all ids
         self.__set_duplicate_ids(tmp_ids)
 
     def clean_duplicates(self):
-        print("Cleaning up duplicates...")
         self.set_duplicates_for_textures()
 
         for id in self.duplicate_ids:
@@ -84,7 +95,6 @@ class Mapper(object):
                     texture.remove_triangle_with_index(id)
 
         self.duplicate_ids = []
-        print("Finished cleaning up duplicates...")
 
     def set_duplicates_for_textures(self):
         # Set the duplicates for the textures
@@ -106,10 +116,8 @@ class Mapper(object):
         return np.argmax(counts)
 
     def export_textured_model(self):
-        print("Exporting textured model to: ", self.output_path)
         ColladaCreator.create_collada_from_model_with_textures(self.model, self.textures, self.output_path,
                                                                self.node_name)
-        print("Finished - have a nice day!")
 
     def __set_duplicate_ids(self, id_list):
         s = np.sort(np.array([id_list]), axis=None)
