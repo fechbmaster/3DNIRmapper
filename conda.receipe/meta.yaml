@@ -1,23 +1,19 @@
 package:
   name: nirmapper
-  version: "v1.0"
+  version: "v1.1"
 
 source:
-  git_rev: v1.0
   git_url: https://github.com/fechbmaster/3DNIRmapper.git
 
 
 requirements:
   build:
     - python
-    - setuptools
+    - numpy
+    - pip
   run:
     - python
     - numpy
-
-test:
-  imports:
-    - nirmapper
 
 about:
   home: https://github.com/fechbmaster/3DNIRmapper
