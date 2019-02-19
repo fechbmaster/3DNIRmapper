@@ -1,4 +1,5 @@
 import ntpath
+import os
 import shutil
 from typing import Tuple, List
 
@@ -39,6 +40,8 @@ class ColladaCreator(object):
             if texture.visible_vertices is None or np.size(texture.visible_vertices) == 0:
                 textures = np.delete(textures, idx)
 
+        # Generate data structure
+        output_path = ColladaCreator.__create_subfolder_at_output_path(output_path, node_name + 'MappedCollada')
         ColladaCreator.__copy_textures_output_path(textures, output_path)
 
         combined_uvs = np.array([])
@@ -221,7 +224,12 @@ class ColladaCreator(object):
             file_name = ntpath.basename(texture.texture_path)
             shutil.copy2(texture.texture_path, output_path + file_name)
 
-
+    @staticmethod
+    def __create_subfolder_at_output_path(output_path: str, folder_name: str):
+        compbined_path = output_path + folder_name
+        if not os.path.exists(compbined_path):
+            os.makedirs(compbined_path)
+        return compbined_path + '/'
 
     @staticmethod
     def __generate_faces(model: Model, ignore_uvs: bool = False) -> Tuple[np.ndarray, List[IndicesFormat]]:
