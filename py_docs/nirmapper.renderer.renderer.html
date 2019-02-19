@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module nirmapper.renderer.renderer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="nirmapper.html"><font color="#ffffff">nirmapper</font></a>.<a href="nirmapper.renderer.html"><font color="#ffffff">renderer</font></a>.renderer</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href="..">index</a><br><a href="file:/home/fechb/PycharmProjects/3DNIRmapper/nirmapper/renderer/renderer.py">/home/fechb/PycharmProjects/3DNIRmapper/nirmapper/renderer/renderer.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="nirmapper.renderer.renderer.html#Renderer">Renderer</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Renderer">class <strong>Renderer</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Static methods defined here:<br>
+<dl><dt><a name="Renderer-barycentric"><strong>barycentric</strong></a>(p, text_coords:numpy.ndarray) -&gt; bool</dt><dd><tt>Barycentric&nbsp;coordinates&nbsp;help&nbsp;to&nbsp;check&nbsp;if&nbsp;a&nbsp;pixel&nbsp;is&nbsp;inside&nbsp;a&nbsp;triangle.<br>
+:param&nbsp;p:&nbsp;The&nbsp;Pixel&nbsp;to&nbsp;check&nbsp;for&nbsp;inclusion<br>
+:param&nbsp;np.ndarray&nbsp;text_coords:&nbsp;The&nbsp;texture&nbsp;coordinates&nbsp;of&nbsp;the&nbsp;triangle<br>
+:return&nbsp;bool:&nbsp;True&nbsp;if&nbsp;inside&nbsp;-&nbsp;False&nbsp;if&nbsp;outside&nbsp;of&nbsp;triangle</tt></dd></dl>
+
+<dl><dt><a name="Renderer-create_z_buffer"><strong>create_z_buffer</strong></a>(vertices:numpy.ndarray, indices:numpy.ndarray, render_camera:nirmapper.renderer.camera.Camera) -&gt; numpy.ndarray</dt><dd><tt>Method&nbsp;builds&nbsp;up&nbsp;a&nbsp;z-buffer<br>
+:param&nbsp;vertices:&nbsp;The&nbsp;vertices.<br>
+:param&nbsp;indices:&nbsp;The&nbsp;indices&nbsp;of&nbsp;the&nbsp;vertices.<br>
+:param&nbsp;Camera&nbsp;render_camera:&nbsp;The&nbsp;render&nbsp;camera<br>
+:return&nbsp;np.ndarray:&nbsp;The&nbsp;z-buffer</tt></dd></dl>
+
+<dl><dt><a name="Renderer-get_bounding_box_coords_for_triangle"><strong>get_bounding_box_coords_for_triangle</strong></a>(text_coords:numpy.ndarray) -&gt; numpy.ndarray</dt><dd><tt>Method&nbsp;builds&nbsp;a&nbsp;bounding&nbsp;box&nbsp;around&nbsp;a&nbsp;triangle<br>
+:param&nbsp;np.array&nbsp;text_coords:&nbsp;The&nbsp;texture&nbsp;coordinates&nbsp;of&nbsp;the&nbsp;triangle<br>
+:return&nbsp;np.ndarray:&nbsp;The&nbsp;bounding&nbsp;box&nbsp;as&nbsp;array</tt></dd></dl>
+
+<dl><dt><a name="Renderer-get_visible_triangles"><strong>get_visible_triangles</strong></a>(vertices:numpy.ndarray, indices:numpy.ndarray, cam:nirmapper.renderer.camera.Camera, buffer_size_x:int, buffer_size_y:int) -&gt; Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]</dt><dd><tt>Method&nbsp;calculates&nbsp;the&nbsp;visible&nbsp;vertices&nbsp;by&nbsp;using&nbsp;a&nbsp;z-buffer&nbsp;approach<br>
+:param&nbsp;vertices:&nbsp;The&nbsp;vertices&nbsp;to&nbsp;check.<br>
+:param&nbsp;indices:&nbsp;The&nbsp;indices&nbsp;of&nbsp;the&nbsp;vertices<br>
+:param&nbsp;np.ndarray&nbsp;cam:&nbsp;The&nbsp;camera&nbsp;that&nbsp;should&nbsp;be&nbsp;used&nbsp;for&nbsp;the&nbsp;visiblity&nbsp;analysis<br>
+:param&nbsp;int&nbsp;buffer_size_x:&nbsp;Z-buffer&nbsp;width<br>
+:param&nbsp;int&nbsp;buffer_size_y:&nbsp;Z-Buffer&nbsp;height<br>
+:return&nbsp;Tuple[np.ndarray,&nbsp;np.ndarray,&nbsp;np.ndarray]:&nbsp;Returns&nbsp;a&nbsp;tuple&nbsp;of&nbsp;the&nbsp;visible&nbsp;vertices,<br>
+their&nbsp;indices&nbsp;depending&nbsp;on&nbsp;the&nbsp;indices&nbsp;of&nbsp;the&nbsp;vertices&nbsp;and&nbsp;their&nbsp;counts</tt></dd></dl>
+
+<dl><dt><a name="Renderer-rasterize"><strong>rasterize</strong></a>(vertices:numpy.ndarray, renderer_cam:nirmapper.renderer.camera.Camera) -&gt; numpy.ndarray</dt><dd><tt>Method&nbsp;rasterizes&nbsp;given&nbsp;vertices&nbsp;in&nbsp;their&nbsp;including&nbsp;pixels<br>
+:param&nbsp;np.ndarray&nbsp;vertices:&nbsp;The&nbsp;3&nbsp;vertices&nbsp;of&nbsp;the&nbsp;triangle<br>
+:param&nbsp;Cam&nbsp;renderer_cam:&nbsp;The&nbsp;render&nbsp;camera<br>
+:return&nbsp;np.ndarray:&nbsp;Array&nbsp;of&nbsp;visible&nbsp;pixels&nbsp;in&nbsp;triangle</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

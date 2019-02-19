@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module nirmapper.model.colladaExporter</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="nirmapper.html"><font color="#ffffff">nirmapper</font></a>.<a href="nirmapper.model.html"><font color="#ffffff">model</font></a>.colladaExporter</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href="..">index</a><br><a href="file:/home/fechb/PycharmProjects/3DNIRmapper/nirmapper/model/colladaExporter.py">/home/fechb/PycharmProjects/3DNIRmapper/nirmapper/model/colladaExporter.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="collada.asset.html">collada.asset</a><br>
+<a href="collada.geometry.html">collada.geometry</a><br>
+<a href="collada.material.html">collada.material</a><br>
+</td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+<a href="ntpath.html">ntpath</a><br>
+<a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="collada.scene.html">collada.scene</a><br>
+<a href="shutil.html">shutil</a><br>
+<a href="collada.source.html">collada.source</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="nirmapper.model.colladaExporter.html#ColladaCreator">ColladaCreator</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ColladaCreator">class <strong>ColladaCreator</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;creator&nbsp;class&nbsp;for&nbsp;Collada&nbsp;files.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Static methods defined here:<br>
+<dl><dt><a name="ColladaCreator-create_collada_from_model"><strong>create_collada_from_model</strong></a>(model:nirmapper.data.model.Model, output_path:str, node_name:str, texture_path:str=None) -&gt; None</dt><dd><tt>Create&nbsp;a&nbsp;Collada&nbsp;file&nbsp;out&nbsp;of&nbsp;an&nbsp;model.<br>
+&nbsp;<br>
+:param&nbsp;model:&nbsp;The&nbsp;model.<br>
+:param&nbsp;texture_path:&nbsp;Path&nbsp;of&nbsp;the&nbsp;texture.<br>
+:param&nbsp;output_path:&nbsp;Path&nbsp;where&nbsp;collada&nbsp;file&nbsp;should&nbsp;be&nbsp;stored.<br>
+:param&nbsp;node_name:&nbsp;The&nbsp;name&nbsp;of&nbsp;the&nbsp;node,&nbsp;the&nbsp;<a href="builtins.html#object">object</a>&nbsp;should&nbsp;carry&nbsp;later.</tt></dd></dl>
+
+<dl><dt><a name="ColladaCreator-create_collada_from_model_with_textures"><strong>create_collada_from_model_with_textures</strong></a>(model:nirmapper.data.model.Model, textures:List[nirmapper.data.texture.Texture], output_path, node_name:str) -&gt; None</dt><dd><tt>Create&nbsp;a&nbsp;Collada&nbsp;file&nbsp;out&nbsp;of&nbsp;an&nbsp;model&nbsp;and&nbsp;textures.<br>
+:param&nbsp;model:&nbsp;The&nbsp;model.<br>
+:param&nbsp;textures:&nbsp;Texture&nbsp;list<br>
+:param&nbsp;output_path:&nbsp;Path&nbsp;where&nbsp;collada&nbsp;file&nbsp;should&nbsp;be&nbsp;stored.<br>
+:param&nbsp;node_name:&nbsp;The&nbsp;name&nbsp;of&nbsp;the&nbsp;node,&nbsp;the&nbsp;<a href="builtins.html#object">object</a>&nbsp;should&nbsp;carry&nbsp;later.</tt></dd></dl>
+
+<dl><dt><a name="ColladaCreator-get_plain_model_geomnode"><strong>get_plain_model_geomnode</strong></a>(mesh:collada.Collada, model:nirmapper.data.model.Model, source_list:List[collada.source.FloatSource], mat_id:int) -&gt; collada.scene.GeometryNode</dt><dd><tt>Method&nbsp;returns&nbsp;a&nbsp;plain&nbsp;model&nbsp;with&nbsp;the&nbsp;default&nbsp;material.&nbsp;Can&nbsp;be&nbsp;used&nbsp;to&nbsp;combine&nbsp;the&nbsp;texture&nbsp;geoms&nbsp;with&nbsp;this&nbsp;plain&nbsp;one.<br>
+:param&nbsp;Collada&nbsp;mesh:&nbsp;The&nbsp;Collada&nbsp;mesh.<br>
+:param&nbsp;Model&nbsp;model:&nbsp;The&nbsp;model.<br>
+:param&nbsp;List[source.FloatSource]&nbsp;source_list:&nbsp;The&nbsp;list&nbsp;with&nbsp;the&nbsp;FloatSource.<br>
+:param&nbsp;int&nbsp;mat_id:&nbsp;The&nbsp;id&nbsp;of&nbsp;the&nbsp;material.<br>
+:return&nbsp;scene.GeometryNode:&nbsp;The&nbsp;geomnode&nbsp;of&nbsp;the&nbsp;plain&nbsp;model.</tt></dd></dl>
+
+<dl><dt><a name="ColladaCreator-insert_plain_material_to_mesh"><strong>insert_plain_material_to_mesh</strong></a>(mesh:collada.Collada, id:int) -&gt; Tuple[collada.material.Material, str]</dt><dd><tt>Method&nbsp;inserts&nbsp;a&nbsp;plain&nbsp;material&nbsp;to&nbsp;the&nbsp;Collada&nbsp;mesh.<br>
+:param&nbsp;Collada&nbsp;mesh:&nbsp;The&nbsp;Collada&nbsp;mesh.<br>
+:param&nbsp;int&nbsp;id:&nbsp;The&nbsp;material&nbsp;id.<br>
+:return&nbsp;Tuple[material.Material,&nbsp;str]:&nbsp;Returns&nbsp;a&nbsp;material.Material&nbsp;and&nbsp;the&nbsp;identifier&nbsp;as&nbsp;string.</tt></dd></dl>
+
+<dl><dt><a name="ColladaCreator-insert_texture_material_to_mesh"><strong>insert_texture_material_to_mesh</strong></a>(mesh:collada.Collada, texture_path:str, id:int) -&gt; Tuple[collada.material.Material, str]</dt><dd><tt>Method&nbsp;inserts&nbsp;a&nbsp;texture&nbsp;as&nbsp;material&nbsp;to&nbsp;the&nbsp;Collada&nbsp;mesh.<br>
+:param&nbsp;Collada&nbsp;mesh:&nbsp;The&nbsp;Collada&nbsp;mesh.<br>
+:param&nbsp;str&nbsp;texture_path:&nbsp;The&nbsp;path&nbsp;of&nbsp;the&nbsp;texture.<br>
+:param&nbsp;int&nbsp;id:&nbsp;The&nbsp;material&nbsp;id.<br>
+:return&nbsp;Tuple[material.Material,&nbsp;str]:&nbsp;Returns&nbsp;a&nbsp;material.Material&nbsp;and&nbsp;the&nbsp;identifier&nbsp;as&nbsp;string.</tt></dd></dl>
+
+<dl><dt><a name="ColladaCreator-write_out_geomnodes"><strong>write_out_geomnodes</strong></a>(mesh:collada.Collada, geomnodes:List[collada.scene.GeometryNode], output_path:str, node_name:str) -&gt; None</dt><dd><tt>Method&nbsp;writes&nbsp;out&nbsp;geomnodes&nbsp;to&nbsp;an&nbsp;ouput&nbsp;path.<br>
+:param&nbsp;Collada&nbsp;mesh:&nbsp;The&nbsp;Collada&nbsp;mesh.<br>
+:param&nbsp;&nbsp;List[scene.GeometryNode]&nbsp;geomnodes:<br>
+:param&nbsp;str&nbsp;output_path:&nbsp;The&nbsp;output&nbsp;path.<br>
+:param&nbsp;str&nbsp;node_name:&nbsp;The&nbsp;name&nbsp;of&nbsp;the&nbsp;node.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>
