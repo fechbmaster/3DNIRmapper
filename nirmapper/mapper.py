@@ -1,3 +1,4 @@
+import multiprocessing
 import time
 from typing import List, Union
 
@@ -29,10 +30,10 @@ class Mapper(object):
         # Reshape the vert sequence to length/9x3x3 triangle Pairs
         self.triangles = generate_triangle_sequence(model.vertices, model.indices)
 
-    def start_texture_mapping(self):
+    def start_texture_mapping(self, mutli_threaded = True):
         print("Starting visibility analysis...")
         start = time.time()
-        self.start_visibility_analysis()
+        self.start_visibility_analysis(mutli_threaded)
         end = time.time()
         duration = end - start
         print("Finished visibility analysis. Time exceeded: ", duration)
@@ -46,41 +47,65 @@ class Mapper(object):
         self.export_textured_model()
         print("Finished - have a nice day!")
 
-    def start_visibility_analysis(self):
+    def start_visibility_analysis(self, multi_threaded = True):
         tmp_ids = np.array([], dtype=int)
-        for idx, texture in enumerate(self.textures):
-            vis_vertices, ids, counts = \
-                self.renderer.get_visible_triangles(self.model.vertices, self.model.indices, texture.cam,
-                                                    self.buffer_x, self.buffer_y)
+        if multi_threaded:
+            manager = multiprocessing.Manager()
+            return_dict = manager.dict()
+            thread_list = []
+            for idx, texture in enumerate(self.textures):
+                p = multiprocessing.Process(target=self.__start_parallel_visibility_analysis_for_texture, args=(texture, idx, return_dict))
+                thread_list.append(p)
+            for p in thread_list:
+                p.start()
+            for p in thread_list:
+                p.join()
 
-            # Set visible vertices
-            texture.visible_vertices = vis_vertices
+            self.textures = return_dict.values()
+        else:
+            for texture in self.textures:
+                self.start_visibility_analysis_for_texture(texture)
 
-            # Set vertex indices
-            texture.verts_indices = self.model.indices[ids]
-
-            # Set normal indices
-            if np.size(self.model.normals) > 0:
-                texture.normal_indices = self.model.normal_indices[ids]
-
-            # Set uv coords
-            uv_coords = texture.cam.get_texture_coords_for_vertices(vis_vertices)
-            texture.uv_coords = uv_coords
-
-            # Set uv indices -> these are just indices of the uv_coords array
-            texture.arange_uv_indices()
-
-            # Set counts
-            texture.counts = counts
-
-            # Set triangle ids
-            texture.vis_triangle_indices = ids
-
+        for texture in self.textures:
             # Set multiple textured triangles
-            tmp_ids = np.append(tmp_ids, ids)
+            tmp_ids = np.append(tmp_ids, texture.vis_triangle_indices)
 
         # Set the list of all ids
         self.__set_duplicate_ids(tmp_ids)
+
+    def __start_parallel_visibility_analysis_for_texture(self,texture: Texture, i: int, return_dict):
+        result = self.start_visibility_analysis_for_texture(texture)
+        return_dict[i] = result
+
+    def start_visibility_analysis_for_texture(self, texture: Texture) -> Texture:
+        vis_vertices, ids, counts = \
+            self.renderer.get_visible_triangles(self.model.vertices, self.model.indices, texture.cam,
+                                                self.buffer_x, self.buffer_y)
+
+        # Set visible vertices
+        texture.visible_vertices = vis_vertices
+
+        # Set vertex indices
+        texture.verts_indices = self.model.indices[ids]
+
+        # Set normal indices
+        if np.size(self.model.normals) > 0:
+            texture.normal_indices = self.model.normal_indices[ids]
+
+        # Set uv coords
+        uv_coords = texture.cam.get_texture_coords_for_vertices(vis_vertices)
+        texture.uv_coords = uv_coords
+
+        # Set uv indices -> these are just indices of the uv_coords array
+        texture.arange_uv_indices()
+
+        # Set counts
+        texture.counts = counts
+
+        # Set triangle ids
+        texture.vis_triangle_indices = ids
+
+        return texture
 
     def clean_duplicates(self):
         self.set_duplicates_for_textures()
