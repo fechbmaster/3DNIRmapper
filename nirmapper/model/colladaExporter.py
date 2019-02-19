@@ -36,22 +36,20 @@ class ColladaCreator(object):
 
         vertices = model.vertices
         normals = model.normals
-        combined_uvs = np.array([])
-        ind_offset = 0
 
         for idx, texture in enumerate(textures):
             if texture.visible_vertices is None or np.size(texture.visible_vertices) == 0:
                 textures = np.delete(textures, idx)
 
+        combined_uvs = np.array([])
         for texture in textures:
+            start_index = np.size(combined_uvs) // 2
+            texture.arange_uv_indices(start_index)
             combined_uvs = np.append(combined_uvs, texture.uv_coords)
-            texture.uv_indices = texture.uv_indices + ind_offset
-            ind_offset = texture.uv_indices.size
+
 
         # === Define sources ===
-        source_list = []
-        # vertices
-        source_list.append(source.FloatSource("verts-array", np.array(vertices), ('X', 'Y', 'Z')))
+        source_list = [source.FloatSource("verts-array", np.array(vertices), ('X', 'Y', 'Z'))]
         # normals
         if np.size(normals) > 0:
             source_list.append(source.FloatSource("normals-array", np.array(normals), ('X', 'Y', 'Z')))

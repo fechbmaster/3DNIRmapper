@@ -21,3 +21,8 @@ class ModelError(Exception):
 class TextureError(Exception):
     def __init__(self, message):
         super().__init__(message)
+
+
+class RenderError(Exception):
+    def __init__(self, message):
+        super().__init__(message)

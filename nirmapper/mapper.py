@@ -5,13 +5,13 @@ from nirmapper.model.colladaExporter import ColladaCreator
 from nirmapper.renderer.renderer import Renderer
 from nirmapper.renderer.texture import Texture
 from nirmapper.model.model import Model
+from nirmapper.utils import generate_triangle_sequence
 
 
 class Mapper(object):
     """The Mapper class is responsible for mapping coordinates from textures to the model.
 
     """
-    all_ids = np.array([], dtype=int)
     duplicate_ids = np.array([], dtype=int)
 
     def __init__(self, textures: Union[List[Texture], Texture], model: Model, buffer_dim_width: int,
@@ -24,10 +24,8 @@ class Mapper(object):
         self.output_path = output_path
         self.node_name = node_name
 
-        # Generate vertices sequence from describing indices
-        vert_sequence = np.array(model.vertices[model.indices.flatten()])
         # Reshape the vert sequence to length/9x3x3 triangle Pairs
-        self.triangles = vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
+        self.triangles = generate_triangle_sequence(model.vertices, model.indices)
 
     def start_texture_mapping(self):
         self.start_visibility_analysis()
@@ -36,10 +34,11 @@ class Mapper(object):
 
     def start_visibility_analysis(self):
         print("Starting visibility analysis...")
-        tmp_ids = np.array([])
+        tmp_ids = np.array([], dtype=int)
         for idx, texture in enumerate(self.textures):
-            vis_vertices, ids, counts = self.renderer.get_visible_triangles(self.triangles, texture.cam,
-                                                                            self.buffer_x, self.buffer_y)
+            vis_vertices, ids, counts = \
+                self.renderer.get_visible_triangles(self.model.vertices, self.model.indices, texture.cam,
+                                                    self.buffer_x, self.buffer_y)
 
             # Set visible vertices
             texture.visible_vertices = vis_vertices
@@ -56,49 +55,54 @@ class Mapper(object):
             texture.uv_coords = uv_coords
 
             # Set uv indices -> these are just indices of the uv_coords array
-            texture.uv_indices = np.arange(texture.uv_coords.size // 2)
+            texture.arange_uv_indices()
 
             # Set counts
             texture.counts = counts
 
             # Set triangle ids
-            texture.vis_triangle_ids = ids
+            texture.vis_triangle_indices = ids
 
             # Set multiple textured triangles
             tmp_ids = np.append(tmp_ids, ids)
 
         print("Finished visibility analysis...")
         # Set the list of all ids
-        self.all_ids = tmp_ids
+        self.__set_duplicate_ids(tmp_ids)
 
     def clean_duplicates(self):
         print("Cleaning up duplicates...")
-        self.duplicate_ids = self.__get_duplicate_ids(self.all_ids)
-
-        # Set the duplicates for the textures
-        for texture in self.textures:
-            dub_ids = np.array(np.where(np.in1d(self.duplicate_ids, texture.vis_triangle_ids)))
-            dub_ids = dub_ids.flatten()
-            texture.duplicate_triangle_ids = self.duplicate_ids[dub_ids]
+        self.set_duplicates_for_textures()
 
         for id in self.duplicate_ids:
-            best_text_idx = self.__get_best_texture_for_id(id)
+            best_texture_idx = self.get_best_texture_for_duplicate_triangle(id)
             for idx, texture in enumerate(self.textures):
-                if idx != best_text_idx:
+                if idx == best_texture_idx:
+                    texture.remove_duplicate_with_index(id)
+                else:
                     # Remove the unwanted data
-                    texture.remove_duplicate_data_at_triangle_id(id)
-            self.duplicate_ids = np.delete(self.duplicate_ids, 0)
+                    texture.remove_triangle_with_index(id)
 
+        self.duplicate_ids = []
         print("Finished cleaning up duplicates...")
 
-    def __get_best_texture_for_id(self, id: int):
+    def set_duplicates_for_textures(self):
+        # Set the duplicates for the textures
+        for texture in self.textures:
+            dub_ids = np.array(np.where(np.in1d(self.duplicate_ids, texture.vis_triangle_indices)), dtype=int)
+            dub_ids = dub_ids.flatten()
+            texture.duplicate_triangle_indices = self.duplicate_ids[dub_ids]
+
+    def get_best_texture_for_duplicate_triangle(self, triangle_index: int):
         counts = []
         for texture in self.textures:
-            index = np.where(texture.duplicate_triangle_ids == id)
-            if np.size(index) == 0:
-                counts.append(0)
-            else:
+            try:
+                index = list(texture.vis_triangle_indices).index(triangle_index)
                 counts.append(texture.counts[index])
+            except ValueError:
+                counts.append(0)
+
+        # Return first texture id with best count
         return np.argmax(counts)
 
     def export_textured_model(self):
@@ -107,7 +111,8 @@ class Mapper(object):
                                                                self.node_name)
         print("Finished - have a nice day!")
 
-    @staticmethod
-    def __get_duplicate_ids(id_list) -> np.ndarray:
+    def __set_duplicate_ids(self, id_list):
         s = np.sort(np.array([id_list]), axis=None)
-        return s[:-1][s[1:] == s[:-1]]
+        s = np.array(s[:-1][s[1:] == s[:-1]], dtype=int)
+
+        self.duplicate_ids = np.unique(s)

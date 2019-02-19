@@ -3,6 +3,7 @@ from unittest import TestCase
 import numpy as np
 
 from nirmapper import Camera, Model
+from nirmapper.exceptions import RenderError
 from nirmapper.renderer.renderer import Renderer
 
 
@@ -86,8 +87,8 @@ class TestRenderer(TestCase):
 
     def test_get_visible_triangles(self):
         # downscale for faster testing
-        buffer_resolution_x = 40
-        buffer_resolution_y = 20
+        buffer_resolution_x = 96
+        buffer_resolution_y = 54
 
         visible_vertices = np.array([[1, 1, -1],
                                      [-1, 1, 1],
@@ -96,15 +97,10 @@ class TestRenderer(TestCase):
                                      [-1, 1, -1],
                                      [-1, 1, 1]])
         visible_triangle_ids = np.array([5, 11])
-        visible_triangle_counts = np.array([99, 96])
-
-        # Generate vertices sequence from describing indices
-        vert_sequence = np.array(self.model.vertices[self.model.indices.flatten()])
-        # Reshape the vert sequence to length/9x3x3 triangle Pairs
-        triangles = vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
+        visible_triangle_counts = np.array([667, 665])
 
         vis_verts, vis_ids, counts = \
-            self.renderer.get_visible_triangles(triangles,
+            self.renderer.get_visible_triangles(self.model.vertices, self.model.indices,
                                                 self.cam,
                                                 buffer_resolution_x, buffer_resolution_y)
 
@@ -119,7 +115,7 @@ class TestRenderer(TestCase):
         self.assertTrue(res)
 
     def test_rasterize(self):
-        triangle = np.array([
+        triangle_vertices = np.array([
             [1, 1, 1],
             [0.99, 1, 1],
             [1, 1, 0.99]
@@ -142,7 +138,7 @@ class TestRenderer(TestCase):
                              [614, 190]])
 
         try:
-            np.testing.assert_equal(self.renderer.rasterize(triangle, self.cam), expected)
+            np.testing.assert_equal(self.renderer.rasterize(triangle_vertices, self.cam), expected)
             res = True
         except AssertionError as err:
             res = False
@@ -150,7 +146,7 @@ class TestRenderer(TestCase):
         self.assertTrue(res)
 
     def test_barycentric(self):
-        triangle = np.array([
+        triangle_text_coords = np.array([
             [0, 0],
             [2, 0],
             [0, 2]
@@ -160,11 +156,11 @@ class TestRenderer(TestCase):
         p_inside2 = [2, 0]
         p_outside = [2, 2]
 
-        self.assertTrue(self.renderer.barycentric(p_inside1, triangle))
-        self.assertTrue(self.renderer.barycentric(p_inside2, triangle))
-        self.assertFalse(self.renderer.barycentric(p_outside, triangle))
+        self.assertTrue(self.renderer.barycentric(p_inside1, triangle_text_coords))
+        self.assertTrue(self.renderer.barycentric(p_inside2, triangle_text_coords))
+        self.assertFalse(self.renderer.barycentric(p_outside, triangle_text_coords))
 
-        triangle2 = np.array([
+        triangle_text_coords2 = np.array([
             [12, 16],
             [27, 16],
             [27, 3]
@@ -172,9 +168,9 @@ class TestRenderer(TestCase):
 
         p_inside3 = [27, 3]
 
-        self.assertTrue(self.renderer.barycentric(p_inside3, triangle2))
+        self.assertTrue(self.renderer.barycentric(p_inside3, triangle_text_coords2))
 
-        triangle3 = np.array([
+        triangle_text_coords3 = np.array([
             [13, 16],
             [27, 4],
             [13, 4]
@@ -183,11 +179,11 @@ class TestRenderer(TestCase):
         p_inside4 = [18, 4]
         p_inside5 = [13, 16]
 
-        self.assertTrue(self.renderer.barycentric(p_inside4, triangle3))
-        self.assertTrue(self.renderer.barycentric(p_inside5, triangle3))
+        self.assertTrue(self.renderer.barycentric(p_inside4, triangle_text_coords3))
+        self.assertTrue(self.renderer.barycentric(p_inside5, triangle_text_coords3))
 
     def test_get_bounding_box_coords_for_triangle(self):
-        triangle = np.array([
+        triangle_text_coords = np.array([
             [1, 0],
             [2, 0],
             [1, 2]
@@ -203,14 +199,14 @@ class TestRenderer(TestCase):
         ])
 
         try:
-            np.testing.assert_equal(self.renderer.get_bounding_box_coords_for_triangle(triangle), expected)
+            np.testing.assert_equal(self.renderer.get_bounding_box_coords_for_triangle(triangle_text_coords), expected)
             res = True
         except AssertionError as err:
             res = False
             print(err)
         self.assertTrue(res)
 
-        triangle_2 = np.array([
+        triangle_text_coords2 = np.array([
             [0, 0],
             [2, 0],
             [0, 2]
@@ -229,9 +225,26 @@ class TestRenderer(TestCase):
         ])
 
         try:
-            np.testing.assert_equal(self.renderer.get_bounding_box_coords_for_triangle(triangle_2), expected_2)
+            np.testing.assert_equal(self.renderer.get_bounding_box_coords_for_triangle(triangle_text_coords2),
+                                    expected_2)
             res = True
         except AssertionError as err:
             res = False
             print(err)
         self.assertTrue(res)
+
+    def test_wrong_ratio(self):
+        with self.assertRaises(RenderError) as context:
+            # downscale for faster testing
+            buffer_resolution_x = 40
+            buffer_resolution_y = 20
+
+            # Generate vertices sequence from describing indices
+            vert_sequence = np.array(self.model.vertices[self.model.indices.flatten()])
+            # Reshape the vert sequence to length/9x3x3 triangle Pairs
+            triangles = vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
+
+            self.renderer.get_visible_triangles(self.model.vertices, self.model.indices, self.cam, buffer_resolution_x,
+                                                buffer_resolution_y)
+
+        self.assertTrue('Wrong ratio set: ', context)

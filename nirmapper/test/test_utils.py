@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from nirmapper.utils import euler_angles_to_rotation_matrix, quaternion_matrix
+from nirmapper.utils import euler_angles_to_rotation_matrix, quaternion_matrix, generate_triangle_sequence
 
 
 class TestUtils(TestCase):
@@ -44,8 +44,8 @@ class TestUtils(TestCase):
                                    [0.0, 1.0, 0.0]])
 
         try:
-            np.testing.assert_almost_equal(euler_angles_to_rotation_matrix(rotation_three).round(decimals=4),
-                                           expected_three)
+            np.testing.assert_equal(euler_angles_to_rotation_matrix(rotation_three).round(decimals=4),
+                                    expected_three)
             res = True
         except AssertionError as err:
             res = False
@@ -61,7 +61,28 @@ class TestUtils(TestCase):
             [0.0, 1.0, 0.0]])
 
         try:
-            np.testing.assert_almost_equal(quaternion_matrix(rotation), expected)
+            np.testing.assert_equal(quaternion_matrix(rotation), expected)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
+
+    def test_generate_triangles(self):
+        indices = [0, 1, 2, 2, 1, 0]
+        vertices = np.array([
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8]
+        ])
+
+        expected = np.array([
+            [[0, 1, 2], [3, 4, 5], [6, 7, 8]],
+            [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
+        ])
+
+        try:
+            np.testing.assert_equal(generate_triangle_sequence(vertices, indices), expected)
             res = True
         except AssertionError as err:
             res = False

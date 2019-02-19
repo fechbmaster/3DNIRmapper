@@ -12,8 +12,7 @@ class TestMapper(TestCase):
     def setUp(self):
         scipt_path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
         texture_path = scipt_path + '/resources/images/texture_cube.png'
-        output_path = '/tmp/cube_example.dae'
-        print("This will create a demo mapping of a cube in ", output_path, " using the renderer from: ", texture_path)
+        output_path = '/tmp/mapper_test.dae'
 
         # Create Cam1
 
@@ -112,7 +111,7 @@ class TestMapper(TestCase):
         model.normal_indices = normal_indices
 
         # Create Mapper
-        self.mapper = Mapper([texture1, texture2], model, 40, 20, "/tmp/test.dae", "TestCube")
+        self.mapper = Mapper([texture1, texture2], model, 96, 54, "/tmp/test.dae", "TestCube")
 
     def test_visibility_analysis(self):
         exp_vis_ids1 = [5, 11]
@@ -121,8 +120,8 @@ class TestMapper(TestCase):
         self.mapper.start_visibility_analysis()
 
         try:
-            np.testing.assert_equal(self.mapper.textures[0].vis_triangle_ids, exp_vis_ids1)
-            np.testing.assert_equal(self.mapper.textures[1].vis_triangle_ids, exp_vis_ids2)
+            np.testing.assert_equal(self.mapper.textures[0].vis_triangle_indices, exp_vis_ids1)
+            np.testing.assert_equal(self.mapper.textures[1].vis_triangle_indices, exp_vis_ids2)
             res = True
         except AssertionError as err:
             res = False
@@ -151,3 +150,106 @@ class TestMapper(TestCase):
             res = False
             print(err)
         self.assertTrue(res)
+
+    def test_clean_duplicates(self):
+        # Create Cam3
+
+        location = [4.28, 3.58, 0]
+        rotation = [-90, 180, -52.2]
+        focal_length = 35
+        sensor_width = 32
+        sensor_height = 18
+        screen_width = 1920
+        screen_height = 1080
+
+        cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+
+        texture3 = Texture('/fake_texture.png', cam3)
+        self.mapper.textures.append(texture3)
+        self.mapper.start_visibility_analysis()
+        self.mapper.clean_duplicates()
+
+        expected_tri_ids_0 = [5, 11]
+        expected_tri_ids_1 = [8]
+        expected_tri_ids_2 = [2]
+
+        try:
+            np.testing.assert_equal(self.mapper.textures[0].vis_triangle_indices, expected_tri_ids_0)
+            np.testing.assert_equal(self.mapper.textures[1].vis_triangle_indices, expected_tri_ids_1)
+            np.testing.assert_equal(self.mapper.textures[2].vis_triangle_indices, expected_tri_ids_2)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
+
+        try:
+            np.testing.assert_equal(self.mapper.textures[0].duplicate_triangle_indices, [])
+            np.testing.assert_equal(self.mapper.textures[1].duplicate_triangle_indices, [])
+            np.testing.assert_equal(self.mapper.textures[2].duplicate_triangle_indices, [])
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
+
+    def test_set_duplicates_for_textures(self):
+        # Create Cam3
+
+        location = [4.28, 3.58, 0]
+        rotation = [-90, 180, -52.2]
+        focal_length = 35
+        sensor_width = 32
+        sensor_height = 18
+        screen_width = 1920
+        screen_height = 1080
+
+        cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+
+        texture3 = Texture('/fake_texture.png', cam3)
+        self.mapper.textures.append(texture3)
+
+        self.mapper.start_visibility_analysis()
+        self.mapper.set_duplicates_for_textures()
+
+        expected_dups_0 = [5, 11]
+        expected_dups_1 = [2, 8]
+        expected_dups_2 = [2, 5, 8, 11]
+
+        try:
+            np.testing.assert_equal(self.mapper.textures[0].duplicate_triangle_indices, expected_dups_0)
+            np.testing.assert_equal(self.mapper.textures[1].duplicate_triangle_indices, expected_dups_1)
+            np.testing.assert_equal(self.mapper.textures[2].duplicate_triangle_indices, expected_dups_2)
+            res = True
+        except AssertionError as err:
+            res = False
+            print(err)
+        self.assertTrue(res)
+
+    def test_get_best_texture_for_id(self):
+        # Create Cam3
+
+        location = [4.28, 3.58, 0]
+        rotation = [-90, 180, -52.2]
+        focal_length = 35
+        sensor_width = 32
+        sensor_height = 18
+        screen_width = 1920
+        screen_height = 1080
+
+        cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+
+        texture3 = Texture('/fake_texture.png', cam3)
+        self.mapper.textures.append(texture3)
+
+        self.mapper.start_visibility_analysis()
+        self.mapper.set_duplicates_for_textures()
+
+        self.assertEqual(self.mapper.get_best_texture_for_duplicate_triangle(2), 2,
+                         "Best Texture for triangle 2 is at index 2")
+        self.assertEqual(self.mapper.get_best_texture_for_duplicate_triangle(8), 1,
+                         "Best Texture for triangle 8 is at index 1")
+        self.assertEqual(self.mapper.get_best_texture_for_duplicate_triangle(5), 0,
+                         "Best Texture for triangle 5 is at index 0")
+        self.assertEqual(self.mapper.get_best_texture_for_duplicate_triangle(11), 0,
+                         "Best Texture for triangle 11 is at index 0")
