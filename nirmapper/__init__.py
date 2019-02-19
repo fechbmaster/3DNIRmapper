@@ -103,6 +103,8 @@ def _generate_tooth_example():
     texture14 = Texture(texture_path14, cam14)
     texture19 = Texture(texture_path19, cam19)
 
+    # Import Model
+
     print("Starting model import...")
     models = Wavefront.import_obj_as_model_list(prepend_dir('resources/models/4_downsized_adjusted.obj'))
     print("Finished model import...")
@@ -110,7 +112,8 @@ def _generate_tooth_example():
     model = models[0]
 
     # Create Mapper
-    mapper = Mapper([texture1, texture4, texture8, texture11, texture14, texture19], model, 1280 * 2, 1024 * 2, output_path, "Tooth")
+    mapper = Mapper([texture1, texture4, texture8, texture11, texture19], model, 1280 * 2, 1024 * 2,
+                    output_path, "Tooth")
     mapper.start_texture_mapping()
 
 
@@ -119,6 +122,8 @@ def _generate_cube_example():
     texture_path = scipt_path + '/resources/images/texture_cube.png'
     texture_path2 = scipt_path + '/resources/images/texture_cube_side.png'
     texture_path3 = scipt_path + '/resources/images/texture_cube_4.png'
+    texture_path4 = scipt_path + '/resources/images/texture_cube_5.png'
+    texture_path5 = scipt_path + '/resources/images/texture_cube_6.png'
     output_path = '/tmp/cube_example.dae'
     print("This will create a demo mapping of a cube in ", output_path, " using the renderer from: ", texture_path)
 
@@ -138,11 +143,6 @@ def _generate_cube_example():
 
     location = [7, 0, 0]
     rotation = [-90, 180, -90]
-    focal_length = 35
-    sensor_width = 32
-    sensor_height = 18
-    screen_width = 1920
-    screen_height = 1080
 
     cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
@@ -150,11 +150,6 @@ def _generate_cube_example():
 
     location = [4.28, 3.58, 0]
     rotation = [-90, 180, -52.2]
-    focal_length = 35
-    sensor_width = 32
-    sensor_height = 18
-    screen_width = 1920
-    screen_height = 1080
 
     cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
@@ -162,13 +157,22 @@ def _generate_cube_example():
 
     location = [4.28, 3.58, 2.91]
     rotation = [-119, 178, -47.8]
-    focal_length = 35
-    sensor_width = 32
-    sensor_height = 18
-    screen_width = 1920
-    screen_height = 1080
 
     cam4 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+
+    # Create Cam5
+
+    location = [5.45, -3.34, 2.91]
+    rotation = [-116, 184, -118]
+
+    cam5 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+
+    # Create Cam6
+
+    location = [-5, -5.14, 2.91]
+    rotation = [-113, 180, -223]
+
+    cam6 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create textures
 
@@ -176,6 +180,8 @@ def _generate_cube_example():
     texture2 = Texture(texture_path, cam2)
     texture3 = Texture(texture_path2, cam3)
     texture4 = Texture(texture_path3, cam4)
+    texture5 = Texture(texture_path4, cam5)
+    texture6 = Texture(texture_path5, cam6)
 
     # Create model
 
@@ -245,5 +251,5 @@ def _generate_cube_example():
     model.normal_indices = normal_indices
 
     # Create Mapper
-    mapper = Mapper([texture1, texture2, texture3, texture4], model, 96, 54, output_path, "Cube")
+    mapper = Mapper([texture1, texture2, texture3, texture4, texture5, texture6], model, 96, 54, output_path, "Cube")
     mapper.start_texture_mapping()
