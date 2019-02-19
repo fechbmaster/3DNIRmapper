@@ -5,7 +5,7 @@ import numpy as np
 import pywavefront
 
 from nirmapper.exceptions import WavefrontError
-from nirmapper.model.model import Model
+from nirmapper.data.model import Model
 from nirmapper.utils import quaternion_matrix
 
 

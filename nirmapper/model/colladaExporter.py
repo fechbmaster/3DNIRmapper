@@ -7,9 +7,9 @@ import numpy as np
 from collada import Collada, material, source, geometry, scene, asset
 
 from nirmapper.exceptions import ColladaError
-from nirmapper.model.model import Model
+from nirmapper.data.model import Model
 from nirmapper.model.wavefrontImporter import IndicesFormat
-from nirmapper.renderer.texture import Texture
+from nirmapper.data.texture import Texture
 
 
 class ColladaCreator(object):

@@ -5,10 +5,10 @@ import numpy as np
 
 from nirmapper.mapper import Mapper
 from nirmapper.model.colladaExporter import ColladaCreator
-from nirmapper.model.model import Model
+from nirmapper.data.model import Model
 from nirmapper.model.wavefrontImporter import Wavefront, IndicesFormat
 from nirmapper.renderer.renderer import Renderer
-from nirmapper.renderer.texture import Texture, Camera
+from nirmapper.data.texture import Texture, Camera
 
 
 def prepend_dir(file):

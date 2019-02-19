@@ -4,10 +4,10 @@ from typing import List, Union
 
 import numpy as np
 
+from nirmapper.data.model import Model
+from nirmapper.data.texture import Texture
 from nirmapper.model.colladaExporter import ColladaCreator
-from nirmapper.model.model import Model
 from nirmapper.renderer.renderer import Renderer
-from nirmapper.renderer.texture import Texture
 from nirmapper.utils import generate_triangle_sequence
 
 
@@ -30,7 +30,7 @@ class Mapper(object):
         # Reshape the vert sequence to length/9x3x3 triangle Pairs
         self.triangles = generate_triangle_sequence(model.vertices, model.indices)
 
-    def start_texture_mapping(self, mutli_threaded = True):
+    def start_texture_mapping(self, mutli_threaded=True):
         print("Starting visibility analysis...")
         start = time.time()
         self.start_visibility_analysis(mutli_threaded)
@@ -47,21 +47,23 @@ class Mapper(object):
         self.export_textured_model()
         print("Finished - have a nice day!")
 
-    def start_visibility_analysis(self, multi_threaded = True):
+    def start_visibility_analysis(self, multi_threaded=True):
         tmp_ids = np.array([], dtype=int)
         if multi_threaded:
             manager = multiprocessing.Manager()
             return_dict = manager.dict()
             thread_list = []
             for idx, texture in enumerate(self.textures):
-                p = multiprocessing.Process(target=self.__start_parallel_visibility_analysis_for_texture, args=(texture, idx, return_dict))
+                p = multiprocessing.Process(target=self.__start_parallel_visibility_analysis_for_texture,
+                                            args=(texture, idx, return_dict))
                 thread_list.append(p)
             for p in thread_list:
                 p.start()
             for p in thread_list:
                 p.join()
 
-            self.textures = return_dict.values()
+            for idx, texture in enumerate(self.textures):
+                self.textures[idx] = return_dict.get(idx)
         else:
             for texture in self.textures:
                 self.start_visibility_analysis_for_texture(texture)
@@ -73,7 +75,7 @@ class Mapper(object):
         # Set the list of all ids
         self.__set_duplicate_ids(tmp_ids)
 
-    def __start_parallel_visibility_analysis_for_texture(self,texture: Texture, i: int, return_dict):
+    def __start_parallel_visibility_analysis_for_texture(self, texture: Texture, i: int, return_dict):
         result = self.start_visibility_analysis_for_texture(texture)
         return_dict[i] = result
 
