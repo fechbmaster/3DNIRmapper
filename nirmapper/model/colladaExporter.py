@@ -1,3 +1,5 @@
+import ntpath
+import shutil
 from typing import Tuple, List
 
 import numpy as np
@@ -37,6 +39,8 @@ class ColladaCreator(object):
             if texture.visible_vertices is None or np.size(texture.visible_vertices) == 0:
                 textures = np.delete(textures, idx)
 
+        ColladaCreator.__copy_textures_output_path(textures, output_path)
+
         combined_uvs = np.array([])
         for texture in textures:
             start_index = np.size(combined_uvs) // 2
@@ -61,7 +65,7 @@ class ColladaCreator(object):
         geom = geometry.Geometry(mesh, "geometry0", "geometry0", source_list)
 
         for i, texture in enumerate(textures):
-            mat, mat_id = ColladaCreator.insert_texture_material_to_mesh(mesh, texture.texture_path, i)
+            mat, mat_id = ColladaCreator.insert_texture_material_to_mesh(mesh, ntpath.basename(texture.texture_path), i)
 
             # Set input list
             input_list = source.InputList()
@@ -210,6 +214,14 @@ class ColladaCreator(object):
         mesh.scene = myscene
 
         mesh.write(output_path + node_name + ".dae")
+
+    @staticmethod
+    def __copy_textures_output_path(textures: List[Texture], output_path: str):
+        for texture in textures:
+            file_name = ntpath.basename(texture.texture_path)
+            shutil.copy2(texture.texture_path, output_path + file_name)
+
+
 
     @staticmethod
     def __generate_faces(model: Model, ignore_uvs: bool = False) -> Tuple[np.ndarray, List[IndicesFormat]]:
