@@ -18,8 +18,8 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    # _generate_cube_example()
-    _generate_tooth_example()
+    _generate_cube_example()
+    #_generate_tooth_example()
 
 
 def _generate_tooth_example():
@@ -33,7 +33,7 @@ def _generate_tooth_example():
     texture_path19 = prepend_dir('resources/images/texture_19_adjusted.bmp')
 
     # Define output path
-    output_path = '/tmp/MappedNIR.dae'
+    output_path = '/tmp/'
 
     # Cam 1
 
@@ -124,8 +124,7 @@ def _generate_cube_example():
     texture_path3 = scipt_path + '/resources/images/texture_cube_4.png'
     texture_path4 = scipt_path + '/resources/images/texture_cube_5.png'
     texture_path5 = scipt_path + '/resources/images/texture_cube_6.png'
-    output_path = '/tmp/cube_example.dae'
-    print("This will create a demo mapping of a cube in ", output_path, " using the renderer from: ", texture_path)
+    output_path = '/tmp/'
 
     # Create Cam1
 

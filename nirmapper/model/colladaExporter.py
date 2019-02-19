@@ -1,13 +1,12 @@
-from copy import copy
 from typing import Tuple, List
 
 import numpy as np
 from collada import Collada, material, source, geometry, scene, asset
 
-from nirmapper.renderer.texture import Texture
 from nirmapper.exceptions import ColladaError
 from nirmapper.model.model import Model
 from nirmapper.model.wavefrontImporter import IndicesFormat
+from nirmapper.renderer.texture import Texture
 
 
 class ColladaCreator(object):
@@ -29,9 +28,6 @@ class ColladaCreator(object):
         axis = asset.UP_AXIS.Z_UP
         mesh.assetInfo.upaxis = axis
 
-        # Insert plain material
-        plain_mat, plain_mat_id = ColladaCreator.insert_plain_material_to_mesh(mesh, 0)
-
         # Define data for 3d model
 
         vertices = model.vertices
@@ -47,7 +43,6 @@ class ColladaCreator(object):
             texture.arange_uv_indices(start_index)
             combined_uvs = np.append(combined_uvs, texture.uv_coords)
 
-
         # === Define sources ===
         source_list = [source.FloatSource("verts-array", np.array(vertices), ('X', 'Y', 'Z'))]
         # normals
@@ -55,37 +50,18 @@ class ColladaCreator(object):
             source_list.append(source.FloatSource("normals-array", np.array(normals), ('X', 'Y', 'Z')))
         source_list.append(source.FloatSource("uv_array", np.array(combined_uvs), ('S', 'T')))
 
-        # === Define plain geometry ===
-        plain_geom = geometry.Geometry(mesh, "mesh1-geometry", "mesh1-geometry", source_list)
+        # Add plain model to see uncolored triangles
+        # plain_geomnode = ColladaCreator.get_plain_model_geomnode(mesh, model, source_list, 0)
 
-        # === Define input list for plain model ===
-        plain_input_list = source.InputList()
-        plain_input_list.addInput(0, 'VERTEX', "#verts-array")
-        if np.size(normals) > 0:
-            plain_input_list.addInput(1, 'NORMAL', "#normals-array")
-
-        # === Define plain faces ===
-        faces, formats = ColladaCreator.__generate_faces(model, True)
-
-        # === Create plain triset ===
-        plain_triset = plain_geom.createTriangleSet(faces, plain_input_list, plain_mat_id)
-
-        # === Combine to geomnode
-        plain_geom.primitives.append(plain_triset)
-        # mesh.geometries.append(plain_geom)
-        plain_matnode = scene.MaterialNode(plain_mat_id, plain_mat, inputs=[])
-        plain_geomnode = scene.GeometryNode(plain_geom, [plain_matnode])
-
-        geomnode_list = [plain_geomnode]
+        geomnode_list = []
+        # geomnode_list.append(plain_geomnode)
         matnode_list = []
 
         # Set geom for textured verts
-        geom = geometry.Geometry(mesh, "geometry1", "geometry1", source_list)
+        geom = geometry.Geometry(mesh, "geometry0", "geometry0", source_list)
 
         for i, texture in enumerate(textures):
-            # i+1 because plain model uses id 0
-            id = i + 1
-            mat, mat_id = ColladaCreator.insert_texture_material_to_mesh(mesh, texture.texture_path, id)
+            mat, mat_id = ColladaCreator.insert_texture_material_to_mesh(mesh, texture.texture_path, i)
 
             # Set input list
             input_list = source.InputList()
@@ -112,17 +88,42 @@ class ColladaCreator(object):
             matnode_list.append(matnode)
 
         # Set geomnode
+        mesh.geometries.append(geom)
         geomnode = scene.GeometryNode(geom, matnode_list)
         geomnode_list.append(geomnode)
 
-        mesh.geometries.append(geom)
-        node = scene.Node(node_name, children=geomnode_list)
+        ColladaCreator.write_out_geomnodes(mesh, geomnode_list, output_path, node_name)
 
-        myscene = scene.Scene("scene0", [node])
-        mesh.scenes.append(myscene)
-        mesh.scene = myscene
+    @staticmethod
+    def get_plain_model_geomnode(mesh: Collada, model: Model, source_list: List[source.FloatSource],
+                                 mat_id: int) -> scene.GeometryNode:
+        # Create plain material
+        plain_mat, plain_mat_id = ColladaCreator.insert_plain_material_to_mesh(mesh, mat_id)
 
-        mesh.write(output_path)
+        # Create plain input list
+
+        # === Define input list for plain model ===
+        plain_input_list = source.InputList()
+        plain_input_list.addInput(0, 'VERTEX', "#verts-array")
+        if np.size(model.normals) > 0:
+            plain_input_list.addInput(1, 'NORMAL', "#normals-array")
+
+        # === Define plain geometry ===
+        plain_geom = geometry.Geometry(mesh, "mesh1-geometry", "mesh1-geometry", source_list)
+
+        # === Define plain faces ===
+        faces, formats = ColladaCreator.__generate_faces(model, True)
+
+        # === Create plain triset ===
+        plain_triset = plain_geom.createTriangleSet(faces, plain_input_list, plain_mat_id)
+
+        # === Combine to geomnode
+        plain_geom.primitives.append(plain_triset)
+        mesh.geometries.append(plain_geom)
+        plain_matnode = scene.MaterialNode(plain_mat_id, plain_mat, inputs=[])
+        plain_geomnode = scene.GeometryNode(plain_geom, [plain_matnode])
+
+        return plain_geomnode
 
     @staticmethod
     def insert_texture_material_to_mesh(mesh: Collada, texture_path: str, id: int) -> Tuple[material.Material, str]:
@@ -197,13 +198,18 @@ class ColladaCreator(object):
 
         matnode = scene.MaterialNode(mat_identifier, mat, inputs=[])
         geomnode = scene.GeometryNode(geom, [matnode])
-        node = scene.Node(node_name, children=[geomnode])
+
+        ColladaCreator.write_out_geomnodes(mesh, [geomnode], output_path, node_name)
+
+    @staticmethod
+    def write_out_geomnodes(mesh: Collada, geomnodes: List[scene.GeometryNode], output_path: str, node_name: str):
+        node = scene.Node(node_name, children=geomnodes)
 
         myscene = scene.Scene("scene0", [node])
         mesh.scenes.append(myscene)
         mesh.scene = myscene
 
-        mesh.write(output_path)
+        mesh.write(output_path + node_name + ".dae")
 
     @staticmethod
     def __generate_faces(model: Model, ignore_uvs: bool = False) -> Tuple[np.ndarray, List[IndicesFormat]]:
