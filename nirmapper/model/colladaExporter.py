@@ -104,6 +104,14 @@ class ColladaCreator(object):
     @staticmethod
     def get_plain_model_geomnode(mesh: Collada, model: Model, source_list: List[source.FloatSource],
                                  mat_id: int) -> scene.GeometryNode:
+        """
+        Method returns a plain model with the default material. Can be used to combine the texture geoms with this plain one.
+        :param Collada mesh: The Collada mesh.
+        :param Model model: The model.
+        :param List[source.FloatSource] source_list: The list with the FloatSource.
+        :param int mat_id: The id of the material.
+        :return scene.GeometryNode: The geomnode of the plain model.
+        """
         # Create plain material
         plain_mat, plain_mat_id = ColladaCreator.insert_plain_material_to_mesh(mesh, mat_id)
 
@@ -134,6 +142,13 @@ class ColladaCreator(object):
 
     @staticmethod
     def insert_texture_material_to_mesh(mesh: Collada, texture_path: str, id: int) -> Tuple[material.Material, str]:
+        """
+        Method inserts a texture as material to the Collada mesh.
+        :param Collada mesh: The Collada mesh.
+        :param str texture_path: The path of the texture.
+        :param int id: The material id.
+        :return Tuple[material.Material, str]: Returns a material.Material and the identifier as string.
+        """
         # needed for renderer
         image = material.CImage("material_%d-image" % id, texture_path)
         surface = material.Surface("material_%d-image-surface" % id, image)
@@ -153,6 +168,12 @@ class ColladaCreator(object):
 
     @staticmethod
     def insert_plain_material_to_mesh(mesh: Collada, id: int) -> Tuple[material.Material, str]:
+        """
+        Method inserts a plain material to the Collada mesh.
+        :param Collada mesh: The Collada mesh.
+        :param int id: The material id.
+        :return Tuple[material.Material, str]: Returns a material.Material and the identifier as string.
+        """
         effect = material.Effect("effect%d" % id, [], "phong", diffuse=(0, 0, 0), specular=(0, 0, 0))
         mat = material.Material("material_%d_ID" % id, "material_%d" % id, effect)
         mesh.effects.append(effect)
@@ -209,7 +230,15 @@ class ColladaCreator(object):
         ColladaCreator.write_out_geomnodes(mesh, [geomnode], output_path, node_name)
 
     @staticmethod
-    def write_out_geomnodes(mesh: Collada, geomnodes: List[scene.GeometryNode], output_path: str, node_name: str):
+    def write_out_geomnodes(mesh: Collada, geomnodes: List[scene.GeometryNode], output_path: str,
+                            node_name: str) -> None:
+        """
+        Method writes out geomnodes to an ouput path.
+        :param Collada mesh: The Collada mesh.
+        :param  List[scene.GeometryNode] geomnodes:
+        :param str output_path: The output path.
+        :param str node_name: The name of the node.
+        """
         node = scene.Node(node_name, children=geomnodes)
 
         myscene = scene.Scene("scene0", [node])
@@ -219,13 +248,25 @@ class ColladaCreator(object):
         mesh.write(output_path + node_name + ".dae")
 
     @staticmethod
-    def __copy_textures_output_path(textures: List[Texture], output_path: str):
+    def __copy_textures_output_path(textures: List[Texture], output_path: str) -> None:
+        """
+        Method copys textures to an output path.
+        :param List[Texture] textures: The tetures to copy.
+        :param output_path: The output path.
+        :return None
+        """
         for texture in textures:
             file_name = ntpath.basename(texture.texture_path)
             shutil.copy2(texture.texture_path, output_path + file_name)
 
     @staticmethod
-    def __create_subfolder_at_output_path(output_path: str, folder_name: str):
+    def __create_subfolder_at_output_path(output_path: str, folder_name: str) -> str:
+        """
+        Method creates a subfolder at output path.
+        :param str output_path: The path where the subfolder should be created.
+        :param str folder_name: The name of the subfoolder
+        :return str: The combined subfolder path.
+        """
         compbined_path = output_path + folder_name
         if not os.path.exists(compbined_path):
             os.makedirs(compbined_path)
