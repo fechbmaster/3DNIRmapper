@@ -6,10 +6,10 @@ from typing import Tuple, List
 import numpy as np
 from collada import Collada, material, source, geometry, scene, asset
 
-from nirmapper.exceptions import ColladaError
 from nirmapper.data.model import Model
-from nirmapper.model.wavefrontImporter import IndicesFormat
 from nirmapper.data.texture import Texture
+from nirmapper.exceptions import ColladaError
+from nirmapper.model.wavefrontImporter import IndicesFormat
 
 
 class ColladaCreator(object):

@@ -78,6 +78,11 @@ class Texture(object):
         self.__normal_indices = normal_indices
 
     def remove_triangle_with_index(self, triangle_index: int):
+        """
+        Removes triangle data if triangle_index is in visible triangle indices list.
+        :param int triangle_index: The index of the triangle.
+        :return None:
+        """
         if triangle_index in self.vis_triangle_indices:
             # Delete elements
             idx = list(self.vis_triangle_indices).index(triangle_index)
@@ -85,6 +90,11 @@ class Texture(object):
             self.remove_duplicate_with_index(triangle_index)
 
     def remove_duplicate_with_index(self, triangle_index: int):
+        """
+        Removes the duplciate triangle at triangle_index.
+        :param triangle_index: The index to remove.
+        :return None:
+        """
         if triangle_index in self.duplicate_triangle_indices:
             # Delete duplicate if there
             idx = list(self.duplicate_triangle_indices).index(triangle_index)
@@ -106,7 +116,6 @@ class Texture(object):
         self.vis_triangle_indices = np.delete(self.vis_triangle_indices, tri_idx)
         # Delete counts
         self.counts = np.delete(self.counts, tri_idx)
-
 
     @staticmethod
     def __reshape(array, vert_length: int) -> np.ndarray:

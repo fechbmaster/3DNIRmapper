@@ -30,7 +30,11 @@ class Mapper(object):
         # Reshape the vert sequence to length/9x3x3 triangle Pairs
         self.triangles = generate_triangle_sequence(model.vertices, model.indices)
 
-    def start_texture_mapping(self, mutli_threaded=True):
+    def start_texture_mapping(self, mutli_threaded: bool = True):
+        """
+        Overall Method that starts visibility analysis, duplication cleaning and exporting.
+        :param bool mutli_threaded: Multiprocessing on or of
+        """
         print("Starting visibility analysis...")
         start = time.time()
         self.start_visibility_analysis(mutli_threaded)
@@ -48,6 +52,10 @@ class Mapper(object):
         print("Finished - have a nice day!")
 
     def start_visibility_analysis(self, multi_threaded=True):
+        """
+        Method starts visibility analysis.
+        :param bool mutli_threaded: Multiprocessing on or of
+        """
         tmp_ids = np.array([], dtype=int)
         if multi_threaded:
             manager = multiprocessing.Manager()
@@ -80,6 +88,11 @@ class Mapper(object):
         return_dict[i] = result
 
     def start_visibility_analysis_for_texture(self, texture: Texture) -> Texture:
+        """
+        Sets the texture variables depending on visibility analysis.
+        :param Texture texture: The texture to perform visibility analysis.
+        :return Texture: The final texture.
+        """
         vis_vertices, ids, counts = \
             self.renderer.get_visible_triangles(self.model.vertices, self.model.indices, texture.cam,
                                                 self.buffer_x, self.buffer_y)
@@ -110,6 +123,9 @@ class Mapper(object):
         return texture
 
     def clean_duplicates(self):
+        """
+        Method cleans up duplicates by checking the pixel counts.
+        """
         self.set_duplicates_for_textures()
 
         for id in self.duplicate_ids:
@@ -124,6 +140,9 @@ class Mapper(object):
         self.duplicate_ids = []
 
     def set_duplicates_for_textures(self):
+        """
+        Sets the duplicates of the textures.
+        """
         # Set the duplicates for the textures
         for texture in self.textures:
             dub_ids = np.array(np.where(np.in1d(self.duplicate_ids, texture.vis_triangle_indices)), dtype=int)
@@ -131,6 +150,11 @@ class Mapper(object):
             texture.duplicate_triangle_indices = self.duplicate_ids[dub_ids]
 
     def get_best_texture_for_duplicate_triangle(self, triangle_index: int):
+        """
+        Method checks which texture is best for triangle.
+        :param int triangle_index: Index of the triangle.
+        :return int: Index of the texture in self.textures.
+        """
         counts = []
         for texture in self.textures:
             try:
@@ -143,6 +167,10 @@ class Mapper(object):
         return np.argmax(counts)
 
     def export_textured_model(self):
+        """
+        Method starts export.
+        :return:
+        """
         ColladaCreator.create_collada_from_model_with_textures(self.model, self.textures, self.output_path,
                                                                self.node_name)
 

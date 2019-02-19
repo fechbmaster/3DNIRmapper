@@ -4,8 +4,8 @@ from typing import List
 import numpy as np
 import pywavefront
 
-from nirmapper.exceptions import WavefrontError
 from nirmapper.data.model import Model
+from nirmapper.exceptions import WavefrontError
 from nirmapper.utils import quaternion_matrix
 
 
@@ -194,15 +194,3 @@ class IndicesFormatter(object):
         :return: An array of indices, The format of the indices.
         """
         return np.arange(0, length)
-
-    # def get_indices_for_format(self, ind_format: IndicesFormat, indices: np.ndarray) -> np.ndarray:
-    #     """
-    #     Gets the indices that describes coordinates by a format.
-    #
-    #     :param indices: The indices list
-    #     :param ind_format: The format of the indices.
-    #     :return: The indices for the format.
-    #     """
-    #     index = self.formats.index(ind_format)
-    #
-    #     return indices[:, [index]]
