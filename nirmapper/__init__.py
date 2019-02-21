@@ -3,12 +3,12 @@ import os
 
 import numpy as np
 
+from nirmapper.data.model import Model
+from nirmapper.data.texture import Texture, Camera
 from nirmapper.mapper import Mapper
 from nirmapper.model.colladaExporter import ColladaCreator
-from nirmapper.data.model import Model
 from nirmapper.model.wavefrontImporter import Wavefront, IndicesFormat
 from nirmapper.renderer.renderer import Renderer
-from nirmapper.data.texture import Texture, Camera
 
 
 def prepend_dir(file):
@@ -18,9 +18,9 @@ def prepend_dir(file):
 def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
-    # _generate_cube_example()
+    _generate_cube_example()
     # _generate_tooth_example()
-    _generate_elephant_example()
+    # _generate_elephant_example()
 
 
 def _generate_tooth_example():
@@ -39,7 +39,6 @@ def _generate_tooth_example():
     # Cam 1
 
     location = np.array([-1.22, 1.21, 9.8])
-    rotation_euler = np.array([-8, 20.2, 85.2])
     rotation_quat = np.array([0.715, -0.169, 0.082, 0.674])
     focal_length = 35
     sensor_width = 32
@@ -47,53 +46,42 @@ def _generate_tooth_example():
     screen_width = 1280
     screen_height = 1024
 
-    cam1 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
-                  rotation_quat)
+    cam1 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_quat)
 
     # Cam 4
 
     location = np.array([9.8, 1.2, 1.22])
-    rotation_euler = np.array([83.6, 7.29, 110])
     rotation_quat = np.array([0.461, 0.342, 0.572, 0.585])
 
-    cam4 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
-                  rotation_quat)
+    cam4 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_quat)
 
     # Cam 8
 
     location = np.array([-1.41, -0.64, -9.89])
-    rotation_euler = np.array([187, -9.41, 86.6])
     rotation_quat = np.array([-0.103, 0.720, 0.686, 0.016])
 
-    cam8 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
-                  rotation_quat)
+    cam8 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_quat)
 
     # Cam 11
 
     location = np.array([-9.88, 0, -1.69])
-    rotation_euler = np.array([259, 360, 76.4])
     rotation_quat = np.array([0.5, -0.606, -0.478, 0.392])
 
-    cam11 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
-                   rotation_quat)
+    cam11 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_quat)
 
     # Cam 14
 
     location = np.array([-2.47, 0.08, 9.77])
-    rotation_euler = np.array([347, -347, 84.5])
     rotation_quat = np.array([0.721, -0.164, 0.007, 0.673])
 
-    cam14 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
-                   rotation_quat)
+    cam14 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_quat)
 
     # Cam 19
 
     location = np.array([2.39, 8.29, -4.38])
-    rotation_euler = np.array([-60.3, 238, -36.1])
     rotation_quat = np.array([-0.265, 0.467, 0.642, 0.548])
 
-    cam19 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
-                   rotation_quat)
+    cam19 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_quat)
 
     # Create textures
 
@@ -113,9 +101,9 @@ def _generate_tooth_example():
     model = models[0]
 
     # Create Mapper
-    mapper = Mapper([texture1, texture4, texture8, texture11], model, 1280 // 8, 1024 // 8,
-                    output_path, "Tooth")
-    mapper.start_texture_mapping()
+    texture_mapper = Mapper([texture1, texture4, texture8, texture11], model, 1280 // 8, 1024 // 8,
+                            output_path, "Tooth")
+    texture_mapper.start_texture_mapping()
 
 
 def _generate_elephant_example():
@@ -133,7 +121,6 @@ def _generate_elephant_example():
     # Cam 0
 
     location = np.array([7.2106, -6.4976, 5.3436])
-    rotation_euler = np.array([59, -2.86, 57.9])
     rotation_quat = np.array([0.755, 0.441, 0.219, 0.437])
     focal_length = 35
     sensor_width = 32
@@ -141,44 +128,35 @@ def _generate_elephant_example():
     screen_width = 1024
     screen_height = 768
 
-    cam0 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
-                  rotation_quat)
+    cam0 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_quat)
 
     # Cam 1
 
     location = np.array([-2.3297, -12.285, 2.0324])
-    rotation_euler = np.array([77.8, 1.98, -5.79])
     rotation_quat = np.array([0.776, 0.628, -0.018, -0.050])
 
-    cam1 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
-                  rotation_quat)
+    cam1 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_quat)
 
     # Cam 2
 
     location = np.array([-7.4062, -6.7939, 4.9206])
-    rotation_euler = np.array([59, -2.86, -46.3])
     rotation_quat = np.array([0.804, 0.444, -0.214, -0.332])
 
-    cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
-                  rotation_quat)
+    cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_quat)
 
     # Cam 3
 
     location = np.array([1.8513, -6.7936, 9.9944])
-    rotation_euler = np.array([31, 9.97, 13.1])
     rotation_quat = np.array([0.956, 0.255, 0.114, 0.086])
 
-    cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
-                  rotation_quat)
+    cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_quat)
 
     # Cam 4
 
     location = np.array([-2.3530, 12.018, 1.7597])
-    rotation_euler = np.array([77.8, 1.98, -169])
     rotation_quat = np.array([0.063, 0.073, -0.624, -0.775])
 
-    cam4 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
-                  rotation_quat)
+    cam4 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_quat)
 
     # Create textures
 
@@ -196,9 +174,9 @@ def _generate_elephant_example():
     model = models[0]
 
     # Create Mapper
-    mapper = Mapper([texture0, texture1, texture2, texture3, texture4], model, 1024 * 2, 768 * 2,
-                    output_path, "Elefant")
-    mapper.start_texture_mapping()
+    texture_mapper = Mapper([texture0, texture1, texture2, texture3, texture4], model, 1024 * 2, 768 * 2,
+                            output_path, "Elefant")
+    texture_mapper.start_texture_mapping()
 
 
 def _generate_cube_example():
@@ -213,7 +191,7 @@ def _generate_cube_example():
     # Create Cam1
 
     location = [0, 7, 0]
-    rotation = [-90, 180, 0]
+    rotation = [-0.0, 0.0, 0.707, 0.707]
     focal_length = 35
     sensor_width = 32
     sensor_height = 18
@@ -225,35 +203,35 @@ def _generate_cube_example():
     # Create Cam2
 
     location = [7, 0, 0]
-    rotation = [-90, 180, -90]
+    rotation = [0.5, 0.5, 0.5, 0.5]
 
     cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create Cam3
 
     location = [4.28, 3.58, 0]
-    rotation = [-90, 180, -52.2]
+    rotation = [0.311, 0.311, 0.635, 0.635]
 
     cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create Cam4
 
     location = [4.28, 3.58, 2.91]
-    rotation = [-119, 178, -47.8]
+    rotation = [0.354, 0.197, 0.466, 0.786]
 
     cam4 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create Cam5
 
     location = [5.45, -3.34, 2.91]
-    rotation = [-116, 184, -118]
+    rotation = [0.714, 0.472, 0.248, 0.454]
 
     cam5 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create Cam6
 
-    location = [-5, -5.14, 2.91]
-    rotation = [-113, 180, -223]
+    location = [-4.998, -5.143, 2.91]
+    rotation = [0.774, 0.518, -0.199, -0.305]
 
     cam6 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
@@ -334,5 +312,6 @@ def _generate_cube_example():
     model.normal_indices = normal_indices
 
     # Create Mapper
-    mapper = Mapper([texture1, texture2, texture3, texture4, texture5, texture6], model, 96, 54, output_path, "Cube")
-    mapper.start_texture_mapping()
+    texture_mapper = Mapper([texture1, texture2, texture3, texture4, texture5, texture6], model, 96, 54, output_path,
+                            "Cube")
+    texture_mapper.start_texture_mapping()

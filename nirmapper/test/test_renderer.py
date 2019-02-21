@@ -18,7 +18,8 @@ class TestRenderer(TestCase):
         screen_width = 1920
         screen_height = 1080
 
-        self.cam = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+        self.cam = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation,
+                          "EULER")
 
         verts = np.array([[1, 1, -1],  # 0
                           [1, -1, -1],  # 1

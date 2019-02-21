@@ -1,7 +1,15 @@
+from enum import Enum
+from typing import Union
+
 import numpy as np
 
 from nirmapper.utils import (
     quaternion_matrix, euler_angles_to_rotation_matrix)
+
+
+class RotationFormat(Enum):
+    EULER = 0
+    QUAT = 1
 
 
 class Camera(object):
@@ -14,15 +22,26 @@ class Camera(object):
                  focal_length_in_mm,
                  resolution_x, resolution_y,
                  sensor_width_in_mm, sensor_height_in_mm,
-                 cam_location_xyz, cam_euler_rotation, cam_quat_rotation=None):
+                 cam_location_xyz,
+                 rotation, rotation_type: Union[RotationFormat, str] = RotationFormat.QUAT):
         self.focal_length_in_mm = focal_length_in_mm
         self.resolution_x = resolution_x
         self.resolution_y = resolution_y
         self.sensor_width_in_mm = sensor_width_in_mm
         self.sensor_height_in_mm = sensor_height_in_mm
         self.cam_location_xyz = cam_location_xyz
-        self.cam_euler_rotation = cam_euler_rotation
-        self.cam_quat_rotation = cam_quat_rotation
+        self.rotation = rotation
+        if isinstance(rotation_type, str):
+            self.rotation_type = RotationFormat[rotation_type]
+        else:
+            self.rotation_type = rotation_type
+            
+        if self.rotation_type is RotationFormat.EULER:
+            if np.size(rotation) != 3:
+                raise ValueError("Wrong shape of rotation coordinates for euler rotation.")
+        elif self.rotation_type is RotationFormat.QUAT:
+            if np.size(rotation) != 4:
+                raise ValueError("Wrong shape of rotation coordinates for quaternion rotation.")
 
         self.A = np.array([])
         self.D = np.array([])
@@ -66,10 +85,12 @@ class Camera(object):
                                  ])
 
             # Transpose since the rotation is object rotation, and coordinate rotation is needed
-            if self.cam_quat_rotation is not None:
-                R_world2cam = quaternion_matrix(self.cam_quat_rotation).T
+            if self.rotation_type is RotationFormat.QUAT:
+                R_world2cam = quaternion_matrix(self.rotation).T
+            elif self.rotation_type is RotationFormat.EULER:
+                R_world2cam = euler_angles_to_rotation_matrix(self.rotation).T
             else:
-                R_world2cam = euler_angles_to_rotation_matrix(self.cam_euler_rotation).T
+                raise ValueError("Rotation Format is not supported!")
             T_world2cam = np.dot(-1 * R_world2cam, self.cam_location_xyz)
 
             R_world2cv = np.dot(R_cam2cv, R_world2cam)

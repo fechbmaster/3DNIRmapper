@@ -17,7 +17,8 @@ class TestTexture(TestCase):
         screen_width = 1920
         screen_height = 1080
 
-        cam1 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+        cam1 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation,
+                      "EULER")
 
         texture = Texture('/fake_path', cam1)
         texture.visible_vertices = np.array([

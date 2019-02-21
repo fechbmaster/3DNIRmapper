@@ -9,7 +9,7 @@ class TestCamera(TestCase):
 
     def setUp(self):
         self.location = np.array([0, 7, 0])
-        self.rotation = np.array([-90, 180, 0])
+        self.rotation = [-0.0, 0.0, 0.707, 0.707]
         self.focal_length = 35
         self.sensor_width = 32
         self.sensor_height = 18

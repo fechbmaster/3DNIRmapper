@@ -29,8 +29,8 @@ class Renderer(object):
 
         render_cam = \
             Camera(cam.focal_length_in_mm, buffer_size_x, buffer_size_y, cam.sensor_width_in_mm,
-                   cam.sensor_height_in_mm, cam.cam_location_xyz, cam.cam_euler_rotation,
-                   cam.cam_quat_rotation)
+                   cam.sensor_height_in_mm, cam.cam_location_xyz, cam.rotation,
+                   cam.rotation_type)
 
         z_buffer = Renderer.create_z_buffer(vertices, indices, render_cam)
         ind_indices = np.array(z_buffer[:, :, 0]).astype(int)

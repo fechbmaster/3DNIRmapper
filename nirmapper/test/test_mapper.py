@@ -1,7 +1,8 @@
 import inspect
-import numpy as np
 import os
 from unittest import TestCase
+
+import numpy as np
 
 from nirmapper import Camera, Texture, Model
 from nirmapper.mapper import Mapper
@@ -24,7 +25,8 @@ class TestMapper(TestCase):
         screen_width = 1920
         screen_height = 1080
 
-        cam1 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+        cam1 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation,
+                      "EULER")
 
         # Create Cam2
 
@@ -36,7 +38,8 @@ class TestMapper(TestCase):
         screen_width = 1920
         screen_height = 1080
 
-        cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+        cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation,
+                      "EULER")
 
         # Create textures
 
@@ -162,7 +165,8 @@ class TestMapper(TestCase):
         screen_width = 1920
         screen_height = 1080
 
-        cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+        cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation,
+                      "EULER")
 
         texture3 = Texture('/fake_texture.png', cam3)
         self.mapper.textures.append(texture3)
@@ -204,7 +208,8 @@ class TestMapper(TestCase):
         screen_width = 1920
         screen_height = 1080
 
-        cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+        cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation,
+                      "EULER")
 
         texture3 = Texture('/fake_texture.png', cam3)
         self.mapper.textures.append(texture3)
@@ -237,7 +242,8 @@ class TestMapper(TestCase):
         screen_width = 1920
         screen_height = 1080
 
-        cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
+        cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation,
+                      "EULER")
 
         texture3 = Texture('/fake_texture.png', cam3)
         self.mapper.textures.append(texture3)
