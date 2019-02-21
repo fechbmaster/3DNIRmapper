@@ -19,7 +19,8 @@ def main(argv=None):
     print("Welcome to 3DNIRMapper!")
 
     # _generate_cube_example()
-    _generate_tooth_example()
+    # _generate_tooth_example()
+    _generate_elephant_example()
 
 
 def _generate_tooth_example():
@@ -112,8 +113,91 @@ def _generate_tooth_example():
     model = models[0]
 
     # Create Mapper
-    mapper = Mapper([texture1], model, 1280 // 8, 1024 // 8,
+    mapper = Mapper([texture1, texture4, texture8, texture11], model, 1280 // 8, 1024 // 8,
                     output_path, "Tooth")
+    mapper.start_texture_mapping()
+
+
+def _generate_elephant_example():
+    # Define texture paths
+
+    texture_path0 = prepend_dir('resources/images/elefant_0.png')
+    texture_path1 = prepend_dir('resources/images/elefant_1.png')
+    texture_path2 = prepend_dir('resources/images/elefant_2.png')
+    texture_path3 = prepend_dir('resources/images/elefant_3.png')
+    texture_path4 = prepend_dir('resources/images/elefant_4.png')
+
+    # Define output path
+    output_path = '/tmp/'
+
+    # Cam 0
+
+    location = np.array([7.2106, -6.4976, 5.3436])
+    rotation_euler = np.array([59, -2.86, 57.9])
+    rotation_quat = np.array([0.755, 0.441, 0.219, 0.437])
+    focal_length = 35
+    sensor_width = 32
+    sensor_height = 25.6
+    screen_width = 1024
+    screen_height = 768
+
+    cam0 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
+                  rotation_quat)
+
+    # Cam 1
+
+    location = np.array([-2.3297, -12.285, 2.0324])
+    rotation_euler = np.array([77.8, 1.98, -5.79])
+    rotation_quat = np.array([0.776, 0.628, -0.018, -0.050])
+
+    cam1 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
+                  rotation_quat)
+
+    # Cam 2
+
+    location = np.array([-7.4062, -6.7939, 4.9206])
+    rotation_euler = np.array([59, -2.86, -46.3])
+    rotation_quat = np.array([0.804, 0.444, -0.214, -0.332])
+
+    cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
+                  rotation_quat)
+
+    # Cam 3
+
+    location = np.array([1.8513, -6.7936, 9.9944])
+    rotation_euler = np.array([31, 9.97, 13.1])
+    rotation_quat = np.array([0.956, 0.255, 0.114, 0.086])
+
+    cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
+                  rotation_quat)
+
+    # Cam 4
+
+    location = np.array([-2.3530, 12.018, 1.7597])
+    rotation_euler = np.array([77.8, 1.98, -169])
+    rotation_quat = np.array([0.063, 0.073, -0.624, -0.775])
+
+    cam4 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation_euler,
+                  rotation_quat)
+
+    # Create textures
+
+    texture0 = Texture(texture_path0, cam0)
+    texture1 = Texture(texture_path1, cam1)
+    texture2 = Texture(texture_path2, cam2)
+    texture3 = Texture(texture_path3, cam3)
+    texture4 = Texture(texture_path4, cam4)
+    # Import Model
+
+    print("Starting model import...")
+    models = Wavefront.import_obj_as_model_list(prepend_dir('resources/models/elefante.obj'))
+    print("Finished model import...")
+
+    model = models[0]
+
+    # Create Mapper
+    mapper = Mapper([texture0, texture1, texture2, texture3, texture4], model, 1024 * 2, 768 * 2,
+                    output_path, "Elefant")
     mapper.start_texture_mapping()
 
 
