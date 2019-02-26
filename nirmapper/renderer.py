@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 
 from nirmapper.exceptions import RenderError
-from nirmapper.renderer.camera import Camera
+from nirmapper.camera import Camera
 from nirmapper.utils import generate_triangle_sequence
 
 

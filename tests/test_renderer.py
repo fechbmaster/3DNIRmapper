@@ -4,7 +4,7 @@ import numpy as np
 
 from nirmapper import Camera, Model
 from nirmapper.exceptions import RenderError
-from nirmapper.renderer.renderer import Renderer
+from nirmapper.renderer import Renderer
 
 
 class TestRenderer(TestCase):

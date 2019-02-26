@@ -3,12 +3,9 @@ import os
 
 import numpy as np
 
-from nirmapper.data.model import Model
-from nirmapper.data.texture import Texture, Camera
-from nirmapper.mapper import Mapper
-from nirmapper.model.colladaExporter import ColladaCreator
-from nirmapper.model.wavefrontImporter import Wavefront, IndicesFormat
-from nirmapper.renderer.renderer import Renderer
+from nirmapper.model import Model, ColladaCreator, IndicesFormat, Wavefront
+from nirmapper.texture import Texture, Camera
+from nirmapper.nirmapper import Mapper
 
 
 def prepend_dir(file):

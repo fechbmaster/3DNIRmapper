@@ -3,7 +3,7 @@ from unittest import TestCase
 import numpy as np
 
 from nirmapper import IndicesFormat
-from nirmapper.model.wavefrontImporter import IndicesFormatter
+from nirmapper.model import IndicesFormatter
 
 
 class TestIndicesFormatter(TestCase):

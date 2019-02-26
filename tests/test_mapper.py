@@ -5,7 +5,7 @@ from unittest import TestCase
 import numpy as np
 
 from nirmapper import Camera, Texture, Model
-from nirmapper.mapper import Mapper
+from nirmapper.nirmapper import Mapper
 
 
 class TestMapper(TestCase):

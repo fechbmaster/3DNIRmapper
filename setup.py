@@ -1,10 +1,9 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='nirmapper',
     version='0.1.0',
-    packages=['nirmapper', 'nirmapper.model', 'nirmapper.renderer', 'nirmapper.tests', 'nirmapper.resources',
-              'nirmapper.resources.images'],
+    packages=find_packages(exclude='tests'),
     url='https://github.com/fechbmaster/3DNIRmapper',
     license='Apache-2.0',
     author='fechbmaster',

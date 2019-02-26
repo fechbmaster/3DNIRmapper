@@ -3,7 +3,7 @@ import string
 import numpy as np
 
 from nirmapper.exceptions import TextureError
-from nirmapper.renderer.camera import Camera
+from nirmapper.camera import Camera
 
 
 class Texture(object):

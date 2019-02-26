@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from nirmapper.model.wavefrontImporter import Wavefront
+from nirmapper import Wavefront
 
 
 def prepend_dir(file):
