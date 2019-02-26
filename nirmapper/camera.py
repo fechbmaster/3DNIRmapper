@@ -133,7 +133,6 @@ class Camera(object):
 
         pixel_coords = []
         for point in points:
-            # todo: maybe vectorize function
             P = self.get_3x4_P_projection_matrix()
             # Append 3d coord with homogeneous coord to calculate coordinate
             uv_xyz = P.dot(np.append(point, 1))

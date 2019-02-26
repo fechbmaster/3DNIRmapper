@@ -62,7 +62,6 @@ class Renderer(object):
             included_pixels = Renderer.rasterize(triangle, render_camera)
             for pixel in included_pixels:
                 uvz_coords = render_camera.get_pixel_coords_for_vertices(triangle, include_z_value=True)
-                # todo: evaluate this
                 # mean is ok here because we don't have to check triangles that get cut by others
                 z_value = np.mean(uvz_coords[:, -1:])
                 # todo: could lead to 'z-fighting'
