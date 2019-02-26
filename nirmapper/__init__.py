@@ -3,8 +3,8 @@ import os
 
 import numpy as np
 
-from nirmapper.model import Model, ColladaCreator, IndicesFormat, Wavefront
-from nirmapper.texture import Texture, Camera
+from nirmapper.model import Model, ColladaCreator, IndicesFormat, Wavefront, Texture
+from nirmapper.camera import Camera
 from nirmapper.nirmapper import Mapper
 
 
