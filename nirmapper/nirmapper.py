@@ -4,10 +4,10 @@ from typing import List, Union
 
 import numpy as np
 
-from nirmapper.model import Model
-from nirmapper.texture import Texture
 from nirmapper import ColladaCreator
+from nirmapper.model import Model
 from nirmapper.renderer import Renderer
+from nirmapper.texture import Texture
 from nirmapper.utils import generate_triangle_sequence
 
 

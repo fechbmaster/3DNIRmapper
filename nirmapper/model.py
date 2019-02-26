@@ -8,8 +8,8 @@ import numpy as np
 import pywavefront
 from collada import Collada, asset, source, geometry, scene, material
 
-from nirmapper.texture import Texture
 from nirmapper.exceptions import ModelError, ColladaError, WavefrontError
+from nirmapper.texture import Texture
 from nirmapper.utils import quaternion_matrix
 
 

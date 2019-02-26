@@ -2,8 +2,8 @@ import string
 
 import numpy as np
 
-from nirmapper.exceptions import TextureError
 from nirmapper.camera import Camera
+from nirmapper.exceptions import TextureError
 
 
 class Texture(object):

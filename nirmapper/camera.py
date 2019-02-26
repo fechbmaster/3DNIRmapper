@@ -35,7 +35,7 @@ class Camera(object):
             self.rotation_type = RotationFormat[rotation_type]
         else:
             self.rotation_type = rotation_type
-            
+
         if self.rotation_type is RotationFormat.EULER:
             if np.size(rotation) != 3:
                 raise ValueError("Wrong shape of rotation coordinates for euler rotation.")
