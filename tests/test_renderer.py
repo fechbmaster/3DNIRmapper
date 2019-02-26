@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from nirmapper import Camera, Model
+from nirmapper.model import Camera, Model
 from nirmapper.exceptions import RenderError
 from nirmapper.renderer import Renderer
 

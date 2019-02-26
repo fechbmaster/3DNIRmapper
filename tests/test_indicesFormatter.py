@@ -2,8 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from nirmapper import IndicesFormat
-from nirmapper.model import IndicesFormatter
+from nirmapper.model import IndicesFormatter, IndicesFormat
 
 
 class TestIndicesFormatter(TestCase):

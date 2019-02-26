@@ -4,8 +4,7 @@ from typing import List, Union
 
 import numpy as np
 
-from nirmapper import ColladaCreator, Texture
-from nirmapper.model import Model
+from nirmapper.model import Model, Texture, ColladaCreator
 from nirmapper.renderer import Renderer
 from nirmapper.utils import generate_triangle_sequence
 
@@ -48,7 +47,6 @@ class Mapper(object):
         print("Finished cleaning up duplicates. Time exceeded: ", duration)
         print("Exporting textured model to: ", self.output_path)
         self.export_textured_model()
-        print("Finished - have a nice day!")
 
     def start_visibility_analysis(self, multi_threaded=True):
         """

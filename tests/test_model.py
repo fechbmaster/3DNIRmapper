@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from nirmapper import Model
+from nirmapper.model import Model
 
 
 class TestModel(TestCase):

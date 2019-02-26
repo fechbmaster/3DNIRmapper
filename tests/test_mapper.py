@@ -4,7 +4,8 @@ from unittest import TestCase
 
 import numpy as np
 
-from nirmapper import Camera, Texture, Model
+from nirmapper.camera import Camera
+from nirmapper.model import Texture, Model
 from nirmapper.nirmapper import Mapper
 
 

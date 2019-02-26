@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from nirmapper import Camera
+from nirmapper.camera import Camera
 
 
 class TestCamera(TestCase):

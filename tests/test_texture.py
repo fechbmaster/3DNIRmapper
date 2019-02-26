@@ -1,7 +1,9 @@
-import numpy as np
 from unittest import TestCase
 
-from nirmapper import Texture, Camera
+import numpy as np
+
+from nirmapper.camera import Camera
+from nirmapper.model import Texture
 
 
 class TestTexture(TestCase):
