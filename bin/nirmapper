@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 import os
+import xml.etree.ElementTree as ET
+from os import listdir
+from os.path import isfile, join
+from typing import List
 
 import click
 
+from nirmapper.camera import Camera
 from nirmapper.examples import generate_cube_example, generate_elephant_example, generate_tooth_example
+from nirmapper.model import Texture, Wavefront
+from nirmapper.nirmapper import Mapper
 
 
 @click.group()
@@ -12,21 +19,19 @@ def cli():
 
 
 @cli.command()
-@click.argument('src', nargs=-1)
-@click.option('--type', type=click.Choice(['cube', 'tooth', 'elephant']), default='tooth',
-              help='generates a example in current directory')
-def example(src, type):
-    type_str = 'Generating ' + type + ' example in current directory.'
+@click.argument('dst', nargs=1)
+@click.option('--type', type=click.Choice(['cube', 'tooth', 'elephant']), default='tooth')
+def example(dst, type):
+    dst = __check_path(dst)
+    type_str = 'Generating ' + type + 'example in ' + dst + '.'
     click.echo(type_str)
 
-    src = __check_path(src)
-
     if type == 'cube':
-        generate_cube_example(src)
+        generate_cube_example(dst)
     elif type == 'tooth':
-        generate_tooth_example(src)
+        generate_tooth_example(dst)
     elif type == 'elephant':
-        generate_elephant_example(src)
+        generate_elephant_example(dst)
     else:
         click.echo('Example type not known!')
         return
@@ -34,11 +39,78 @@ def example(src, type):
 
 
 @cli.command()
-@click.argument('src', nargs=-1)
+@click.argument('name', nargs=1)
+@click.argument('model_src', nargs=1)
+@click.argument('texture_src', nargs=1)
 @click.argument('dst', nargs=1)
-def copy(src, dst):
-    for fn in src:
-        click.echo('move %s to folder %s' % (fn, dst))
+@click.option('-z', default=1, type=float,
+              help='The z factor defines how big the z-buffer should be for the visibility analysis. '
+                   'If results are bad put this up to 2 or 3.')
+@click.option('--thread/--unthread', default=True)
+def mapp(name, model_src, texture_src, dst, z, thread):
+    texture_src = __check_path(texture_src)
+    dst = __check_path(dst)
+    textures: List[Texture] = []
+    files = [f for f in listdir(texture_src) if isfile(join(texture_src, f))]
+    for f in files:
+        file_name = os.path.splitext(f)[0]
+        extension = os.path.splitext(f)[1]
+        if extension == '.jpg' or extension == '.png' or extension == '.bmp':
+            xml_file_path = texture_src + file_name + '.xml'
+            if not os.path.exists(xml_file_path):
+                click.echo('XML file not found. Every image must provide a xml-file with the'
+                           ' same file name. The XML file provides the camera parameters. '
+                           'An example can be found in nirmapper/resources/xmlExample .')
+                exit()
+            try:
+                cam: Camera = __parse_xml(texture_src + file_name + '.xml')
+                texture = Texture(texture_src + f, cam)
+                textures.append(texture)
+            except AttributeError:
+                click.echo('Malformed XML file. Abort mapping program.')
+                exit()
+
+    click.echo("Starting model import...")
+    model = Wavefront.import_obj_as_model_list(model_src)[0]
+    click.echo("Finished model import...")
+
+    # Create Mapper
+    texture_mapper = Mapper(textures, model, int(textures[0].cam.resolution_x * z),
+                            int(textures[0].cam.resolution_y * z), dst, name)
+
+    texture_mapper.start_texture_mapping(thread)
+    click.echo('Finished - have a nice day!')
+
+
+def __parse_xml(file) -> Camera:
+    tree = ET.parse(file)
+    root: ET.Element = tree.getroot()
+
+    focal_length = float(root.find('focal-length').text)
+    resolution = root.find('resolution')
+    resolution_x = int(resolution.find('width').text)
+    resolution_y = int(resolution.find('height').text)
+
+    sensor = root.find('sensor')
+    sensor_x = float(sensor.find('width').text)
+    sensor_y = float(sensor.find('height').text)
+
+    location = root.find('location')
+    location = [float(location.find('x').text), float(location.find('y').text), float(location.find('z').text)]
+
+    rotation = root.find('rotation')
+    rotation_type = rotation.attrib['type']
+    if rotation_type == 'EULER':
+        rotation = [float(rotation.find('x').text), float(rotation.find('y').text), float(rotation.find('z').text)]
+    elif rotation_type == 'QUAT':
+        rotation = [float(rotation.find('w').text), float(rotation.find('x').text), float(rotation.find('y').text),
+                    float(rotation.find('z').text)]
+    else:
+        raise AttributeError('Rotation type must be either euler or quaternion')
+
+    cam = Camera(focal_length, resolution_x, resolution_y, sensor_x, sensor_y, location, rotation, rotation_type)
+
+    return cam
 
 
 def __check_path(path):
