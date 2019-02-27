@@ -10,18 +10,20 @@ from nirmapper.utils import generate_triangle_sequence
 class Renderer(object):
 
     @staticmethod
-    def get_visible_triangles(vertices: np.ndarray, indices: np.ndarray, cam: Camera, buffer_size_x: int,
-                              buffer_size_y: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def get_visible_triangles(vertices: np.ndarray, indices: np.ndarray, cam: Camera, buffer_factor: float = 1.0) \
+            -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Method calculates the visible vertices by using a z-buffer approach
         :param vertices: The vertices to check.
-        :param indices: The indices of the vertices
-        :param np.ndarray cam: The camera that should be used for the visiblity analysis
-        :param int buffer_size_x: Z-buffer width
-        :param int buffer_size_y: Z-Buffer height
+        :param indices: The indices of the vertices.
+        :param np.ndarray cam: The camera that should be used for the visiblity analysis.
+        :param int buffer_factor: Z-buffer factor that gets multiplied on the resolution of the texture.
         :return Tuple[np.ndarray, np.ndarray, np.ndarray]: Returns a tuple of the visible vertices,
         their indices depending on the indices of the vertices and their counts
         """
+        buffer_size_x = int(cam.resolution_x * buffer_factor)
+        buffer_size_y = int(cam.resolution_y * buffer_factor)
+
         aspect_ratio_cam = cam.resolution_x / cam.resolution_y
         aspect_ratio_buffer = buffer_size_x / buffer_size_y
         if aspect_ratio_cam != aspect_ratio_buffer:

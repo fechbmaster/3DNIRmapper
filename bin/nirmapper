@@ -23,7 +23,7 @@ def cli():
 @click.option('--type', type=click.Choice(['cube', 'tooth', 'elephant']), default='tooth')
 def example(dst, type):
     dst = __check_path(dst)
-    type_str = 'Generating ' + type + 'example in ' + dst + '.'
+    type_str = 'Generating ' + type + ' example in ' + dst + '.'
     click.echo(type_str)
 
     if type == 'cube':
@@ -43,11 +43,15 @@ def example(dst, type):
 @click.argument('model_src', nargs=1)
 @click.argument('texture_src', nargs=1)
 @click.argument('dst', nargs=1)
-@click.option('-z', default=1, type=float,
+@click.option('--zfactor', default=1, type=float,
               help='The z factor defines how big the z-buffer should be for the visibility analysis. '
-                   'If results are bad put this up to 2 or 3.')
+                   'If results are bad put this up to 2 or 3. Be careful with values below zero because zfactor'
+                   ' is multiplied with resolution of camera and must match aspect ratio of resolution.')
 @click.option('--thread/--unthread', default=True)
-def mapp(name, model_src, texture_src, dst, z, thread):
+def mapp(name, model_src, texture_src, dst, zfactor, thread):
+    if zfactor <= 0:
+        click.echo('The zfactor must be greater than zero.')
+        exit()
     texture_src = __check_path(texture_src)
     dst = __check_path(dst)
     textures: List[Texture] = []
@@ -75,8 +79,7 @@ def mapp(name, model_src, texture_src, dst, z, thread):
     click.echo("Finished model import...")
 
     # Create Mapper
-    texture_mapper = Mapper(textures, model, int(textures[0].cam.resolution_x * z),
-                            int(textures[0].cam.resolution_y * z), dst, name)
+    texture_mapper = Mapper(textures, model, dst, name, zfactor)
 
     texture_mapper.start_texture_mapping(thread)
     click.echo('Finished - have a nice day!')

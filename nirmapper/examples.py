@@ -90,8 +90,7 @@ def generate_tooth_example(src):
     model = models[0]
 
     # Create Mapper
-    texture_mapper = Mapper([texture1, texture4, texture8, texture11, texture19], model, 1280 // 8, 1024 // 8,
-                            output_path, "Tooth")
+    texture_mapper = Mapper([texture1, texture4, texture8, texture11, texture19], model, output_path, "Tooth", 0.5)
     texture_mapper.start_texture_mapping()
 
 
@@ -163,8 +162,8 @@ def generate_elephant_example(src):
     model = models[0]
 
     # Create Mapper
-    texture_mapper = Mapper([texture0, texture1, texture2, texture3, texture4], model, 1024 * 2, 768 * 2,
-                            output_path, "Elefant")
+    texture_mapper = Mapper([texture0, texture1, texture2, texture3, texture4], model,
+                            output_path, "Elephant", 0.5)
     texture_mapper.start_texture_mapping()
 
 
@@ -301,6 +300,6 @@ def generate_cube_example(src):
     model.normal_indices = normal_indices
 
     # Create Mapper
-    texture_mapper = Mapper([texture1, texture2, texture3, texture4, texture5, texture6], model, 96, 54, output_path,
-                            "Cube")
+    texture_mapper = Mapper([texture1, texture2, texture3, texture4, texture5, texture6], model, output_path, "Cube",
+                            0.05)
     texture_mapper.start_texture_mapping()

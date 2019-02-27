@@ -15,15 +15,14 @@ class Mapper(object):
     """
     duplicate_ids = np.array([], dtype=int)
 
-    def __init__(self, textures: Union[List[Texture], Texture], model: Model, buffer_dim_width: int,
-                 buffer_dim_height: int, output_path: str, node_name: str):
+    def __init__(self, textures: Union[List[Texture], Texture], model: Model, output_path: str, node_name: str,
+                 buffer_factor: float = 1.0):
         self.textures = textures
         self.model = model
         self.renderer = Renderer()
-        self.buffer_x = buffer_dim_width
-        self.buffer_y = buffer_dim_height
         self.output_path = output_path
         self.node_name = node_name
+        self.buffer_factor = buffer_factor
 
         # Reshape the vert sequence to length/9x3x3 triangle Pairs
         self.triangles = generate_triangle_sequence(model.vertices, model.indices)
@@ -51,6 +50,7 @@ class Mapper(object):
     def start_visibility_analysis(self, multi_threaded=True):
         """
         Method starts visibility analysis.
+        :param multi_threaded: Indicator if method should perform multiprocessing in CPU.
         :param bool mutli_threaded: Multiprocessing on or of
         """
         tmp_ids = np.array([], dtype=int)
@@ -92,7 +92,7 @@ class Mapper(object):
         """
         vis_vertices, ids, counts = \
             self.renderer.get_visible_triangles(self.model.vertices, self.model.indices, texture.cam,
-                                                self.buffer_x, self.buffer_y)
+                                                self.buffer_factor)
 
         # Set visible vertices
         texture.visible_vertices = vis_vertices
