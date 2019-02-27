@@ -2,8 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name='nirmapper',
-    version='1.1.1',
-    packages=find_packages(exclude='tests'),
+    version='1.1.7',
+    packages=find_packages(exclude=['tests', 'tests.*']),
+    package_data={'': ['license.txt']},
+    include_package_data=True,
     url='https://github.com/fechbmaster/3DNIRmapper',
     license='Apache-2.0',
     author='fechbmaster',

@@ -3,7 +3,6 @@ import os
 import xml.etree.ElementTree as ET
 from os import listdir
 from os.path import isfile, join
-from typing import List
 
 import click
 
@@ -54,7 +53,7 @@ def mapp(name, model_src, texture_src, dst, zfactor, thread):
         exit()
     texture_src = __check_path(texture_src)
     dst = __check_path(dst)
-    textures: List[Texture] = []
+    textures = []
     files = [f for f in listdir(texture_src) if isfile(join(texture_src, f))]
     for f in files:
         file_name = os.path.splitext(f)[0]
@@ -67,7 +66,7 @@ def mapp(name, model_src, texture_src, dst, zfactor, thread):
                            'An example can be found in nirmapper/resources/xmlExample .')
                 exit()
             try:
-                cam: Camera = __parse_xml(texture_src + file_name + '.xml')
+                cam = __parse_xml(texture_src + file_name + '.xml')
                 texture = Texture(texture_src + f, cam)
                 textures.append(texture)
             except AttributeError:
@@ -87,7 +86,7 @@ def mapp(name, model_src, texture_src, dst, zfactor, thread):
 
 def __parse_xml(file) -> Camera:
     tree = ET.parse(file)
-    root: ET.Element = tree.getroot()
+    root = tree.getroot()
 
     focal_length = float(root.find('focal-length').text)
     resolution = root.find('resolution')
