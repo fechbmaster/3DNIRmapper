@@ -1,5 +1,4 @@
 import ntpath
-import os
 import shutil
 import string
 from enum import Enum
