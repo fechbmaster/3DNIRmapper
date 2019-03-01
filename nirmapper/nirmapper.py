@@ -20,6 +20,7 @@ class Mapper(object):
         self.textures = textures
         self.model = model
         self.renderer = Renderer()
+        self.collada_creator = ColladaCreator()
         self.output_path = output_path
         self.node_name = node_name
         self.buffer_factor = buffer_factor
@@ -168,7 +169,7 @@ class Mapper(object):
         Method starts export.
         :return:
         """
-        ColladaCreator.create_collada_from_model_with_textures(self.model, self.textures, self.output_path,
+        self.collada_creator.create_collada_from_model_with_textures(self.model, self.textures, self.output_path,
                                                                self.node_name)
 
     def __set_duplicate_ids(self, id_list):
