@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union
+from typing import Union, List
 
 import numpy as np
 
@@ -19,11 +19,12 @@ class Camera(object):
     """
 
     def __init__(self,
-                 focal_length_in_mm,
-                 resolution_x, resolution_y,
-                 sensor_width_in_mm, sensor_height_in_mm,
-                 cam_location_xyz,
-                 rotation, rotation_type: Union[RotationFormat, str] = RotationFormat.QUAT):
+                 focal_length_in_mm: float,
+                 resolution_x: int, resolution_y: int,
+                 sensor_width_in_mm: float, sensor_height_in_mm: float,
+                 cam_location_xyz: Union[List[int], np.ndarray],
+                 rotation: Union[List[int], np.ndarray],
+                 rotation_type: Union[RotationFormat, str] = RotationFormat.QUAT):
         self.focal_length_in_mm = focal_length_in_mm
         self.resolution_x = resolution_x
         self.resolution_y = resolution_y
