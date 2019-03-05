@@ -51,8 +51,7 @@ class Mapper(object):
     def start_visibility_analysis(self, multi_threaded=True):
         """
         Method starts visibility analysis.
-        :param multi_threaded: Indicator if method should perform multiprocessing in CPU.
-        :param bool mutli_threaded: Multiprocessing on or of
+        :param multi_threaded: Indicator if method should perform multiprocessing on CPU.
         """
         tmp_ids = np.array([], dtype=int)
         if multi_threaded:
