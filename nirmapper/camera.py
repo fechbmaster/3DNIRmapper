@@ -22,8 +22,8 @@ class Camera(object):
                  focal_length_in_mm: float,
                  resolution_x: int, resolution_y: int,
                  sensor_width_in_mm: float, sensor_height_in_mm: float,
-                 cam_location_xyz: Union[List[int], np.ndarray],
-                 rotation: Union[List[int], np.ndarray],
+                 cam_location_xyz: Union[List[float], np.ndarray],
+                 rotation: Union[List[float], np.ndarray],
                  rotation_type: Union[RotationFormat, str] = RotationFormat.QUAT):
         self.focal_length_in_mm = focal_length_in_mm
         self.resolution_x = resolution_x
