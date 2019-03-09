@@ -169,17 +169,18 @@ def generate_elephant_example(src):
 
 def generate_cube_example(src):
     scipt_path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    texture_path = scipt_path + '/resources/images/texture_cube.png'
-    texture_path2 = scipt_path + '/resources/images/texture_cube_side.png'
-    texture_path3 = scipt_path + '/resources/images/texture_cube_4.png'
-    texture_path4 = scipt_path + '/resources/images/texture_cube_5.png'
-    texture_path5 = scipt_path + '/resources/images/texture_cube_6.png'
+    texture_path1 = scipt_path + '/resources/images/cube_1.png'
+    texture_path2 = scipt_path + '/resources/images/cube_2.png'
+    texture_path3 = scipt_path + '/resources/images/cube_3.png'
+    texture_path4 = scipt_path + '/resources/images/cube_4.png'
+    texture_path5 = scipt_path + '/resources/images/cube_5.png'
+    texture_path6 = scipt_path + '/resources/images/cube_6.png'
     output_path = src
 
     # Create Cam1
 
     location = [0, 7, 0]
-    rotation = [-0.0, 0.0, 0.707, 0.707]
+    rotation = [0.0, 0.0, 0.707, 0.707]
     focal_length = 35
     sensor_width = 32
     sensor_height = 18
@@ -190,47 +191,47 @@ def generate_cube_example(src):
 
     # Create Cam2
 
-    location = [7, 0, 0]
+    location = [7.0, 0.0, 0.0]
     rotation = [0.5, 0.5, 0.5, 0.5]
 
     cam2 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create Cam3
 
-    location = [4.28, 3.58, 0]
-    rotation = [0.311, 0.311, 0.635, 0.635]
+    location = [0.0, -7.0, 0]
+    rotation = [0.707, 0.707, 0.0, 0.0]
 
     cam3 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create Cam4
 
-    location = [4.28, 3.58, 2.91]
-    rotation = [0.354, 0.197, 0.466, 0.786]
+    location = [-7.0, 0.0, 0.0]
+    rotation = [0.5, 0.5, -0.5, -0.5]
 
     cam4 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create Cam5
 
-    location = [5.45, -3.34, 2.91]
-    rotation = [0.714, 0.472, 0.248, 0.454]
+    location = [0.0, 0.0, 7.0]
+    rotation = [-0.707, 0.0, 0.0, 0.707]
 
     cam5 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create Cam6
 
-    location = [-4.998, -5.143, 2.91]
-    rotation = [0.774, 0.518, -0.199, -0.305]
+    location = [0.0, 0.0, -7.0]
+    rotation = [0.0, 0.707, 0.707, -0.0]
 
     cam6 = Camera(focal_length, screen_width, screen_height, sensor_width, sensor_height, location, rotation)
 
     # Create textures
 
-    texture1 = Texture(texture_path, cam1)
-    texture2 = Texture(texture_path, cam2)
-    texture3 = Texture(texture_path2, cam3)
-    texture4 = Texture(texture_path3, cam4)
-    texture5 = Texture(texture_path4, cam5)
-    texture6 = Texture(texture_path5, cam6)
+    texture1 = Texture(texture_path1, cam1)
+    texture2 = Texture(texture_path2, cam2)
+    texture3 = Texture(texture_path3, cam3)
+    texture4 = Texture(texture_path4, cam4)
+    texture5 = Texture(texture_path5, cam5)
+    texture6 = Texture(texture_path6, cam6)
 
     # Create model
 
