@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='nirmapper',
-    version='1.1.8',
+    version='1.1.9',
     packages=find_packages(exclude=['tests', 'tests.*']),
     package_data={'': ['license.txt']},
     include_package_data=True,
