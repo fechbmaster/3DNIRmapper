@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![preview](https://raw.githubusercontent.com/fechbmaster/3DNIRmapper/tree/master/nirmapper/resources/images/result.png)](#readme)
+[![preview](https://github.com/fechbmaster/3DNIRmapper/blob/master/nirmapper/resources/images/result.png)](#readme)
 
 </div>
 
