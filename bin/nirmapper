@@ -47,7 +47,7 @@ def example(dst, type):
                    'If results are bad put this up to 2 or 3. Be careful with values below zero because zfactor'
                    ' is multiplied with resolution of camera and must match aspect ratio of resolution.')
 @click.option('--thread/--unthread', default=True)
-def mapp(name, model_src, texture_src, dst, zfactor, thread):
+def map(name, model_src, texture_src, dst, zfactor, thread):
     if zfactor <= 0:
         click.echo('The zfactor must be greater than zero.')
         exit()
