@@ -3,7 +3,7 @@
 
 # 3DNIRmapper
 
-3DNirMapper maps multiple textures with given camera parameters on a 3d-model using a z-buffer approach. It was originaly developed to map nearinfrared pictures to a 3d tooth model and was developed in proceedings of my master thesis.
+3DNirMapper maps multiple textures with given camera parameters on a 3d-model using a z-buffer approach. It was originaly developed to map nearinfrared pictures on a 3d tooth model and was developed in proceedings of my master thesis.
 
 For example with the given camera parameters it can map these two images to a 3d-modell...
 
@@ -14,7 +14,7 @@ For example with the given camera parameters it can map these two images to a 3d
 
 </div>
 
-...by projecting them to the image area and resolve the overlapping parts like this...
+...by projecting them to the image area and resolving the overlapping parts as shown here:
 
 <div align="center">
 
@@ -23,7 +23,7 @@ For example with the given camera parameters it can map these two images to a 3d
 
 </div>
 
-... and resulting to the combined textured 3d-modell:
+... and finally creates the combined textured 3d-modell:
 
 <div align="center">
 
@@ -31,9 +31,7 @@ For example with the given camera parameters it can map these two images to a 3d
 
 </div>
 
-
-
-The program is able to import wavefront objects and export them to textured Collada files.
+The program is able to import wavefront objects and exports them to textured Collada files.
 
 The package is on [pypi](https://pypi.org/project/nirmapper/)
 or can be cloned on [github](https://github.com/fechbmaster/3DNIRmapper).
@@ -44,7 +42,11 @@ pip install nirmapper
 
 ## CLI Usage
 
-The program comes with a cli, developed with Click. It contains two commands. The first maps textures to a 3d-model:
+The program comes with a cli, developed with Click. It contains two commands. 
+
+### map
+
+The first command maps textures to a 3d-model:
 ```
 Usage: nirmapper map [OPTIONS] NAME MODEL_SRC TEXTURE_SRC DST
 
@@ -97,6 +99,8 @@ The camera parameters must be provided for every picture to map in a XML-file in
 ```
 It can contain either euler or quaternion rotation although quaternions are highly recommended. For every texture to map there must be an .xml file with the same file name providing those parameters. An example can be found in nirmapper/xmlExample.
 
+### example
+
 The second cli call creates a cube, tooth or elefant example:
 
 ```
@@ -110,6 +114,23 @@ Options:
 where:
 * DST is the destination path.
 
+## Code Usage
+
+To use the implemented modules for own developments or improvement just include them to your project:
+
+```
+import nirmapper
+```
+
+For example if you want to use on of the examples:
+
+```
+from nirmapper.examples import generate_cube_example
+
+dst = '/tmp/Cube'
+
+generate_cube_example(dst)
+```
 
 
 
