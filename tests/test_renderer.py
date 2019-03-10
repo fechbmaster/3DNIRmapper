@@ -2,8 +2,8 @@ from unittest import TestCase
 
 import numpy as np
 
-from nirmapper.model import Camera, Model
 from nirmapper.exceptions import RenderError
+from nirmapper.model import Camera, Model
 from nirmapper.renderer import Renderer
 
 
@@ -88,8 +88,8 @@ class TestRenderer(TestCase):
 
     def test_get_visible_triangles(self):
         # downscale for faster testing
-        buffer_resolution_x = 96
-        buffer_resolution_y = 54
+        self.cam.resolution_x = 96
+        self.cam.resolution_y = 54
 
         visible_vertices = np.array([[1, 1, -1],
                                      [-1, 1, 1],
@@ -102,8 +102,7 @@ class TestRenderer(TestCase):
 
         vis_verts, vis_ids, counts = \
             self.renderer.get_visible_triangles(self.model.vertices, self.model.indices,
-                                                self.cam,
-                                                buffer_resolution_x, buffer_resolution_y)
+                                                self.cam)
 
         try:
             np.testing.assert_equal(vis_verts, visible_vertices)
@@ -236,16 +235,7 @@ class TestRenderer(TestCase):
 
     def test_wrong_ratio(self):
         with self.assertRaises(RenderError) as context:
-            # downscale for faster testing
-            buffer_resolution_x = 40
-            buffer_resolution_y = 20
 
-            # Generate vertices sequence from describing indices
-            vert_sequence = np.array(self.model.vertices[self.model.indices.flatten()])
-            # Reshape the vert sequence to length/9x3x3 triangle Pairs
-            triangles = vert_sequence.reshape(vert_sequence.size // 9, 3, 3)
-
-            self.renderer.get_visible_triangles(self.model.vertices, self.model.indices, self.cam, buffer_resolution_x,
-                                                buffer_resolution_y)
+            self.renderer.get_visible_triangles(self.model.vertices, self.model.indices, self.cam, 0.24)
 
         self.assertTrue('Wrong ratio set: ', context)
