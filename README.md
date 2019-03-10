@@ -118,13 +118,13 @@ where:
 
 To use the implemented modules for own developments or improvement just include them to your project:
 
-```
+```python
 import nirmapper
 ```
 
 For example if you want to use on of the examples:
 
-```
+```python
 from nirmapper.examples import generate_cube_example
 
 dst = '/tmp/Cube'
@@ -132,6 +132,23 @@ dst = '/tmp/Cube'
 generate_cube_example(dst)
 ```
 
+## Tests
+
+All tests can be found in the `tests` directory. To run the tests:
+
+```bash
+# Install pywavefront in develop mode
+python setup.py develop
+
+# Install required packages for running tests
+pip install -r test-requirements.txt
+
+# Run all tests
+pytest
+
+# Optionally specific tests modules can be runned sepeartely
+pytest tests/test_parser.py
+```
 
 
 
