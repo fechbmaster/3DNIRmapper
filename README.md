@@ -47,7 +47,7 @@ The program comes with a cli, developed with Click. It contains two commands.
 ### map
 
 The first command maps textures to a 3d-model:
-```
+```bash
 Usage: nirmapper map [OPTIONS] NAME MODEL_SRC TEXTURE_SRC DST
 
 Options:
@@ -67,7 +67,7 @@ where
 
 The camera parameters must be provided for every picture to map in a XML-file in the TEXTURE_SRC that looks like this:
 
-```
+```xml
 <?xml version="1.0"?>
 <data>
     <focal-length>35</focal-length>
@@ -103,7 +103,7 @@ It can contain either euler or quaternion rotation although quaternions are high
 
 The second cli call creates a cube, tooth or elefant example:
 
-```
+```bash
 Usage: nirmapper example [OPTIONS] DST
 
 Options:
