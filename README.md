@@ -97,7 +97,7 @@ The camera parameters must be provided for every picture to map in a XML-file in
     </rotation>
 </data>
 ```
-It can contain either euler or quaternion rotation although quaternions are highly recommended. For every texture to map there must be an .xml file with the same file name providing those parameters. An example can be found in nirmapper/xmlExample.
+It can contain either euler or quaternion rotation although quaternions are highly recommended. For every texture to map there must be an .xml file with the same file name providing those parameters. An example can be found in nirmapper/resources/xmlExample/.
 
 ### example
 
