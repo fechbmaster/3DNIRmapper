@@ -3,7 +3,7 @@
 
 # 3DNIRmapper
 
-3DNirMapper maps multiple textures with given camera parameters on a 3d-model using a z-buffer approach. It was originaly developed to map nearinfrared pictures on a 3d tooth model and was developed in proceedings of my master thesis.
+3DNIRMapper maps multiple textures with given camera parameters on a 3d-model using a z-buffer approach. It was originaly developed to map nearinfrared pictures on a 3d tooth model and was developed in proceedings of my master thesis.
 
 For example with the given camera parameters it can map these two images to a 3d-modell...
 
