@@ -5,7 +5,7 @@
 
 3DNirMapper maps multiple textures with given camera parameters on a 3d-model using a z-buffer approach. It was originaly developed to map nearinfrared pictures to a 3d tooth model and was developed in proceedings of my master thesis.
 
-With the given camera parameters it can map the two images:
+For example with the given camera parameters it can map these two images to a 3d-modell...
 
 <div align="center">
 
@@ -14,7 +14,7 @@ With the given camera parameters it can map the two images:
 
 </div>
 
-by projecting them to the image area and resolve the overlapping parts like such:
+...by projecting them to the image area and resolve the overlapping parts like this...
 
 <div align="center">
 
@@ -23,7 +23,7 @@ by projecting them to the image area and resolve the overlapping parts like such
 
 </div>
 
-and resulting to the combined textured 3d-modell:
+... and resulting to the combined textured 3d-modell:
 
 <div align="center">
 
