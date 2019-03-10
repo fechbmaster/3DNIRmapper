@@ -150,5 +150,8 @@ pytest
 pytest tests/test_parser.py
 ```
 
+License
+-------
 
+3DNIRMapper is [Apache-licensed](https://github.com/fechbmaster/3DNirmapper/LICENSE)
 
