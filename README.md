@@ -23,7 +23,7 @@ For example with the given camera parameters it can map these two images to a 3d
 
 </div>
 
-... and finally creates the combined textured 3d-modell:
+exclude=['tests', 'tests.*']... and finally creates the combined textured 3d-modell:
 
 <div align="center">
 
@@ -145,9 +145,6 @@ pip install -r test-requirements.txt
 
 # Run all tests
 pytest
-
-# Optionally specific tests modules can be runned sepeartely
-pytest tests/test_parser.py
 ```
 
 License
