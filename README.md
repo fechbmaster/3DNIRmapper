@@ -23,7 +23,7 @@ For example with the given camera parameters it can map these two images to a 3d
 
 </div>
 
-exclude=['tests', 'tests.*']... and finally creates the combined textured 3d-modell:
+...and finally creates the combined textured 3d-modell:
 
 <div align="center">
 
